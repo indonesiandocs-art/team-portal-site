@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Портал сотрудников</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Разделы портала">
+        <a class="brand" href="#" aria-label="Портал сотрудников">
+          <span class="brand-mark">P</span>
+          <span>
+            <strong>Портал</strong>
+            <small>для сотрудников</small>
+          </span>
+        </a>
+
+        <nav class="section-nav">
+          <a class="nav-item is-active" href="#employees" data-nav-target="employees">
+            <span class="nav-icon" aria-hidden="true">E</span>
+            <span>Сотрудники</span>
+          </a>
+          <a class="nav-item is-disabled" href="#" aria-disabled="true">
+            <span class="nav-icon" aria-hidden="true">B</span>
+            <span>Дни рождения</span>
+          </a>
+          <a class="nav-item is-disabled" href="#" aria-disabled="true">
+            <span class="nav-icon" aria-hidden="true">V</span>
+            <span>Отпуска</span>
+          </a>
+          <a class="nav-item" href="#knowledge" data-nav-target="knowledge">
+            <span class="nav-icon" aria-hidden="true">K</span>
+            <span>База знаний</span>
+          </a>
+          <a class="nav-item is-disabled" href="#" aria-disabled="true">
+            <span class="nav-icon" aria-hidden="true">D</span>
+            <span>Документы</span>
+          </a>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <section class="page-view is-active" id="employees" data-page="employees">
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Внутренний портал</p>
+              <h1>Сотрудники компании</h1>
+            </div>
+            <button class="primary-action" type="button">
+              <span aria-hidden="true">+</span>
+              Добавить сотрудника
+            </button>
+          </header>
+
+          <section class="summary-grid" aria-label="Сводка по сотрудникам">
+            <article class="metric">
+              <span>Всего</span>
+              <strong id="totalEmployees">0</strong>
+            </article>
+            <article class="metric">
+              <span>В офисе</span>
+              <strong id="officeEmployees">0</strong>
+            </article>
+            <article class="metric">
+              <span>Удаленно</span>
+              <strong id="remoteEmployees">0</strong>
+            </article>
+            <article class="metric">
+              <span>Отделов</span>
+              <strong id="departmentCount">0</strong>
+            </article>
+          </section>
+
+          <section class="workspace-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Команда</h2>
+              <p>Роли, отделы, форматы работы и быстрые контакты.</p>
+            </div>
+            <div class="view-switch" aria-label="Вид списка">
+              <button class="view-button is-active" type="button" data-view="table" aria-label="Показать таблицей" aria-pressed="true" title="Таблица">
+                <span aria-hidden="true">≡</span>
+              </button>
+              <button class="view-button" type="button" data-view="cards" aria-label="Показать карточками" aria-pressed="false" title="Карточки">
+                <span aria-hidden="true">▦</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="toolbar" aria-label="Фильтры сотрудников">
+            <label class="search-field">
+              <span class="visually-hidden">Поиск сотрудника</span>
+              <input id="employeeSearch" type="search" placeholder="Поиск по имени, роли или отделу" autocomplete="off" />
+            </label>
+
+            <label class="select-field">
+              <span>Отдел</span>
+              <select id="departmentFilter">
+                <option value="all">Все отделы</option>
+              </select>
+            </label>
+
+            <label class="select-field">
+              <span>Формат</span>
+              <select id="workModeFilter">
+                <option value="all">Любой</option>
+                <option value="office">Офис</option>
+                <option value="remote">Удаленно</option>
+                <option value="hybrid">Гибрид</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="employees-table-wrap" data-view-target="table">
+            <table class="employees-table">
+              <thead>
+                <tr>
+                  <th>Сотрудник</th>
+                  <th>Роль</th>
+                  <th>Отдел</th>
+                  <th>Формат</th>
+                  <th>Контакты</th>
+                </tr>
+              </thead>
+              <tbody id="employeesTableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="employees-grid" id="employeesGrid" data-view-target="cards" hidden></div>
+
+          <div class="empty-state" id="emptyState" hidden>
+            <strong>Ничего не найдено</strong>
+            <span>Попробуйте изменить поиск или фильтры.</span>
+          </div>
+          </section>
+        </section>
+
+        <section class="page-view" id="knowledge" data-page="knowledge" hidden>
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Внутренний портал</p>
+              <h1>База знаний</h1>
+            </div>
+          </header>
+
+          <section class="workspace-panel knowledge-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Статьи и редактор</h2>
+              <p>Инструкции, регламенты и внутренние материалы компании.</p>
+            </div>
+            <button class="secondary-action" id="newArticleButton" type="button">
+              <span aria-hidden="true">+</span>
+              Новая статья
+            </button>
+          </div>
+
+          <div class="knowledge-layout">
+            <aside class="article-sidebar" aria-label="Статьи базы знаний">
+              <label class="search-field">
+                <span class="visually-hidden">Поиск статьи</span>
+                <input id="articleSearch" type="search" placeholder="Поиск по статьям" autocomplete="off" />
+              </label>
+              <div class="article-list" id="articleList"></div>
+            </aside>
+
+            <article class="editor-shell">
+              <div class="editor-topbar">
+                <label class="title-field">
+                  <span class="visually-hidden">Название статьи</span>
+                  <input id="articleTitle" type="text" placeholder="Название статьи" />
+                </label>
+                <label class="select-field compact-field">
+                  <span>Статус</span>
+                  <select id="articleStatus">
+                    <option value="draft">Черновик</option>
+                    <option value="review">На проверке</option>
+                    <option value="published">Опубликовано</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="editor-toolbar" role="toolbar" aria-label="Форматирование статьи">
+                <select id="blockFormat" aria-label="Стиль текста">
+                  <option value="P">Текст</option>
+                  <option value="H2">Заголовок</option>
+                  <option value="H3">Подзаголовок</option>
+                  <option value="BLOCKQUOTE">Цитата</option>
+                </select>
+                <span class="toolbar-divider" aria-hidden="true"></span>
+                <button class="tool-button" type="button" data-command="bold" aria-label="Жирный" title="Жирный">B</button>
+                <button class="tool-button" type="button" data-command="italic" aria-label="Курсив" title="Курсив">I</button>
+                <button class="tool-button" type="button" data-command="underline" aria-label="Подчеркнутый" title="Подчеркнутый">U</button>
+                <span class="toolbar-divider" aria-hidden="true"></span>
+                <button class="tool-button" type="button" data-command="insertUnorderedList" aria-label="Маркированный список" title="Маркированный список">•</button>
+                <button class="tool-button" type="button" data-command="insertOrderedList" aria-label="Нумерованный список" title="Нумерованный список">1.</button>
+                <button class="tool-button" type="button" data-action="link" aria-label="Ссылка" title="Ссылка">↗</button>
+                <button class="tool-button" type="button" data-action="image" aria-label="Добавить картинку" title="Добавить картинку">▧</button>
+                <button class="tool-button" type="button" data-command="removeFormat" aria-label="Очистить формат" title="Очистить формат">Tx</button>
+                <input class="visually-hidden" id="imageUpload" type="file" accept="image/*" />
+              </div>
+
+              <div class="article-editor" id="articleEditor" contenteditable="true" aria-label="Текст статьи"></div>
+
+              <div class="editor-footer">
+                <span class="save-status" id="saveStatus">Изменения сохранены</span>
+                <button class="primary-action" id="saveArticleButton" type="button">Сохранить</button>
+              </div>
+            </article>
+          </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
