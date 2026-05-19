@@ -1,215 +1,501 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Портал сотрудников</title>
+    <title>Nova Group Team Portal</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar" aria-label="Разделы портала">
-        <a class="brand" href="#" aria-label="Портал сотрудников">
-          <span class="brand-mark">P</span>
+      <aside class="sidebar" aria-label="Portal sections">
+        <a class="brand" href="#home" data-nav-target="home" aria-label="Nova Group Team Portal">
+          <img class="brand-logo" src="./assets/logo-nova.jpg" alt="Nova Group" />
           <span>
-            <strong>Портал</strong>
-            <small>для сотрудников</small>
+            <strong>Nova Group</strong>
+            <small>Team portal</small>
           </span>
         </a>
 
         <nav class="section-nav">
-          <a class="nav-item is-active" href="#employees" data-nav-target="employees">
-            <span class="nav-icon" aria-hidden="true">E</span>
-            <span>Сотрудники</span>
+          <a class="nav-item is-active" href="#home" data-nav-target="home">
+            <span class="nav-icon" aria-hidden="true">H</span>
+            <span>Home</span>
           </a>
-          <a class="nav-item is-disabled" href="#" aria-disabled="true">
-            <span class="nav-icon" aria-hidden="true">B</span>
-            <span>Дни рождения</span>
-          </a>
-          <a class="nav-item is-disabled" href="#" aria-disabled="true">
-            <span class="nav-icon" aria-hidden="true">V</span>
-            <span>Отпуска</span>
+          <a class="nav-item" href="#employees" data-nav-target="employees">
+            <span class="nav-icon" aria-hidden="true">T</span>
+            <span>Team</span>
           </a>
           <a class="nav-item" href="#knowledge" data-nav-target="knowledge">
             <span class="nav-icon" aria-hidden="true">K</span>
-            <span>База знаний</span>
+            <span>Knowledge Base</span>
           </a>
-          <a class="nav-item is-disabled" href="#" aria-disabled="true">
+          <a class="nav-item" href="#documents" data-nav-target="documents">
             <span class="nav-icon" aria-hidden="true">D</span>
-            <span>Документы</span>
+            <span>Documents</span>
+          </a>
+          <a class="nav-item" href="#admin" data-nav-target="admin">
+            <span class="nav-icon" aria-hidden="true">A</span>
+            <span>Admin</span>
           </a>
         </nav>
       </aside>
 
       <main class="main-content">
-        <section class="page-view is-active" id="employees" data-page="employees">
+        <section class="page-view is-active" id="home" data-page="home">
           <header class="page-header">
             <div>
-              <p class="eyebrow">Внутренний портал</p>
-              <h1>Сотрудники компании</h1>
+              <p class="eyebrow">Internal portal</p>
+              <h1>Global team hub</h1>
             </div>
-            <button class="primary-action" type="button">
+            <a class="primary-action" href="#knowledge" data-nav-target="knowledge">
               <span aria-hidden="true">+</span>
-              Добавить сотрудника
+              New article
+            </a>
+          </header>
+
+          <section class="summary-grid portal-summary" aria-label="Portal summary">
+            <article class="metric">
+              <span>Team members</span>
+              <strong id="homeEmployees">0</strong>
+            </article>
+            <article class="metric">
+              <span>Articles</span>
+              <strong id="homeArticles">0</strong>
+            </article>
+            <article class="metric">
+              <span>Documents</span>
+              <strong id="homeDocuments">0</strong>
+            </article>
+            <article class="metric">
+              <span>On leave</span>
+              <strong id="homeVacations">0</strong>
+            </article>
+          </section>
+
+          <section class="dashboard-grid">
+            <article class="workspace-panel focus-panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Quick access</h2>
+                  <p>Common actions for a distributed trading team.</p>
+                </div>
+              </div>
+              <div class="quick-links">
+                <a href="#employees" data-nav-target="employees">
+                  <strong>Find a team member</strong>
+                  <span>Roles, departments, locations, contacts</span>
+                </a>
+                <a href="#knowledge" data-nav-target="knowledge">
+                  <strong>Open a procedure</strong>
+                  <span>Operations playbooks and internal guides</span>
+                </a>
+                <a href="#documents" data-nav-target="documents">
+                  <strong>Get a document</strong>
+                  <span>Templates, policies, and compliance files</span>
+                </a>
+                <a href="#admin" data-nav-target="admin">
+                  <strong>Manage content</strong>
+                  <span>Team profiles, articles, and documents</span>
+                </a>
+              </div>
+            </article>
+
+            <article class="workspace-panel">
+              <div class="panel-header compact-header">
+                <div>
+                  <h2>Upcoming</h2>
+                  <p>Birthdays, leave, reviews, and key dates.</p>
+                </div>
+              </div>
+              <div class="event-list" id="eventList"></div>
+            </article>
+
+            <article class="workspace-panel">
+              <div class="panel-header compact-header">
+                <div>
+                  <h2>Recent articles</h2>
+                  <p>Recently updated internal materials.</p>
+                </div>
+              </div>
+              <div class="compact-list" id="recentArticles"></div>
+            </article>
+
+            <article class="workspace-panel">
+              <div class="panel-header compact-header">
+                <div>
+                  <h2>Key documents</h2>
+                  <p>Files that should always be close at hand.</p>
+                </div>
+              </div>
+              <div class="compact-list" id="featuredDocuments"></div>
+            </article>
+          </section>
+        </section>
+
+        <section class="page-view" id="employees" data-page="employees" hidden>
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Internal portal</p>
+              <h1>Company team</h1>
+            </div>
+            <button class="primary-action" id="addEmployeeButton" type="button">
+              <span aria-hidden="true">+</span>
+              Add team member
             </button>
           </header>
 
-          <section class="summary-grid" aria-label="Сводка по сотрудникам">
+          <section class="summary-grid" aria-label="Team summary">
             <article class="metric">
-              <span>Всего</span>
+              <span>Total</span>
               <strong id="totalEmployees">0</strong>
             </article>
             <article class="metric">
-              <span>В офисе</span>
+              <span>Office based</span>
               <strong id="officeEmployees">0</strong>
             </article>
             <article class="metric">
-              <span>Удаленно</span>
+              <span>Remote</span>
               <strong id="remoteEmployees">0</strong>
             </article>
             <article class="metric">
-              <span>Отделов</span>
+              <span>Departments</span>
               <strong id="departmentCount">0</strong>
             </article>
           </section>
 
           <section class="workspace-panel">
-          <div class="panel-header">
-            <div>
-              <h2>Команда</h2>
-              <p>Роли, отделы, форматы работы и быстрые контакты.</p>
+            <div class="panel-header">
+              <div>
+                <h2>Team directory</h2>
+                <p>Roles, departments, work modes, and quick contacts.</p>
+              </div>
+              <div class="view-switch" aria-label="Directory view">
+                <button class="view-button is-active" type="button" data-view="table" aria-label="Show table view" aria-pressed="true" title="Table">
+                  <span aria-hidden="true">≡</span>
+                </button>
+                <button class="view-button" type="button" data-view="cards" aria-label="Show card view" aria-pressed="false" title="Cards">
+                  <span aria-hidden="true">▦</span>
+                </button>
+              </div>
             </div>
-            <div class="view-switch" aria-label="Вид списка">
-              <button class="view-button is-active" type="button" data-view="table" aria-label="Показать таблицей" aria-pressed="true" title="Таблица">
-                <span aria-hidden="true">≡</span>
-              </button>
-              <button class="view-button" type="button" data-view="cards" aria-label="Показать карточками" aria-pressed="false" title="Карточки">
-                <span aria-hidden="true">▦</span>
-              </button>
+
+            <div class="toolbar" aria-label="Team filters">
+              <label class="search-field">
+                <span class="visually-hidden">Search team members</span>
+                <input id="employeeSearch" type="search" placeholder="Search by name, role, department, or location" autocomplete="off" />
+              </label>
+
+              <label class="select-field">
+                <span>Department</span>
+                <select id="departmentFilter">
+                  <option value="all">All departments</option>
+                </select>
+              </label>
+
+              <label class="select-field">
+                <span>Work mode</span>
+                <select id="workModeFilter">
+                  <option value="all">Any</option>
+                  <option value="office">Office</option>
+                  <option value="remote">Remote</option>
+                  <option value="hybrid">Hybrid</option>
+                </select>
+              </label>
             </div>
-          </div>
 
-          <div class="toolbar" aria-label="Фильтры сотрудников">
-            <label class="search-field">
-              <span class="visually-hidden">Поиск сотрудника</span>
-              <input id="employeeSearch" type="search" placeholder="Поиск по имени, роли или отделу" autocomplete="off" />
-            </label>
+            <div class="employees-table-wrap" data-view-target="table">
+              <table class="employees-table">
+                <thead>
+                  <tr>
+                    <th>Team member</th>
+                    <th>Role</th>
+                    <th>Department</th>
+                    <th>Work mode</th>
+                    <th>Contact</th>
+                  </tr>
+                </thead>
+                <tbody id="employeesTableBody"></tbody>
+              </table>
+            </div>
 
-            <label class="select-field">
-              <span>Отдел</span>
-              <select id="departmentFilter">
-                <option value="all">Все отделы</option>
-              </select>
-            </label>
+            <div class="employees-grid" id="employeesGrid" data-view-target="cards" hidden></div>
 
-            <label class="select-field">
-              <span>Формат</span>
-              <select id="workModeFilter">
-                <option value="all">Любой</option>
-                <option value="office">Офис</option>
-                <option value="remote">Удаленно</option>
-                <option value="hybrid">Гибрид</option>
-              </select>
-            </label>
-          </div>
-
-          <div class="employees-table-wrap" data-view-target="table">
-            <table class="employees-table">
-              <thead>
-                <tr>
-                  <th>Сотрудник</th>
-                  <th>Роль</th>
-                  <th>Отдел</th>
-                  <th>Формат</th>
-                  <th>Контакты</th>
-                </tr>
-              </thead>
-              <tbody id="employeesTableBody"></tbody>
-            </table>
-          </div>
-
-          <div class="employees-grid" id="employeesGrid" data-view-target="cards" hidden></div>
-
-          <div class="empty-state" id="emptyState" hidden>
-            <strong>Ничего не найдено</strong>
-            <span>Попробуйте изменить поиск или фильтры.</span>
-          </div>
+            <div class="empty-state" id="emptyState" hidden>
+              <strong>No results found</strong>
+              <span>Try changing the search query or filters.</span>
+            </div>
           </section>
         </section>
 
         <section class="page-view" id="knowledge" data-page="knowledge" hidden>
           <header class="page-header">
             <div>
-              <p class="eyebrow">Внутренний портал</p>
-              <h1>База знаний</h1>
+              <p class="eyebrow">Internal portal</p>
+              <h1>Knowledge Base</h1>
             </div>
           </header>
 
           <section class="workspace-panel knowledge-panel">
-          <div class="panel-header">
-            <div>
-              <h2>Статьи и редактор</h2>
-              <p>Инструкции, регламенты и внутренние материалы компании.</p>
+            <div class="panel-header">
+              <div>
+                <h2>Articles and editor</h2>
+                <p>Procedures, playbooks, compliance notes, and internal guidance.</p>
+              </div>
+              <button class="secondary-action" id="newArticleButton" type="button">
+                <span aria-hidden="true">+</span>
+                New article
+              </button>
             </div>
-            <button class="secondary-action" id="newArticleButton" type="button">
-              <span aria-hidden="true">+</span>
-              Новая статья
-            </button>
-          </div>
 
-          <div class="knowledge-layout">
-            <aside class="article-sidebar" aria-label="Статьи базы знаний">
-              <label class="search-field">
-                <span class="visually-hidden">Поиск статьи</span>
-                <input id="articleSearch" type="search" placeholder="Поиск по статьям" autocomplete="off" />
-              </label>
-              <div class="article-list" id="articleList"></div>
-            </aside>
-
-            <article class="editor-shell">
-              <div class="editor-topbar">
-                <label class="title-field">
-                  <span class="visually-hidden">Название статьи</span>
-                  <input id="articleTitle" type="text" placeholder="Название статьи" />
+            <div class="knowledge-layout">
+              <aside class="article-sidebar" aria-label="Knowledge base articles">
+                <label class="search-field">
+                  <span class="visually-hidden">Search articles</span>
+                  <input id="articleSearch" type="search" placeholder="Search articles" autocomplete="off" />
                 </label>
-                <label class="select-field compact-field">
-                  <span>Статус</span>
-                  <select id="articleStatus">
-                    <option value="draft">Черновик</option>
-                    <option value="review">На проверке</option>
-                    <option value="published">Опубликовано</option>
+                <div class="article-list" id="articleList"></div>
+              </aside>
+
+              <article class="editor-shell">
+                <div class="editor-topbar">
+                  <label class="title-field">
+                    <span class="visually-hidden">Article title</span>
+                    <input id="articleTitle" type="text" placeholder="Article title" />
+                  </label>
+                  <label class="select-field compact-field">
+                    <span>Status</span>
+                    <select id="articleStatus">
+                      <option value="draft">Draft</option>
+                      <option value="review">In review</option>
+                      <option value="published">Published</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="editor-toolbar" role="toolbar" aria-label="Article formatting">
+                  <select id="blockFormat" aria-label="Text style">
+                    <option value="P">Text</option>
+                    <option value="H2">Heading</option>
+                    <option value="H3">Subheading</option>
+                    <option value="BLOCKQUOTE">Quote</option>
                   </select>
-                </label>
-              </div>
+                  <span class="toolbar-divider" aria-hidden="true"></span>
+                  <button class="tool-button" type="button" data-command="bold" aria-label="Bold" title="Bold">B</button>
+                  <button class="tool-button" type="button" data-command="italic" aria-label="Italic" title="Italic">I</button>
+                  <button class="tool-button" type="button" data-command="underline" aria-label="Underline" title="Underline">U</button>
+                  <span class="toolbar-divider" aria-hidden="true"></span>
+                  <button class="tool-button" type="button" data-command="insertUnorderedList" aria-label="Bulleted list" title="Bulleted list">•</button>
+                  <button class="tool-button" type="button" data-command="insertOrderedList" aria-label="Numbered list" title="Numbered list">1.</button>
+                  <button class="tool-button" type="button" data-action="link" aria-label="Insert link" title="Insert link">↗</button>
+                  <button class="tool-button" type="button" data-action="image" aria-label="Add image" title="Add image">▧</button>
+                  <button class="tool-button" type="button" data-command="removeFormat" aria-label="Clear formatting" title="Clear formatting">Tx</button>
+                  <input class="visually-hidden" id="imageUpload" type="file" accept="image/*" />
+                </div>
 
-              <div class="editor-toolbar" role="toolbar" aria-label="Форматирование статьи">
-                <select id="blockFormat" aria-label="Стиль текста">
-                  <option value="P">Текст</option>
-                  <option value="H2">Заголовок</option>
-                  <option value="H3">Подзаголовок</option>
-                  <option value="BLOCKQUOTE">Цитата</option>
+                <div class="article-editor" id="articleEditor" contenteditable="true" aria-label="Article body"></div>
+
+                <div class="editor-footer">
+                  <span class="save-status" id="saveStatus">Changes saved</span>
+                  <button class="primary-action" id="saveArticleButton" type="button">Save</button>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
+
+        <section class="page-view" id="documents" data-page="documents" hidden>
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Internal portal</p>
+              <h1>Documents</h1>
+            </div>
+            <button class="primary-action" id="addDocumentButton" type="button">
+              <span aria-hidden="true">+</span>
+              Add document
+            </button>
+          </header>
+
+          <section class="workspace-panel documents-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Company files</h2>
+                <p>Corporate records, trade templates, policies, and forms.</p>
+              </div>
+            </div>
+
+            <div class="toolbar documents-toolbar" aria-label="Document filters">
+              <label class="search-field">
+                <span class="visually-hidden">Search documents</span>
+                <input id="documentSearch" type="search" placeholder="Search documents" autocomplete="off" />
+              </label>
+              <label class="select-field">
+                <span>Category</span>
+                <select id="documentCategoryFilter">
+                  <option value="all">All categories</option>
                 </select>
-                <span class="toolbar-divider" aria-hidden="true"></span>
-                <button class="tool-button" type="button" data-command="bold" aria-label="Жирный" title="Жирный">B</button>
-                <button class="tool-button" type="button" data-command="italic" aria-label="Курсив" title="Курсив">I</button>
-                <button class="tool-button" type="button" data-command="underline" aria-label="Подчеркнутый" title="Подчеркнутый">U</button>
-                <span class="toolbar-divider" aria-hidden="true"></span>
-                <button class="tool-button" type="button" data-command="insertUnorderedList" aria-label="Маркированный список" title="Маркированный список">•</button>
-                <button class="tool-button" type="button" data-command="insertOrderedList" aria-label="Нумерованный список" title="Нумерованный список">1.</button>
-                <button class="tool-button" type="button" data-action="link" aria-label="Ссылка" title="Ссылка">↗</button>
-                <button class="tool-button" type="button" data-action="image" aria-label="Добавить картинку" title="Добавить картинку">▧</button>
-                <button class="tool-button" type="button" data-command="removeFormat" aria-label="Очистить формат" title="Очистить формат">Tx</button>
-                <input class="visually-hidden" id="imageUpload" type="file" accept="image/*" />
-              </div>
+              </label>
+            </div>
 
-              <div class="article-editor" id="articleEditor" contenteditable="true" aria-label="Текст статьи"></div>
+            <div class="document-grid" id="documentGrid"></div>
+            <div class="empty-state" id="documentEmptyState" hidden>
+              <strong>No documents found</strong>
+              <span>Try changing the search query or category.</span>
+            </div>
+          </section>
+        </section>
 
-              <div class="editor-footer">
-                <span class="save-status" id="saveStatus">Изменения сохранены</span>
-                <button class="primary-action" id="saveArticleButton" type="button">Сохранить</button>
+        <section class="page-view" id="admin" data-page="admin" hidden>
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Internal portal</p>
+              <h1>Admin</h1>
+            </div>
+            <button class="primary-action" id="newAdminItemButton" type="button">
+              <span aria-hidden="true">+</span>
+              New item
+            </button>
+          </header>
+
+          <section class="workspace-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Management console</h2>
+                <p>A foundation for editing portal content without touching code.</p>
               </div>
-            </article>
-          </div>
+            </div>
+
+            <form class="admin-auth" id="adminAuthForm">
+              <div>
+                <strong>Shared backend</strong>
+                <span id="adminSyncStatus">Checking shared storage...</span>
+              </div>
+              <label>
+                <span>Admin key</span>
+                <input id="adminTokenInput" type="password" autocomplete="current-password" />
+              </label>
+              <button class="secondary-action" type="submit">Connect</button>
+            </form>
+
+            <div class="admin-tabs" role="tablist" aria-label="Admin sections">
+              <button class="admin-tab is-active" type="button" data-admin-tab="team" aria-pressed="true">Team</button>
+              <button class="admin-tab" type="button" data-admin-tab="documents" aria-pressed="false">Documents</button>
+              <button class="admin-tab" type="button" data-admin-tab="knowledge" aria-pressed="false">Knowledge Base</button>
+            </div>
+
+            <div class="admin-workspace">
+              <section class="admin-section is-active" data-admin-section="team">
+                <div class="admin-list-panel">
+                  <div class="admin-list-header">
+                    <h3>Team records</h3>
+                    <button class="secondary-action" id="createEmployeeRecordButton" type="button">New</button>
+                  </div>
+                  <div class="admin-record-list" id="adminEmployeeList"></div>
+                </div>
+
+                <form class="admin-form" id="employeeForm">
+                  <div class="form-header">
+                    <h3 id="employeeFormTitle">Edit team member</h3>
+                    <button class="danger-action" id="deleteEmployeeButton" type="button">Delete</button>
+                  </div>
+                  <label>
+                    <span>Name</span>
+                    <input name="name" type="text" required />
+                  </label>
+                  <label>
+                    <span>Role</span>
+                    <input name="role" type="text" required />
+                  </label>
+                  <label>
+                    <span>Department</span>
+                    <input name="department" type="text" required />
+                  </label>
+                  <label>
+                    <span>Location</span>
+                    <input name="location" type="text" required />
+                  </label>
+                  <label>
+                    <span>Email</span>
+                    <input name="email" type="email" required />
+                  </label>
+                  <label>
+                    <span>Phone</span>
+                    <input name="phone" type="text" required />
+                  </label>
+                  <label>
+                    <span>Work mode</span>
+                    <select name="workMode">
+                      <option value="office">Office</option>
+                      <option value="remote">Remote</option>
+                      <option value="hybrid">Hybrid</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Avatar color</span>
+                    <select name="tone">
+                      <option value="blue">Blue</option>
+                      <option value="green">Green</option>
+                      <option value="pink">Pink</option>
+                      <option value="yellow">Yellow</option>
+                    </select>
+                  </label>
+                  <button class="primary-action" type="submit">Save team member</button>
+                </form>
+              </section>
+
+              <section class="admin-section" data-admin-section="documents" hidden>
+                <div class="admin-list-panel">
+                  <div class="admin-list-header">
+                    <h3>Document records</h3>
+                    <button class="secondary-action" id="createDocumentRecordButton" type="button">New</button>
+                  </div>
+                  <div class="admin-record-list" id="adminDocumentList"></div>
+                </div>
+
+                <form class="admin-form" id="documentForm">
+                  <div class="form-header">
+                    <h3 id="documentFormTitle">Edit document</h3>
+                    <button class="danger-action" id="deleteDocumentButton" type="button">Delete</button>
+                  </div>
+                  <label>
+                    <span>Title</span>
+                    <input name="title" type="text" required />
+                  </label>
+                  <label>
+                    <span>Category</span>
+                    <input name="category" type="text" required />
+                  </label>
+                  <label>
+                    <span>Owner</span>
+                    <input name="owner" type="text" required />
+                  </label>
+                  <label>
+                    <span>File type</span>
+                    <input name="type" type="text" required />
+                  </label>
+                  <label>
+                    <span>Status</span>
+                    <input name="status" type="text" required />
+                  </label>
+                  <label>
+                    <span>Updated</span>
+                    <input name="updatedAt" type="date" required />
+                  </label>
+                  <button class="primary-action" type="submit">Save document</button>
+                </form>
+              </section>
+
+              <section class="admin-section" data-admin-section="knowledge" hidden>
+                <div class="admin-module knowledge-admin-module">
+                  <span class="module-icon">K</span>
+                  <div>
+                    <h3>Knowledge Base editor</h3>
+                    <p>Articles are edited in the Knowledge Base section. Categories, permissions, and publishing workflow will become the next backend-backed layer.</p>
+                  </div>
+                  <a class="secondary-action" href="#knowledge" data-nav-target="knowledge">Open editor</a>
+                </div>
+              </section>
+            </div>
           </section>
         </section>
       </main>

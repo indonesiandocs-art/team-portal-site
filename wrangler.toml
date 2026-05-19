@@ -1,5 +1,10 @@
 name = "divine-wave-7f6d"
+main = "worker.js"
 compatibility_date = "2026-05-19"
+
+[[kv_namespaces]]
+binding = "PORTAL_KV"
+id = "cf1e4c7179ad490092de2c9e6169bcb0"
 
 [assets]
 directory = "./dist"
