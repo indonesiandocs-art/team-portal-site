@@ -340,6 +340,8 @@ function setAdminStatus(message, status = "idle") {
 
 function renderAdminGate() {
   const isUnlocked = state.adminUnlocked;
+  elements.addEmployeeButton.hidden = !isUnlocked;
+  elements.addDocumentButton.hidden = !isUnlocked;
   elements.newAdminItemButton.hidden = !isUnlocked;
   elements.adminLockedPanel.hidden = isUnlocked;
   elements.contentOverview.hidden = !isUnlocked;
@@ -1610,11 +1612,21 @@ elements.imageUpload.addEventListener("change", (event) => insertImage(event.tar
 elements.newArticleButton.addEventListener("click", createArticle);
 elements.saveArticleButton.addEventListener("click", () => persistCurrentArticle());
 elements.addEmployeeButton.addEventListener("click", () => {
+  if (!state.adminUnlocked) {
+    setActivePage("admin");
+    return;
+  }
+
   setActivePage("admin");
   setAdminTab("team");
   createEmployeeRecord();
 });
 elements.addDocumentButton.addEventListener("click", () => {
+  if (!state.adminUnlocked) {
+    setActivePage("admin");
+    return;
+  }
+
   setActivePage("admin");
   setAdminTab("documents");
   createDocumentRecord();
