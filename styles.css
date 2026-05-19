@@ -741,6 +741,11 @@ h2 {
   background: var(--pink-soft);
 }
 
+.tag.not-set {
+  color: var(--muted);
+  background: #eef1f5;
+}
+
 .contact-list {
   display: grid;
   gap: 3px;

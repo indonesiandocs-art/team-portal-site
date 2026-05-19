@@ -1,73 +1,39 @@
 const defaultEmployees = [
-  {
-    id: "aisha-rahman",
-    name: "Aisha Rahman",
-    role: "People Operations Lead",
-    department: "People & Culture",
-    workMode: "office",
-    location: "Singapore",
-    email: "aisha.rahman@novagroup.trade",
-    phone: "+65 8123 4410",
-    tone: "pink",
-  },
-  {
-    id: "marco-silva",
-    name: "Marco Silva",
-    role: "Frontend Engineer",
-    department: "Product",
-    workMode: "hybrid",
-    location: "Lisbon",
-    email: "marco.silva@novagroup.trade",
-    phone: "+351 910 220 184",
-    tone: "blue",
-  },
-  {
-    id: "sofia-chen",
-    name: "Sofia Chen",
-    role: "Customer Operations Manager",
-    department: "Customer Operations",
-    workMode: "remote",
-    location: "Hong Kong",
-    email: "sofia.chen@novagroup.trade",
-    phone: "+852 5123 7290",
-    tone: "yellow",
-  },
-  {
-    id: "daniel-weber",
-    name: "Daniel Weber",
-    role: "Financial Controller",
-    department: "Finance",
-    workMode: "office",
-    location: "Hamburg",
-    email: "daniel.weber@novagroup.trade",
-    phone: "+49 151 4083 3170",
-    tone: "green",
-  },
-  {
-    id: "leyla-demir",
-    name: "Leyla Demir",
-    role: "Trade Compliance Counsel",
-    department: "Legal & Compliance",
-    workMode: "hybrid",
-    location: "Istanbul",
-    email: "leyla.demir@novagroup.trade",
-    phone: "+90 532 512 6420",
-    tone: "pink",
-  },
-  {
-    id: "noah-jensen",
-    name: "Noah Jensen",
-    role: "Systems Administrator",
-    department: "IT",
-    workMode: "office",
-    location: "Copenhagen",
-    email: "noah.jensen@novagroup.trade",
-    phone: "+45 60 39 10 50",
-    tone: "blue",
-  },
+  { id: "lenar", name: "Lenar", role: "Partner, General Director", department: "Leadership", workMode: "not-set", location: "Global", email: "", phone: "", tone: "blue" },
+  { id: "dmitry", name: "Dmitry", role: "Partner", department: "Leadership", workMode: "not-set", location: "Global", email: "", phone: "", tone: "green" },
+  { id: "elena", name: "Elena", role: "Director", department: "Operations", workMode: "not-set", location: "Head office", email: "", phone: "", tone: "pink" },
+  { id: "andrey", name: "Andrey", role: "Senior Manager", department: "Operations", workMode: "not-set", location: "Head office", email: "", phone: "", tone: "yellow" },
+  { id: "ekaterina", name: "Ekaterina", role: "Manager", department: "Operations", workMode: "not-set", location: "Head office", email: "", phone: "", tone: "blue" },
+  { id: "vera", name: "Vera", role: "Manager", department: "Operations", workMode: "not-set", location: "Head office", email: "", phone: "", tone: "green" },
+  { id: "julia", name: "Julia", role: "Manager", department: "Operations", workMode: "not-set", location: "Head office", email: "", phone: "", tone: "pink" },
+  { id: "veronika", name: "Veronika", role: "Manager", department: "Operations", workMode: "not-set", location: "Head office", email: "", phone: "", tone: "yellow" },
+  { id: "asila", name: "Asila", role: "Manager", department: "Operations", workMode: "not-set", location: "Head office", email: "", phone: "", tone: "blue" },
+  { id: "daria", name: "Daria", role: "Junior Manager", department: "Operations", workMode: "not-set", location: "Head office", email: "", phone: "", tone: "green" },
+  { id: "alexander", name: "Alexander", role: "Financial Manager", department: "Finance", workMode: "not-set", location: "Global", email: "", phone: "", tone: "pink" },
+  { id: "iskander", name: "Iskander", role: "Managing Director, Foreign Countries", department: "International Management", workMode: "not-set", location: "Global", email: "", phone: "", tone: "yellow" },
+  { id: "vladimir", name: "Vladimir", role: "Legal Manager", department: "Legal & Compliance", workMode: "not-set", location: "Global", email: "", phone: "", tone: "blue" },
+  { id: "viktoria", name: "Viktoria", role: "Logistics Manager", department: "Logistics", workMode: "not-set", location: "Global", email: "", phone: "", tone: "green" },
+  { id: "vadim", name: "Vadim", role: "Relationship Manager", department: "Relationship Management", workMode: "not-set", location: "Global", email: "", phone: "", tone: "pink" },
+  { id: "alex", name: "Alex", role: "Compliance Manager", department: "Legal & Compliance", workMode: "not-set", location: "Global", email: "", phone: "", tone: "yellow" },
+  { id: "stas", name: "Stas", role: "IT", department: "IT", workMode: "not-set", location: "Global", email: "", phone: "", tone: "blue" },
+  { id: "liza", name: "Liza", role: "Chinese Manager", department: "China", workMode: "not-set", location: "China", email: "", phone: "", tone: "green" },
+  { id: "zhao", name: "Zhao", role: "Chinese Accountant", department: "China", workMode: "not-set", location: "China", email: "", phone: "", tone: "pink" },
+  { id: "ceyhun", name: "Ceyhun", role: "Turkish Manager, Turkish Accountant, Nominee", department: "Turkey", workMode: "not-set", location: "Turkey", email: "", phone: "", tone: "yellow" },
+  { id: "rexi", name: "Rexi", role: "Indonesian Legal", department: "Indonesia", workMode: "not-set", location: "Indonesia", email: "", phone: "", tone: "blue" },
+  { id: "riri", name: "Riri", role: "Indonesian Accountant", department: "Indonesia", workMode: "not-set", location: "Indonesia", email: "", phone: "", tone: "green" },
+  { id: "nikhil", name: "Nikhil", role: "Dubai Accountant", department: "Dubai", workMode: "not-set", location: "Dubai", email: "", phone: "", tone: "pink" },
+  { id: "carmen", name: "Carmen", role: "Malaysian Manager", department: "Malaysia", workMode: "not-set", location: "Malaysia", email: "", phone: "", tone: "yellow" },
+  { id: "stephy", name: "Stephy", role: "Malaysian Accountant", department: "Malaysia", workMode: "not-set", location: "Malaysia", email: "", phone: "", tone: "blue" },
+  { id: "rustam", name: "Rustam", role: "Kazakhstan Manager", department: "Kazakhstan", workMode: "not-set", location: "Kazakhstan", email: "", phone: "", tone: "green" },
+  { id: "svetlana", name: "Svetlana", role: "Kazakhstan Accountant", department: "Kazakhstan", workMode: "not-set", location: "Kazakhstan", email: "", phone: "", tone: "pink" },
+  { id: "sari", name: "Sari", role: "Nominee", department: "Nominees", workMode: "not-set", location: "Global", email: "", phone: "", tone: "yellow" },
+  { id: "zalfa", name: "Zalfa", role: "Nominee", department: "Nominees", workMode: "not-set", location: "Global", email: "", phone: "", tone: "blue" },
+  { id: "deiby", name: "Deiby", role: "Nominee", department: "Nominees", workMode: "not-set", location: "Global", email: "", phone: "", tone: "green" },
+  { id: "cholpon", name: "Cholpon", role: "Kyrgyzstan Accountant", department: "Kyrgyzstan", workMode: "not-set", location: "Kyrgyzstan", email: "", phone: "", tone: "pink" },
 ];
 
 const workModeLabels = {
+  "not-set": "Not set",
   office: "Office",
   remote: "Remote",
   hybrid: "Hybrid",
@@ -172,8 +138,8 @@ const defaultDocuments = [
 ];
 
 const defaultEvents = [
-  { id: "birthday-sofia-chen", type: "birthday", title: "Birthday: Sofia Chen", date: "2026-05-23", meta: "Customer Operations" },
-  { id: "leave-marco-silva", type: "vacation", title: "Vacation: Marco Silva", date: "2026-05-27", meta: "Product, 5 days" },
+  { id: "team-birthdays", type: "birthday", title: "Team birthdays", date: "2026-05-23", meta: "Add birthday dates in Admin" },
+  { id: "vacation-calendar", type: "vacation", title: "Vacation calendar", date: "2026-05-27", meta: "Add approved vacations in Admin" },
   { id: "review-procurement-policy", type: "document", title: "Review procurement policy", date: "2026-05-30", meta: "IT" },
 ];
 
@@ -224,8 +190,8 @@ const elements = {
   tableWrap: document.querySelector('[data-view-target="table"]'),
   viewButtons: document.querySelectorAll(".view-button"),
   totalEmployees: document.querySelector("#totalEmployees"),
-  officeEmployees: document.querySelector("#officeEmployees"),
-  remoteEmployees: document.querySelector("#remoteEmployees"),
+  locationCount: document.querySelector("#locationCount"),
+  pendingContacts: document.querySelector("#pendingContacts"),
   departmentCount: document.querySelector("#departmentCount"),
   navItems: document.querySelectorAll(".section-nav [data-nav-target]"),
   pageViews: document.querySelectorAll("[data-page]"),
@@ -477,7 +443,7 @@ function normalizeEventRecords(records) {
   return normalizeSharedRecords(records, cloneDefaultEvents).map((event, index) => ({
     id: event.id || createId(`event-${index}`),
     type: event.type || "document",
-    title: event.title === "Leave: Marco Silva" ? "Vacation: Marco Silva" : event.title || "New event",
+    title: event.title || "New event",
     date: event.date || new Date().toISOString().slice(0, 10),
     meta: event.meta || "Details",
   }));
@@ -653,8 +619,8 @@ function renderDepartmentOptions() {
 
 function renderSummary() {
   elements.totalEmployees.textContent = state.employees.length;
-  elements.officeEmployees.textContent = state.employees.filter((employee) => employee.workMode === "office").length;
-  elements.remoteEmployees.textContent = state.employees.filter((employee) => employee.workMode === "remote").length;
+  elements.locationCount.textContent = new Set(state.employees.map((employee) => employee.location)).size;
+  elements.pendingContacts.textContent = state.employees.filter((employee) => !employee.email && !employee.phone).length;
   elements.departmentCount.textContent = new Set(state.employees.map((employee) => employee.department)).size;
 }
 
@@ -811,6 +777,22 @@ function employeePersonMarkup(employee) {
   `;
 }
 
+function employeeContactMarkup(employee) {
+  const email = String(employee.email || "").trim();
+  const phone = String(employee.phone || "").trim();
+
+  if (!email && !phone) {
+    return `<span class="contact-list"><span class="subtle">Contact pending</span></span>`;
+  }
+
+  return `
+    <span class="contact-list">
+      ${email ? `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>` : ""}
+      ${phone ? `<span class="subtle">${escapeHtml(phone)}</span>` : ""}
+    </span>
+  `;
+}
+
 function renderTable(filteredEmployees) {
   elements.tableBody.innerHTML = filteredEmployees
     .map(
@@ -820,12 +802,7 @@ function renderTable(filteredEmployees) {
           <td><strong>${escapeHtml(employee.role)}</strong></td>
           <td>${escapeHtml(employee.department)}</td>
           <td><span class="tag ${escapeHtml(employee.workMode)}">${workModeLabels[employee.workMode]}</span></td>
-          <td>
-            <span class="contact-list">
-              <a href="mailto:${escapeHtml(employee.email)}">${escapeHtml(employee.email)}</a>
-              <span class="subtle">${escapeHtml(employee.phone)}</span>
-            </span>
-          </td>
+          <td>${employeeContactMarkup(employee)}</td>
         </tr>
       `,
     )
@@ -843,10 +820,7 @@ function renderCards(filteredEmployees) {
             <div class="meta-row"><span>Department</span><strong>${escapeHtml(employee.department)}</strong></div>
             <div class="meta-row"><span>Work mode</span><strong>${workModeLabels[employee.workMode]}</strong></div>
           </div>
-          <span class="contact-list">
-            <a href="mailto:${escapeHtml(employee.email)}">${escapeHtml(employee.email)}</a>
-            <span class="subtle">${escapeHtml(employee.phone)}</span>
-          </span>
+          ${employeeContactMarkup(employee)}
         </article>
       `,
     )
@@ -1068,10 +1042,10 @@ function createEmployeeRecord() {
     name: "New team member",
     role: "Role",
     department: "Department",
-    workMode: "hybrid",
+    workMode: "not-set",
     location: "Location",
-    email: "name@novagroup.trade",
-    phone: "+00 000 000 000",
+    email: "",
+    phone: "",
     tone: "blue",
   };
 

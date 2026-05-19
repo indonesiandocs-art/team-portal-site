@@ -159,12 +159,12 @@
               <strong id="totalEmployees">0</strong>
             </article>
             <article class="metric">
-              <span>Office based</span>
-              <strong id="officeEmployees">0</strong>
+              <span>Locations</span>
+              <strong id="locationCount">0</strong>
             </article>
             <article class="metric">
-              <span>Remote</span>
-              <strong id="remoteEmployees">0</strong>
+              <span>Contact pending</span>
+              <strong id="pendingContacts">0</strong>
             </article>
             <article class="metric">
               <span>Departments</span>
@@ -532,15 +532,16 @@
                   </label>
                   <label>
                     <span>Email</span>
-                    <input name="email" type="email" required />
+                    <input name="email" type="email" />
                   </label>
                   <label>
                     <span>Phone</span>
-                    <input name="phone" type="text" required />
+                    <input name="phone" type="text" />
                   </label>
                   <label>
                     <span>Work mode</span>
                     <select name="workMode">
+                      <option value="not-set">Not set</option>
                       <option value="office">Office</option>
                       <option value="remote">Remote</option>
                       <option value="hybrid">Hybrid</option>
