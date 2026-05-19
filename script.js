@@ -10,6 +10,7 @@ const defaultEmployees = [
   { id: "asila", name: "Asila", role: "Manager", department: "Operations", workMode: "not-set", location: "Head office", email: "", phone: "", tone: "blue" },
   { id: "daria", name: "Daria", role: "Junior Manager", department: "Operations", workMode: "not-set", location: "Head office", email: "", phone: "", tone: "green" },
   { id: "alexander", name: "Alexander", role: "Financial Manager", department: "Finance", workMode: "not-set", location: "Global", email: "", phone: "", tone: "pink" },
+  { id: "elena-accountant", name: "Elena", role: "Accountant", department: "Finance", workMode: "not-set", location: "Global", email: "", phone: "", tone: "yellow" },
   { id: "iskander", name: "Iskander", role: "Managing Director, Foreign Countries", department: "International Management", workMode: "not-set", location: "Global", email: "", phone: "", tone: "yellow" },
   { id: "vladimir", name: "Vladimir", role: "Legal Manager", department: "Legal", workMode: "not-set", location: "Global", email: "", phone: "", tone: "blue" },
   { id: "viktoria", name: "Viktoria", role: "Logistics Manager", department: "Logistics", workMode: "not-set", location: "Global", email: "", phone: "", tone: "green" },
@@ -453,7 +454,7 @@ function normalizeEmployeeRecords(records) {
   const employeeRecords = normalizeSharedRecords(records, cloneDefaultEmployees);
   const normalizedRecords = isLegacyDemoEmployeeSet(employeeRecords) ? cloneDefaultEmployees() : employeeRecords;
 
-  return normalizedRecords.map((employee) => {
+  const updatedRecords = normalizedRecords.map((employee) => {
     const normalizedEmployee = { ...employee };
 
     if (normalizedEmployee.id === "vladimir" && normalizedEmployee.department === "Legal & Compliance") {
@@ -470,6 +471,17 @@ function normalizeEmployeeRecords(records) {
 
     return normalizedEmployee;
   });
+
+  if (!updatedRecords.some((employee) => employee.id === "elena-accountant")) {
+    const financeManagerIndex = updatedRecords.findIndex((employee) => employee.id === "alexander");
+    const elenaAccountant = cloneDefaultEmployees().find((employee) => employee.id === "elena-accountant");
+
+    if (elenaAccountant) {
+      updatedRecords.splice(financeManagerIndex >= 0 ? financeManagerIndex + 1 : updatedRecords.length, 0, elenaAccountant);
+    }
+  }
+
+  return updatedRecords;
 }
 
 function normalizeEventRecords(records) {
