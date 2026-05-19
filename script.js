@@ -141,7 +141,7 @@ const defaultDocuments = [
   },
   {
     id: "leave-request-template",
-    title: "Leave Request Template",
+    title: "Vacation Request Template",
     category: "People",
     owner: "People & Culture",
     updatedAt: "2026-05-06",
@@ -173,13 +173,13 @@ const defaultDocuments = [
 
 const defaultEvents = [
   { id: "birthday-sofia-chen", type: "birthday", title: "Birthday: Sofia Chen", date: "2026-05-23", meta: "Customer Operations" },
-  { id: "leave-marco-silva", type: "vacation", title: "Leave: Marco Silva", date: "2026-05-27", meta: "Product, 5 days" },
+  { id: "leave-marco-silva", type: "vacation", title: "Vacation: Marco Silva", date: "2026-05-27", meta: "Product, 5 days" },
   { id: "review-procurement-policy", type: "document", title: "Review procurement policy", date: "2026-05-30", meta: "IT" },
 ];
 
 const eventTypeLabels = {
   birthday: "Birthday",
-  vacation: "Leave",
+  vacation: "Vacation",
   document: "Reminder",
 };
 
@@ -470,7 +470,7 @@ function normalizeEventRecords(records) {
   return normalizeSharedRecords(records, cloneDefaultEvents).map((event, index) => ({
     id: event.id || createId(`event-${index}`),
     type: event.type || "document",
-    title: event.title || "New event",
+    title: event.title === "Leave: Marco Silva" ? "Vacation: Marco Silva" : event.title || "New event",
     date: event.date || new Date().toISOString().slice(0, 10),
     meta: event.meta || "Details",
   }));
@@ -479,7 +479,7 @@ function normalizeEventRecords(records) {
 function normalizeDocumentRecords(records) {
   return normalizeSharedRecords(records, cloneDefaultDocuments).map((documentItem, index) => ({
     id: documentItem.id || createId(`document-${index}`),
-    title: documentItem.title || "New document",
+    title: documentItem.title === "Leave Request Template" ? "Vacation Request Template" : documentItem.title || "New document",
     category: documentItem.category || "Category",
     owner: documentItem.owner || "Owner",
     updatedAt: documentItem.updatedAt || new Date().toISOString().slice(0, 10),
@@ -549,7 +549,7 @@ async function publishPortalData({ silent = false } = {}) {
 
   if (!state.sharedBackendAvailable) {
     if (!silent) {
-      setAdminStatus("Saved in this browser only", "error");
+      setAdminStatus("Saved in this browser", "error");
     }
     return false;
   }
