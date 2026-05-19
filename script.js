@@ -460,7 +460,25 @@ function isLegacyDemoEmployeeSet(records) {
 
 function normalizeEmployeeRecords(records) {
   const employeeRecords = normalizeSharedRecords(records, cloneDefaultEmployees);
-  return isLegacyDemoEmployeeSet(employeeRecords) ? cloneDefaultEmployees() : employeeRecords;
+  const normalizedRecords = isLegacyDemoEmployeeSet(employeeRecords) ? cloneDefaultEmployees() : employeeRecords;
+
+  return normalizedRecords.map((employee) => {
+    const normalizedEmployee = { ...employee };
+
+    if (normalizedEmployee.id === "vladimir" && normalizedEmployee.department === "Legal & Compliance") {
+      normalizedEmployee.department = "Legal";
+    }
+
+    if (normalizedEmployee.id === "alex" && normalizedEmployee.department === "Legal & Compliance") {
+      normalizedEmployee.department = "Compliance";
+    }
+
+    if (normalizedEmployee.id === "stas" && normalizedEmployee.role === "IT") {
+      normalizedEmployee.role = "IT Manager";
+    }
+
+    return normalizedEmployee;
+  });
 }
 
 function normalizeEventRecords(records) {
