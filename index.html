@@ -456,11 +456,12 @@
 
             <div class="admin-locked" id="adminLockedPanel">
               <strong>Protected management area</strong>
-              <p>Enter the admin key to manage team records, documents, and Knowledge Base publishing.</p>
+              <p>Enter the admin key to manage team records, events, documents, and Knowledge Base publishing.</p>
             </div>
 
             <div class="admin-tabs" role="tablist" aria-label="Admin sections">
               <button class="admin-tab is-active" type="button" data-admin-tab="team" aria-pressed="true">Team</button>
+              <button class="admin-tab" type="button" data-admin-tab="events" aria-pressed="false">Events</button>
               <button class="admin-tab" type="button" data-admin-tab="documents" aria-pressed="false">Documents</button>
               <button class="admin-tab" type="button" data-admin-tab="knowledge" aria-pressed="false">Knowledge Base</button>
             </div>
@@ -522,6 +523,44 @@
                     </select>
                   </label>
                   <button class="primary-action" type="submit">Save team member</button>
+                </form>
+              </section>
+
+              <section class="admin-section" data-admin-section="events" hidden>
+                <div class="admin-list-panel">
+                  <div class="admin-list-header">
+                    <h3>Event records</h3>
+                    <button class="secondary-action" id="createEventRecordButton" type="button">New</button>
+                  </div>
+                  <div class="admin-record-list" id="adminEventList"></div>
+                </div>
+
+                <form class="admin-form" id="eventForm">
+                  <div class="form-header">
+                    <h3 id="eventFormTitle">Edit event</h3>
+                    <button class="danger-action" id="deleteEventButton" type="button">Delete</button>
+                  </div>
+                  <label>
+                    <span>Title</span>
+                    <input name="title" type="text" required />
+                  </label>
+                  <label>
+                    <span>Type</span>
+                    <select name="type">
+                      <option value="birthday">Birthday</option>
+                      <option value="vacation">Leave</option>
+                      <option value="document">Reminder</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Date</span>
+                    <input name="date" type="date" required />
+                  </label>
+                  <label>
+                    <span>Details</span>
+                    <input name="meta" type="text" required />
+                  </label>
+                  <button class="primary-action" type="submit">Save event</button>
                 </form>
               </section>
 

@@ -166,10 +166,10 @@ const defaultDocuments = [
   },
 ];
 
-const portalEvents = [
-  { type: "birthday", title: "Birthday: Sofia Chen", date: "2026-05-23", meta: "Customer Operations" },
-  { type: "vacation", title: "Leave: Marco Silva", date: "2026-05-27", meta: "Product, 5 days" },
-  { type: "document", title: "Review procurement policy", date: "2026-05-30", meta: "IT" },
+const defaultEvents = [
+  { id: "birthday-sofia-chen", type: "birthday", title: "Birthday: Sofia Chen", date: "2026-05-23", meta: "Customer Operations" },
+  { id: "leave-marco-silva", type: "vacation", title: "Leave: Marco Silva", date: "2026-05-27", meta: "Product, 5 days" },
+  { id: "review-procurement-policy", type: "document", title: "Review procurement policy", date: "2026-05-30", meta: "IT" },
 ];
 
 const eventTypeLabels = {
@@ -181,6 +181,7 @@ const eventTypeLabels = {
 const articleStorageKey = "novaGroupKnowledgeArticles";
 const employeeStorageKey = "novaGroupEmployees";
 const documentStorageKey = "novaGroupDocuments";
+const eventStorageKey = "novaGroupEvents";
 const adminTokenStorageKey = "novaGroupAdminToken";
 const portalDataEndpoint = "/api/portal-data";
 const adminCheckEndpoint = "/api/admin-check";
@@ -196,8 +197,10 @@ const state = {
   adminTab: "team",
   currentEmployeeId: "",
   currentDocumentId: "",
+  currentEventId: "",
   employees: [],
   documents: [],
+  events: [],
   currentArticleId: "",
   articles: [],
   adminToken: "",
@@ -261,6 +264,7 @@ const elements = {
   adminTabs: document.querySelectorAll("[data-admin-tab]"),
   adminSections: document.querySelectorAll("[data-admin-section]"),
   adminEmployeeList: document.querySelector("#adminEmployeeList"),
+  adminEventList: document.querySelector("#adminEventList"),
   adminDocumentList: document.querySelector("#adminDocumentList"),
   adminAuthForm: document.querySelector("#adminAuthForm"),
   adminLockedPanel: document.querySelector("#adminLockedPanel"),
@@ -270,6 +274,10 @@ const elements = {
   employeeFormTitle: document.querySelector("#employeeFormTitle"),
   createEmployeeRecordButton: document.querySelector("#createEmployeeRecordButton"),
   deleteEmployeeButton: document.querySelector("#deleteEmployeeButton"),
+  eventForm: document.querySelector("#eventForm"),
+  eventFormTitle: document.querySelector("#eventFormTitle"),
+  createEventRecordButton: document.querySelector("#createEventRecordButton"),
+  deleteEventButton: document.querySelector("#deleteEventButton"),
   documentForm: document.querySelector("#documentForm"),
   documentFormTitle: document.querySelector("#documentFormTitle"),
   createDocumentRecordButton: document.querySelector("#createDocumentRecordButton"),
@@ -305,6 +313,10 @@ function cloneDefaultEmployees() {
 
 function cloneDefaultDocuments() {
   return JSON.parse(JSON.stringify(defaultDocuments));
+}
+
+function cloneDefaultEvents() {
+  return JSON.parse(JSON.stringify(defaultEvents));
 }
 
 function getStoredCollection(storageKey, fallbackFactory) {
@@ -433,6 +445,7 @@ function getPortalDataPayload() {
   return {
     employees: state.employees,
     documents: state.documents,
+    events: state.events,
     articles: state.articles,
   };
 }
@@ -440,11 +453,22 @@ function getPortalDataPayload() {
 function saveLocalPortalData() {
   saveCollection(employeeStorageKey, state.employees);
   saveCollection(documentStorageKey, state.documents);
+  saveCollection(eventStorageKey, state.events);
   saveArticles();
 }
 
 function normalizeSharedRecords(records, fallback) {
   return Array.isArray(records) && records.length ? records : fallback();
+}
+
+function normalizeEventRecords(records) {
+  return normalizeSharedRecords(records, cloneDefaultEvents).map((event, index) => ({
+    id: event.id || createId(`event-${index}`),
+    type: event.type || "document",
+    title: event.title || "New event",
+    date: event.date || new Date().toISOString().slice(0, 10),
+    meta: event.meta || "Details",
+  }));
 }
 
 function applySharedPortalData(data) {
@@ -454,9 +478,11 @@ function applySharedPortalData(data) {
 
   state.employees = normalizeSharedRecords(data.employees, cloneDefaultEmployees);
   state.documents = normalizeSharedRecords(data.documents, cloneDefaultDocuments);
+  state.events = normalizeEventRecords(data.events);
   state.articles = normalizeSharedRecords(data.articles, cloneDefaultArticles);
   state.currentEmployeeId = state.employees[0]?.id || "";
   state.currentDocumentId = state.documents[0]?.id || "";
+  state.currentEventId = state.events[0]?.id || "";
   state.currentArticleId = state.articles[0]?.id || "";
   saveLocalPortalData();
   refreshPortal();
@@ -608,7 +634,7 @@ function renderSummary() {
 }
 
 function getSortedEvents() {
-  return [...portalEvents].sort((a, b) => new Date(a.date) - new Date(b.date));
+  return [...state.events].sort((a, b) => new Date(a.date) - new Date(b.date));
 }
 
 function eventItemMarkup(event, { compact = false } = {}) {
@@ -814,6 +840,10 @@ function getCurrentDocument() {
   return state.documents.find((documentItem) => documentItem.id === state.currentDocumentId);
 }
 
+function getCurrentEvent() {
+  return state.events.find((event) => event.id === state.currentEventId);
+}
+
 function renderAdminEmployees() {
   elements.adminEmployeeList.innerHTML = state.employees
     .map(
@@ -821,6 +851,19 @@ function renderAdminEmployees() {
         <button class="admin-record ${employee.id === state.currentEmployeeId ? "is-active" : ""}" type="button" data-employee-id="${employee.id}">
           <strong>${escapeHtml(employee.name)}</strong>
           <span>${escapeHtml(employee.role)} · ${escapeHtml(employee.location)}</span>
+        </button>
+      `,
+    )
+    .join("");
+}
+
+function renderAdminEvents() {
+  elements.adminEventList.innerHTML = getSortedEvents()
+    .map(
+      (event) => `
+        <button class="admin-record ${event.id === state.currentEventId ? "is-active" : ""}" type="button" data-event-id="${event.id}">
+          <strong>${escapeHtml(event.title)}</strong>
+          <span>${eventTypeLabels[event.type] || "Event"} · ${formatDate(event.date)}</span>
         </button>
       `,
     )
@@ -842,6 +885,7 @@ function renderAdminDocuments() {
 
 function renderAdminLists() {
   renderAdminEmployees();
+  renderAdminEvents();
   renderAdminDocuments();
 }
 
@@ -875,6 +919,21 @@ function fillDocumentForm(documentItem) {
   });
 }
 
+function fillEventForm(event) {
+  if (!event) {
+    return;
+  }
+
+  elements.eventFormTitle.textContent = `Edit ${event.title}`;
+  Object.entries(event).forEach(([key, value]) => {
+    const field = elements.eventForm.elements[key];
+
+    if (field) {
+      field.value = value;
+    }
+  });
+}
+
 function refreshPortal() {
   renderDepartmentOptions();
   renderDocumentCategories();
@@ -885,6 +944,7 @@ function refreshPortal() {
   renderHome();
   renderAdminLists();
   fillEmployeeForm(getCurrentEmployee());
+  fillEventForm(getCurrentEvent());
   fillDocumentForm(getCurrentDocument());
 }
 
@@ -898,6 +958,12 @@ function selectDocument(documentId) {
   state.currentDocumentId = documentId;
   renderAdminDocuments();
   fillDocumentForm(getCurrentDocument());
+}
+
+function selectEvent(eventId) {
+  state.currentEventId = eventId;
+  renderAdminEvents();
+  fillEventForm(getCurrentEvent());
 }
 
 function createEmployeeRecord() {
@@ -940,6 +1006,23 @@ function createDocumentRecord() {
   elements.documentForm.elements.title.select();
 }
 
+function createEventRecord() {
+  const event = {
+    id: createId("event"),
+    type: "document",
+    title: "New event",
+    date: new Date().toISOString().slice(0, 10),
+    meta: "Details",
+  };
+
+  state.events.unshift(event);
+  state.currentEventId = event.id;
+  refreshPortal();
+  void publishPortalData({ silent: true });
+  elements.eventForm.elements.title.focus();
+  elements.eventForm.elements.title.select();
+}
+
 function saveEmployeeFromForm(event) {
   event.preventDefault();
 
@@ -952,6 +1035,24 @@ function saveEmployeeFromForm(event) {
   const formData = new FormData(elements.employeeForm);
   ["name", "role", "department", "location", "email", "phone", "workMode", "tone"].forEach((key) => {
     employee[key] = String(formData.get(key) || "").trim();
+  });
+
+  refreshPortal();
+  void publishPortalData();
+}
+
+function saveEventFromForm(event) {
+  event.preventDefault();
+
+  const portalEvent = getCurrentEvent();
+
+  if (!portalEvent) {
+    return;
+  }
+
+  const formData = new FormData(elements.eventForm);
+  ["title", "type", "date", "meta"].forEach((key) => {
+    portalEvent[key] = String(formData.get(key) || "").trim();
   });
 
   refreshPortal();
@@ -998,6 +1099,17 @@ function deleteDocumentRecord() {
   void publishPortalData();
 }
 
+function deleteEventRecord() {
+  if (state.events.length <= 1 || !window.confirm("Delete this event?")) {
+    return;
+  }
+
+  state.events = state.events.filter((event) => event.id !== state.currentEventId);
+  state.currentEventId = state.events[0]?.id || "";
+  refreshPortal();
+  void publishPortalData();
+}
+
 function setAdminTab(tab) {
   state.adminTab = tab;
 
@@ -1017,8 +1129,10 @@ function setAdminTab(tab) {
 function initializeCollections() {
   state.employees = getStoredCollection(employeeStorageKey, cloneDefaultEmployees);
   state.documents = getStoredCollection(documentStorageKey, cloneDefaultDocuments);
+  state.events = normalizeEventRecords(getStoredCollection(eventStorageKey, cloneDefaultEvents));
   state.currentEmployeeId = state.employees[0]?.id || "";
   state.currentDocumentId = state.documents[0]?.id || "";
+  state.currentEventId = state.events[0]?.id || "";
 }
 
 function setView(view) {
@@ -1398,6 +1512,11 @@ elements.addDocumentButton.addEventListener("click", () => {
   createDocumentRecord();
 });
 elements.newAdminItemButton.addEventListener("click", () => {
+  if (state.adminTab === "events") {
+    createEventRecord();
+    return;
+  }
+
   if (state.adminTab === "documents") {
     createDocumentRecord();
     return;
@@ -1429,6 +1548,13 @@ elements.adminEmployeeList.addEventListener("click", (event) => {
     selectEmployee(item.dataset.employeeId);
   }
 });
+elements.adminEventList.addEventListener("click", (event) => {
+  const item = event.target.closest("[data-event-id]");
+
+  if (item) {
+    selectEvent(item.dataset.eventId);
+  }
+});
 elements.adminDocumentList.addEventListener("click", (event) => {
   const item = event.target.closest("[data-document-id]");
 
@@ -1437,10 +1563,13 @@ elements.adminDocumentList.addEventListener("click", (event) => {
   }
 });
 elements.employeeForm.addEventListener("submit", saveEmployeeFromForm);
+elements.eventForm.addEventListener("submit", saveEventFromForm);
 elements.documentForm.addEventListener("submit", saveDocumentFromForm);
 elements.createEmployeeRecordButton.addEventListener("click", createEmployeeRecord);
+elements.createEventRecordButton.addEventListener("click", createEventRecord);
 elements.createDocumentRecordButton.addEventListener("click", createDocumentRecord);
 elements.deleteEmployeeButton.addEventListener("click", deleteEmployeeRecord);
+elements.deleteEventButton.addEventListener("click", deleteEventRecord);
 elements.deleteDocumentButton.addEventListener("click", deleteDocumentRecord);
 elements.adminAuthForm.addEventListener("submit", async (event) => {
   event.preventDefault();
