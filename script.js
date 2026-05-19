@@ -439,6 +439,30 @@ function normalizeSharedRecords(records, fallback) {
   return Array.isArray(records) && records.length ? records : fallback();
 }
 
+function isLegacyDemoEmployeeSet(records) {
+  if (!Array.isArray(records) || records.length !== 6) {
+    return false;
+  }
+
+  const departments = new Set(records.map((employee) => employee.department));
+  const locations = new Set(records.map((employee) => employee.location));
+
+  return (
+    departments.has("People & Culture") &&
+    departments.has("Product") &&
+    departments.has("Customer Operations") &&
+    locations.has("Singapore") &&
+    locations.has("Lisbon") &&
+    locations.has("Hong Kong") &&
+    records.every((employee) => String(employee.email || "").endsWith("@novagroup.trade"))
+  );
+}
+
+function normalizeEmployeeRecords(records) {
+  const employeeRecords = normalizeSharedRecords(records, cloneDefaultEmployees);
+  return isLegacyDemoEmployeeSet(employeeRecords) ? cloneDefaultEmployees() : employeeRecords;
+}
+
 function normalizeEventRecords(records) {
   return normalizeSharedRecords(records, cloneDefaultEvents).map((event, index) => ({
     id: event.id || createId(`event-${index}`),
@@ -467,7 +491,7 @@ function applySharedPortalData(data) {
     return;
   }
 
-  state.employees = normalizeSharedRecords(data.employees, cloneDefaultEmployees);
+  state.employees = normalizeEmployeeRecords(data.employees);
   state.documents = normalizeDocumentRecords(data.documents);
   state.events = normalizeEventRecords(data.events);
   state.articles = normalizeSharedRecords(data.articles, cloneDefaultArticles);
@@ -1198,7 +1222,7 @@ function setAdminTab(tab) {
 }
 
 function initializeCollections() {
-  state.employees = getStoredCollection(employeeStorageKey, cloneDefaultEmployees);
+  state.employees = normalizeEmployeeRecords(getStoredCollection(employeeStorageKey, cloneDefaultEmployees));
   state.documents = normalizeDocumentRecords(getStoredCollection(documentStorageKey, cloneDefaultDocuments));
   state.events = normalizeEventRecords(getStoredCollection(eventStorageKey, cloneDefaultEvents));
   state.currentEmployeeId = state.employees[0]?.id || "";
