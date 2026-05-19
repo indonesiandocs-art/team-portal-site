@@ -172,6 +172,12 @@ const portalEvents = [
   { type: "document", title: "Review procurement policy", date: "2026-05-30", meta: "IT" },
 ];
 
+const eventTypeLabels = {
+  birthday: "Birthday",
+  vacation: "Leave",
+  document: "Reminder",
+};
+
 const articleStorageKey = "novaGroupKnowledgeArticles";
 const employeeStorageKey = "novaGroupEmployees";
 const documentStorageKey = "novaGroupDocuments";
@@ -220,6 +226,13 @@ const elements = {
   homeDocuments: document.querySelector("#homeDocuments"),
   homeVacations: document.querySelector("#homeVacations"),
   eventList: document.querySelector("#eventList"),
+  eventTotal: document.querySelector("#eventTotal"),
+  birthdayTotal: document.querySelector("#birthdayTotal"),
+  leaveTotal: document.querySelector("#leaveTotal"),
+  reminderTotal: document.querySelector("#reminderTotal"),
+  eventsPageList: document.querySelector("#eventsPageList"),
+  birthdayList: document.querySelector("#birthdayList"),
+  leaveList: document.querySelector("#leaveList"),
   recentArticles: document.querySelector("#recentArticles"),
   featuredDocuments: document.querySelector("#featuredDocuments"),
   articleSearch: document.querySelector("#articleSearch"),
@@ -594,8 +607,48 @@ function renderSummary() {
   elements.departmentCount.textContent = new Set(state.employees.map((employee) => employee.department)).size;
 }
 
+function getSortedEvents() {
+  return [...portalEvents].sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
+function eventItemMarkup(event, { compact = false } = {}) {
+  if (compact) {
+    return `
+      <a class="compact-item" href="#events" data-nav-target="events">
+        <strong>${escapeHtml(event.title)}</strong>
+        <span>${formatDate(event.date)} · ${escapeHtml(event.meta)}</span>
+      </a>
+    `;
+  }
+
+  return `
+    <div class="event-item" data-type="${escapeHtml(event.type)}">
+      <span>${formatDate(event.date)}</span>
+      <strong>${escapeHtml(event.title)}</strong>
+      <small>${eventTypeLabels[event.type] || "Event"} · ${escapeHtml(event.meta)}</small>
+    </div>
+  `;
+}
+
+function renderEvents() {
+  const events = getSortedEvents();
+  const birthdays = events.filter((event) => event.type === "birthday");
+  const leaveEvents = events.filter((event) => event.type === "vacation");
+  const reminders = events.filter((event) => event.type !== "birthday" && event.type !== "vacation");
+
+  elements.eventTotal.textContent = events.length;
+  elements.birthdayTotal.textContent = birthdays.length;
+  elements.leaveTotal.textContent = leaveEvents.length;
+  elements.reminderTotal.textContent = reminders.length;
+
+  elements.eventsPageList.innerHTML = events.map((event) => eventItemMarkup(event)).join("");
+  elements.birthdayList.innerHTML = birthdays.map((event) => eventItemMarkup(event, { compact: true })).join("");
+  elements.leaveList.innerHTML = leaveEvents.map((event) => eventItemMarkup(event, { compact: true })).join("");
+}
+
 function renderHome() {
-  const vacationEvents = portalEvents.filter((event) => event.type === "vacation");
+  const events = getSortedEvents();
+  const vacationEvents = events.filter((event) => event.type === "vacation");
   const visibleArticles = getVisibleArticles();
   const recentArticles = [...visibleArticles]
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
@@ -606,17 +659,7 @@ function renderHome() {
   elements.homeDocuments.textContent = state.documents.length;
   elements.homeVacations.textContent = vacationEvents.length;
 
-  elements.eventList.innerHTML = portalEvents
-    .map(
-      (event) => `
-        <div class="event-item" data-type="${escapeHtml(event.type)}">
-          <span>${formatDate(event.date)}</span>
-          <strong>${escapeHtml(event.title)}</strong>
-          <small>${escapeHtml(event.meta)}</small>
-        </div>
-      `,
-    )
-    .join("");
+  elements.eventList.innerHTML = events.map((event) => eventItemMarkup(event)).join("");
 
   elements.recentArticles.innerHTML = recentArticles
     .map(
@@ -838,6 +881,7 @@ function refreshPortal() {
   renderSummary();
   renderEmployees();
   renderDocuments();
+  renderEvents();
   renderHome();
   renderAdminLists();
   fillEmployeeForm(getCurrentEmployee());

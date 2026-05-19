@@ -401,6 +401,25 @@ h2 {
   margin-top: 16px;
 }
 
+.events-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.events-grid .workspace-panel:first-child {
+  grid-row: span 2;
+}
+
+.expanded-events {
+  gap: 10px;
+}
+
+.expanded-events .event-item {
+  min-height: 74px;
+}
+
 .event-item {
   display: grid;
   grid-template-columns: 58px minmax(0, 1fr);
@@ -1383,6 +1402,7 @@ h2 {
   .dashboard-grid,
   .quick-links,
   .document-grid,
+  .events-grid,
   .admin-grid,
   .admin-section,
   .documents-toolbar {

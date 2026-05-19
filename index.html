@@ -26,6 +26,10 @@
             <span class="nav-icon" aria-hidden="true">T</span>
             <span>Team</span>
           </a>
+          <a class="nav-item" href="#events" data-nav-target="events">
+            <span class="nav-icon" aria-hidden="true">E</span>
+            <span>Events</span>
+          </a>
           <a class="nav-item" href="#knowledge" data-nav-target="knowledge">
             <span class="nav-icon" aria-hidden="true">K</span>
             <span>Knowledge Base</span>
@@ -48,9 +52,9 @@
               <p class="eyebrow">Internal portal</p>
               <h1>Global team hub</h1>
             </div>
-            <a class="primary-action" href="#knowledge" data-nav-target="knowledge">
-              <span aria-hidden="true">+</span>
-              New article
+            <a class="primary-action" href="#employees" data-nav-target="employees">
+              <span aria-hidden="true">→</span>
+              View team
             </a>
           </header>
 
@@ -89,6 +93,10 @@
                 <a href="#knowledge" data-nav-target="knowledge">
                   <strong>Open a procedure</strong>
                   <span>Operations playbooks and internal guides</span>
+                </a>
+                <a href="#events" data-nav-target="events">
+                  <strong>Check upcoming dates</strong>
+                  <span>Birthdays, leave, reviews, and reminders</span>
                 </a>
                 <a href="#documents" data-nav-target="documents">
                   <strong>Get a document</strong>
@@ -225,6 +233,66 @@
               <strong>No results found</strong>
               <span>Try changing the search query or filters.</span>
             </div>
+          </section>
+        </section>
+
+        <section class="page-view" id="events" data-page="events" hidden>
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Internal portal</p>
+              <h1>Events</h1>
+            </div>
+          </header>
+
+          <section class="summary-grid" aria-label="Events summary">
+            <article class="metric">
+              <span>Upcoming</span>
+              <strong id="eventTotal">0</strong>
+            </article>
+            <article class="metric">
+              <span>Birthdays</span>
+              <strong id="birthdayTotal">0</strong>
+            </article>
+            <article class="metric">
+              <span>On leave</span>
+              <strong id="leaveTotal">0</strong>
+            </article>
+            <article class="metric">
+              <span>Reminders</span>
+              <strong id="reminderTotal">0</strong>
+            </article>
+          </section>
+
+          <section class="events-grid">
+            <article class="workspace-panel">
+              <div class="panel-header compact-header">
+                <div>
+                  <h2>Upcoming dates</h2>
+                  <p>Birthdays, leave, and internal reminders.</p>
+                </div>
+              </div>
+              <div class="event-list expanded-events" id="eventsPageList"></div>
+            </article>
+
+            <article class="workspace-panel">
+              <div class="panel-header compact-header">
+                <div>
+                  <h2>Birthdays</h2>
+                  <p>Upcoming team birthdays.</p>
+                </div>
+              </div>
+              <div class="compact-list" id="birthdayList"></div>
+            </article>
+
+            <article class="workspace-panel">
+              <div class="panel-header compact-header">
+                <div>
+                  <h2>Leave</h2>
+                  <p>Planned time away from work.</p>
+                </div>
+              </div>
+              <div class="compact-list" id="leaveList"></div>
+            </article>
           </section>
         </section>
 
