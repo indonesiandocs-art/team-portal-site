@@ -109,9 +109,25 @@ async function handlePortalData(request, env) {
   return jsonResponse({ error: "Method not allowed" }, 405);
 }
 
+function handleAdminCheck(request, env) {
+  if (request.method !== "POST") {
+    return jsonResponse({ error: "Method not allowed" }, 405);
+  }
+
+  if (!isAuthorized(request, env)) {
+    return unauthorized();
+  }
+
+  return jsonResponse({ ok: true });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if (url.pathname === "/api/admin-check") {
+      return handleAdminCheck(request, env);
+    }
 
     if (url.pathname === "/api/portal-data") {
       return handlePortalData(request, env);

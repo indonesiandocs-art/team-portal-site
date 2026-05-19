@@ -177,6 +177,7 @@ const employeeStorageKey = "novaGroupEmployees";
 const documentStorageKey = "novaGroupDocuments";
 const adminTokenStorageKey = "novaGroupAdminToken";
 const portalDataEndpoint = "/api/portal-data";
+const adminCheckEndpoint = "/api/admin-check";
 
 const state = {
   search: "",
@@ -194,6 +195,7 @@ const state = {
   currentArticleId: "",
   articles: [],
   adminToken: "",
+  adminUnlocked: false,
   sharedBackendAvailable: false,
   saveTimer: 0,
 };
@@ -242,6 +244,7 @@ const elements = {
   adminEmployeeList: document.querySelector("#adminEmployeeList"),
   adminDocumentList: document.querySelector("#adminDocumentList"),
   adminAuthForm: document.querySelector("#adminAuthForm"),
+  adminLockedPanel: document.querySelector("#adminLockedPanel"),
   adminTokenInput: document.querySelector("#adminTokenInput"),
   adminSyncStatus: document.querySelector("#adminSyncStatus"),
   employeeForm: document.querySelector("#employeeForm"),
@@ -335,6 +338,68 @@ function setAdminStatus(message, status = "idle") {
   elements.adminAuthForm.dataset.status = status;
 }
 
+function renderAdminGate() {
+  const isUnlocked = state.adminUnlocked;
+  elements.newAdminItemButton.hidden = !isUnlocked;
+  elements.adminLockedPanel.hidden = isUnlocked;
+  document.querySelector(".admin-tabs").hidden = !isUnlocked;
+  document.querySelector(".admin-workspace").hidden = !isUnlocked;
+}
+
+async function verifyAdminAccess({ silent = false } = {}) {
+  if (!state.adminToken) {
+    state.adminUnlocked = false;
+    renderAdminGate();
+
+    if (!silent) {
+      setAdminStatus("Enter the admin key to unlock management", "error");
+      elements.adminTokenInput.focus();
+    }
+
+    return false;
+  }
+
+  if (!window.fetch || window.location.protocol === "file:" || !state.sharedBackendAvailable) {
+    state.adminUnlocked = false;
+    renderAdminGate();
+
+    if (!silent) {
+      setAdminStatus("Shared storage is required to verify admin access", "error");
+    }
+
+    return false;
+  }
+
+  if (!silent) {
+    setAdminStatus("Checking admin key...", "idle");
+  }
+
+  try {
+    const response = await fetch(adminCheckEndpoint, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${state.adminToken}`,
+      },
+    });
+
+    state.adminUnlocked = response.ok;
+    renderAdminGate();
+
+    if (response.ok) {
+      setAdminStatus("Admin access unlocked", "ready");
+      return true;
+    }
+
+    setAdminStatus("Admin key is not accepted", "error");
+    return false;
+  } catch {
+    state.adminUnlocked = false;
+    renderAdminGate();
+    setAdminStatus("Could not verify admin access", "error");
+    return false;
+  }
+}
+
 function getPortalDataPayload() {
   return {
     employees: state.employees,
@@ -387,11 +452,19 @@ async function loadSharedPortalData() {
 
     if (payload.data) {
       applySharedPortalData(payload.data);
-      setAdminStatus("Shared content loaded", "ready");
+      if (state.adminToken) {
+        await verifyAdminAccess({ silent: true });
+      } else {
+        setAdminStatus("Enter admin key to unlock management", "ready");
+      }
       return;
     }
 
-    setAdminStatus("Shared storage is ready", "ready");
+    if (state.adminToken) {
+      await verifyAdminAccess({ silent: true });
+    } else {
+      setAdminStatus("Enter admin key to unlock management", "ready");
+    }
   } catch {
     state.sharedBackendAvailable = false;
     setAdminStatus("Shared storage unavailable, using this browser", "error");
@@ -409,6 +482,9 @@ async function publishPortalData({ silent = false } = {}) {
   }
 
   if (!state.adminToken) {
+    state.adminUnlocked = false;
+    renderAdminGate();
+
     if (!silent) {
       setAdminStatus("Enter the admin key to publish changes", "error");
       elements.adminTokenInput.focus();
@@ -431,6 +507,8 @@ async function publishPortalData({ silent = false } = {}) {
     });
 
     if (response.status === 401) {
+      state.adminUnlocked = false;
+      renderAdminGate();
       setAdminStatus("Admin key is not accepted", "error");
       return false;
     }
@@ -440,6 +518,8 @@ async function publishPortalData({ silent = false } = {}) {
     }
 
     setAdminStatus("Shared content saved", "ready");
+    state.adminUnlocked = true;
+    renderAdminGate();
     return true;
   } catch {
     setAdminStatus("Could not save shared content", "error");
@@ -1224,14 +1304,16 @@ elements.adminAuthForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   state.adminToken = elements.adminTokenInput.value.trim();
   setStoredAdminToken(state.adminToken);
-  await publishPortalData();
+  await verifyAdminAccess();
 });
 
 async function initializePortal() {
   state.adminToken = getStoredAdminToken();
+  state.adminUnlocked = false;
   elements.adminTokenInput.value = state.adminToken;
   initializeCollections();
   setAdminTab(state.adminTab);
+  renderAdminGate();
   refreshPortal();
   initializeKnowledgeBase();
   setActivePage(window.location.hash.replace("#", "") || "home");

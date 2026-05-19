@@ -367,7 +367,7 @@
 
             <form class="admin-auth" id="adminAuthForm">
               <div>
-                <strong>Shared backend</strong>
+                <strong>Admin access</strong>
                 <span id="adminSyncStatus">Checking shared storage...</span>
               </div>
               <label>
@@ -376,6 +376,11 @@
               </label>
               <button class="secondary-action" type="submit">Connect</button>
             </form>
+
+            <div class="admin-locked" id="adminLockedPanel">
+              <strong>Protected management area</strong>
+              <p>Enter the admin key to manage team records, documents, and Knowledge Base publishing.</p>
+            </div>
 
             <div class="admin-tabs" role="tablist" aria-label="Admin sections">
               <button class="admin-tab is-active" type="button" data-admin-tab="team" aria-pressed="true">Team</button>
