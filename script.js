@@ -32,13 +32,6 @@ const defaultEmployees = [
   { id: "cholpon", name: "Cholpon", role: "Kyrgyzstan Accountant", department: "Kyrgyzstan", workMode: "not-set", location: "Kyrgyzstan", email: "", phone: "", tone: "pink" },
 ];
 
-const workModeLabels = {
-  "not-set": "Not set",
-  office: "Office",
-  remote: "Remote",
-  hybrid: "Hybrid",
-};
-
 const articleStatusLabels = {
   draft: "Draft",
   review: "In review",
@@ -160,7 +153,6 @@ const adminCheckEndpoint = "/api/admin-check";
 const state = {
   search: "",
   department: "all",
-  workMode: "all",
   view: "table",
   articleSearch: "",
   documentSearch: "",
@@ -183,7 +175,6 @@ const state = {
 const elements = {
   search: document.querySelector("#employeeSearch"),
   departmentFilter: document.querySelector("#departmentFilter"),
-  workModeFilter: document.querySelector("#workModeFilter"),
   tableBody: document.querySelector("#employeesTableBody"),
   grid: document.querySelector("#employeesGrid"),
   emptyState: document.querySelector("#emptyState"),
@@ -634,9 +625,7 @@ function getFilteredEmployees() {
       .map(normalize)
       .some((value) => value.includes(query));
     const matchesDepartment = state.department === "all" || employee.department === state.department;
-    const matchesWorkMode = state.workMode === "all" || employee.workMode === state.workMode;
-
-    return matchesSearch && matchesDepartment && matchesWorkMode;
+    return matchesSearch && matchesDepartment;
   });
 }
 
@@ -843,7 +832,6 @@ function renderTable(filteredEmployees) {
           <td>${employeePersonMarkup(employee)}</td>
           <td><strong>${escapeHtml(employee.role)}</strong></td>
           <td>${escapeHtml(employee.department)}</td>
-          <td><span class="tag ${escapeHtml(employee.workMode)}">${workModeLabels[employee.workMode]}</span></td>
           <td>${employeeContactMarkup(employee)}</td>
         </tr>
       `,
@@ -860,7 +848,6 @@ function renderCards(filteredEmployees) {
           <div class="card-meta">
             <div class="meta-row"><span>Role</span><strong>${escapeHtml(employee.role)}</strong></div>
             <div class="meta-row"><span>Department</span><strong>${escapeHtml(employee.department)}</strong></div>
-            <div class="meta-row"><span>Work mode</span><strong>${workModeLabels[employee.workMode]}</strong></div>
           </div>
           ${employeeContactMarkup(employee)}
         </article>
@@ -1146,7 +1133,7 @@ function saveEmployeeFromForm(event) {
   }
 
   const formData = new FormData(elements.employeeForm);
-  ["name", "role", "department", "location", "email", "phone", "workMode", "tone"].forEach((key) => {
+  ["name", "role", "department", "location", "email", "phone", "tone"].forEach((key) => {
     employee[key] = String(formData.get(key) || "").trim();
   });
 
@@ -1529,11 +1516,6 @@ elements.search.addEventListener("input", (event) => {
 
 elements.departmentFilter.addEventListener("change", (event) => {
   state.department = event.target.value;
-  renderEmployees();
-});
-
-elements.workModeFilter.addEventListener("change", (event) => {
-  state.workMode = event.target.value;
   renderEmployees();
 });
 

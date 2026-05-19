@@ -176,7 +176,7 @@
             <div class="panel-header">
               <div>
                 <h2>Team directory</h2>
-                <p>Roles, departments, work modes, and quick contacts.</p>
+                <p>Roles, departments, and quick contacts.</p>
               </div>
               <div class="view-switch" aria-label="Directory view">
                 <button class="view-button is-active" type="button" data-view="table" aria-label="Show table view" aria-pressed="true" title="Table">
@@ -200,16 +200,6 @@
                   <option value="all">All departments</option>
                 </select>
               </label>
-
-              <label class="select-field">
-                <span>Work mode</span>
-                <select id="workModeFilter">
-                  <option value="all">Any</option>
-                  <option value="office">Office</option>
-                  <option value="remote">Remote</option>
-                  <option value="hybrid">Hybrid</option>
-                </select>
-              </label>
             </div>
 
             <div class="employees-table-wrap" data-view-target="table">
@@ -219,7 +209,6 @@
                     <th>Team member</th>
                     <th>Role</th>
                     <th>Department</th>
-                    <th>Work mode</th>
                     <th>Contact</th>
                   </tr>
                 </thead>
@@ -537,15 +526,6 @@
                   <label>
                     <span>Phone</span>
                     <input name="phone" type="text" />
-                  </label>
-                  <label>
-                    <span>Work mode</span>
-                    <select name="workMode">
-                      <option value="not-set">Not set</option>
-                      <option value="office">Office</option>
-                      <option value="remote">Remote</option>
-                      <option value="hybrid">Hybrid</option>
-                    </select>
                   </label>
                   <label>
                     <span>Avatar color</span>

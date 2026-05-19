@@ -713,39 +713,6 @@ h2 {
   overflow-wrap: anywhere;
 }
 
-.tag {
-  display: inline-flex;
-  min-height: 28px;
-  align-items: center;
-  padding: 0 9px;
-  border-radius: 999px;
-  color: var(--accent-dark);
-  background: var(--accent-soft);
-  font-size: 13px;
-  font-weight: 750;
-  white-space: nowrap;
-}
-
-.tag.office {
-  color: #5a4012;
-  background: var(--warning-soft);
-}
-
-.tag.remote {
-  color: #1b4782;
-  background: var(--blue-soft);
-}
-
-.tag.hybrid {
-  color: #7f2548;
-  background: var(--pink-soft);
-}
-
-.tag.not-set {
-  color: var(--muted);
-  background: #eef1f5;
-}
-
 .contact-list {
   display: grid;
   gap: 3px;
