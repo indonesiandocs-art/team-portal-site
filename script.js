@@ -224,6 +224,12 @@ const elements = {
   featuredDocuments: document.querySelector("#featuredDocuments"),
   articleSearch: document.querySelector("#articleSearch"),
   articleList: document.querySelector("#articleList"),
+  articleReader: document.querySelector("#articleReader"),
+  articleReaderStatus: document.querySelector("#articleReaderStatus"),
+  articleReaderDate: document.querySelector("#articleReaderDate"),
+  articleReaderTitle: document.querySelector("#articleReaderTitle"),
+  articleReaderBody: document.querySelector("#articleReaderBody"),
+  articleEditorShell: document.querySelector("#articleEditorShell"),
   articleTitle: document.querySelector("#articleTitle"),
   articleStatus: document.querySelector("#articleStatus"),
   articleEditor: document.querySelector("#articleEditor"),
@@ -344,6 +350,16 @@ function renderAdminGate() {
   elements.adminLockedPanel.hidden = isUnlocked;
   document.querySelector(".admin-tabs").hidden = !isUnlocked;
   document.querySelector(".admin-workspace").hidden = !isUnlocked;
+  renderKnowledgeMode();
+
+  if (!isUnlocked && state.articles.length && !getVisibleArticles().some((article) => article.id === state.currentArticleId)) {
+    loadArticle(state.currentArticleId);
+    renderHome();
+    return;
+  }
+
+  renderArticles();
+  renderHome();
 }
 
 async function verifyAdminAccess({ silent = false } = {}) {
@@ -580,12 +596,13 @@ function renderSummary() {
 
 function renderHome() {
   const vacationEvents = portalEvents.filter((event) => event.type === "vacation");
-  const recentArticles = [...state.articles]
+  const visibleArticles = getVisibleArticles();
+  const recentArticles = [...visibleArticles]
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
     .slice(0, 3);
 
   elements.homeEmployees.textContent = state.employees.length;
-  elements.homeArticles.textContent = state.articles.length;
+  elements.homeArticles.textContent = visibleArticles.length;
   elements.homeDocuments.textContent = state.documents.length;
   elements.homeVacations.textContent = vacationEvents.length;
 
@@ -1026,11 +1043,46 @@ function getCurrentArticle() {
   return state.articles.find((article) => article.id === state.currentArticleId);
 }
 
+function getPublishedArticles() {
+  return state.articles.filter((article) => article.status === "published");
+}
+
+function getVisibleArticles() {
+  return state.adminUnlocked ? state.articles : getPublishedArticles();
+}
+
+function renderKnowledgeMode() {
+  const canEdit = state.adminUnlocked;
+
+  elements.newArticleButton.hidden = !canEdit;
+  elements.articleReader.hidden = canEdit;
+  elements.articleEditorShell.hidden = !canEdit;
+  elements.articleTitle.disabled = !canEdit;
+  elements.articleStatus.disabled = !canEdit;
+  elements.articleEditor.contentEditable = canEdit ? "true" : "false";
+  elements.blockFormat.disabled = !canEdit;
+  elements.saveArticleButton.disabled = !canEdit;
+  document.querySelectorAll(".editor-toolbar button").forEach((button) => {
+    button.disabled = !canEdit;
+  });
+}
+
 function renderArticles() {
   const query = normalize(state.articleSearch);
-  const filteredArticles = state.articles.filter((article) =>
-    normalize(`${article.title} ${article.status} ${article.content.replace(/<[^>]*>/g, " ")}`).includes(query),
+  const visibleArticles = getVisibleArticles();
+  const filteredArticles = visibleArticles.filter((article) =>
+    normalize(`${article.title} ${state.adminUnlocked ? article.status : ""} ${article.content.replace(/<[^>]*>/g, " ")}`).includes(query),
   );
+
+  if (!filteredArticles.length) {
+    elements.articleList.innerHTML = `
+      <div class="article-empty">
+        <strong>No published articles yet</strong>
+        <span>Published knowledge base articles will appear here.</span>
+      </div>
+    `;
+    return;
+  }
 
   elements.articleList.innerHTML = filteredArticles
     .map(
@@ -1038,7 +1090,7 @@ function renderArticles() {
         <button class="article-item ${article.id === state.currentArticleId ? "is-active" : ""}" type="button" data-article-id="${article.id}">
           <strong>${escapeHtml(article.title || "Untitled")}</strong>
           <span class="article-meta">
-            <span class="status-pill ${article.status}">${articleStatusLabels[article.status]}</span>
+            ${state.adminUnlocked ? `<span class="status-pill ${article.status}">${articleStatusLabels[article.status]}</span>` : ""}
             <span>${formatDate(article.updatedAt)}</span>
           </span>
         </button>
@@ -1048,13 +1100,32 @@ function renderArticles() {
 }
 
 function loadArticle(articleId) {
-  const article = state.articles.find((item) => item.id === articleId) || state.articles[0];
+  renderKnowledgeMode();
+
+  const visibleArticles = getVisibleArticles();
+  const article = visibleArticles.find((item) => item.id === articleId) || visibleArticles[0];
 
   if (!article) {
+    state.currentArticleId = "";
+    elements.articleReaderStatus.textContent = "Published";
+    elements.articleReaderStatus.className = "status-pill published";
+    elements.articleReaderDate.textContent = "";
+    elements.articleReaderTitle.textContent = "No published articles yet";
+    elements.articleReaderBody.innerHTML = "<p>Published knowledge base articles will appear here.</p>";
+    elements.articleTitle.value = "";
+    elements.articleStatus.value = "draft";
+    elements.articleEditor.innerHTML = "";
+    elements.saveStatus.textContent = "Nothing to edit";
+    renderArticles();
     return;
   }
 
   state.currentArticleId = article.id;
+  elements.articleReaderStatus.textContent = articleStatusLabels[article.status] || "Published";
+  elements.articleReaderStatus.className = `status-pill ${article.status}`;
+  elements.articleReaderDate.textContent = formatDate(article.updatedAt);
+  elements.articleReaderTitle.textContent = article.title || "Untitled";
+  elements.articleReaderBody.innerHTML = article.content || "<p></p>";
   elements.articleTitle.value = article.title;
   elements.articleStatus.value = article.status;
   elements.articleEditor.innerHTML = article.content;
@@ -1063,6 +1134,10 @@ function loadArticle(articleId) {
 }
 
 function persistCurrentArticle({ silent = false } = {}) {
+  if (!state.adminUnlocked) {
+    return;
+  }
+
   const article = getCurrentArticle();
 
   if (!article) {
@@ -1084,12 +1159,20 @@ function persistCurrentArticle({ silent = false } = {}) {
 }
 
 function scheduleArticleSave() {
+  if (!state.adminUnlocked) {
+    return;
+  }
+
   elements.saveStatus.textContent = "Saving...";
   window.clearTimeout(state.saveTimer);
   state.saveTimer = window.setTimeout(() => persistCurrentArticle(), 450);
 }
 
 function createArticle() {
+  if (!state.adminUnlocked) {
+    return;
+  }
+
   persistCurrentArticle({ silent: true });
 
   const article = {
@@ -1109,6 +1192,10 @@ function createArticle() {
 }
 
 function runEditorCommand(command, value = null) {
+  if (!state.adminUnlocked) {
+    return;
+  }
+
   elements.articleEditor.focus();
   document.execCommand(command, false, value);
   scheduleArticleSave();
@@ -1116,6 +1203,10 @@ function runEditorCommand(command, value = null) {
 }
 
 function insertLink() {
+  if (!state.adminUnlocked) {
+    return;
+  }
+
   const url = window.prompt("Link URL");
 
   if (!url) {
@@ -1126,7 +1217,7 @@ function insertLink() {
 }
 
 function insertImage(file) {
-  if (!file) {
+  if (!state.adminUnlocked || !file) {
     return;
   }
 
@@ -1216,7 +1307,10 @@ elements.articleList.addEventListener("click", (event) => {
     return;
   }
 
-  persistCurrentArticle({ silent: true });
+  if (state.adminUnlocked) {
+    persistCurrentArticle({ silent: true });
+  }
+
   loadArticle(item.dataset.articleId);
 });
 
@@ -1241,7 +1335,11 @@ document.querySelectorAll("[data-command]").forEach((button) => {
 });
 
 document.querySelector('[data-action="link"]').addEventListener("click", insertLink);
-document.querySelector('[data-action="image"]').addEventListener("click", () => elements.imageUpload.click());
+document.querySelector('[data-action="image"]').addEventListener("click", () => {
+  if (state.adminUnlocked) {
+    elements.imageUpload.click();
+  }
+});
 elements.imageUpload.addEventListener("change", (event) => insertImage(event.target.files[0]));
 elements.newArticleButton.addEventListener("click", createArticle);
 elements.saveArticleButton.addEventListener("click", () => persistCurrentArticle());

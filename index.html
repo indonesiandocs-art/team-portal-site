@@ -239,8 +239,8 @@
           <section class="workspace-panel knowledge-panel">
             <div class="panel-header">
               <div>
-                <h2>Articles and editor</h2>
-                <p>Procedures, playbooks, compliance notes, and internal guidance.</p>
+                <h2>Company knowledge</h2>
+                <p>Published procedures, playbooks, and internal guidance.</p>
               </div>
               <button class="secondary-action" id="newArticleButton" type="button">
                 <span aria-hidden="true">+</span>
@@ -257,7 +257,16 @@
                 <div class="article-list" id="articleList"></div>
               </aside>
 
-              <article class="editor-shell">
+              <article class="reader-shell" id="articleReader">
+                <div class="reader-topbar">
+                  <span class="status-pill published" id="articleReaderStatus">Published</span>
+                  <span id="articleReaderDate"></span>
+                </div>
+                <h2 id="articleReaderTitle"></h2>
+                <div class="article-reader-body" id="articleReaderBody"></div>
+              </article>
+
+              <article class="editor-shell" id="articleEditorShell">
                 <div class="editor-topbar">
                   <label class="title-field">
                     <span class="visually-hidden">Article title</span>
