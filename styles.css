@@ -909,6 +909,30 @@ h2 {
   font-size: 13px;
 }
 
+.document-action {
+  grid-column: 2;
+  justify-self: start;
+  min-height: 30px;
+  padding: 6px 10px;
+  border: 1px solid rgba(244, 91, 63, 0.28);
+  border-radius: 6px;
+  color: var(--accent-dark);
+  background: var(--accent-soft);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.document-action:hover {
+  border-color: rgba(244, 91, 63, 0.5);
+}
+
+.document-action.is-disabled {
+  border-color: var(--line);
+  color: var(--muted);
+  background: #f7f9fc;
+}
+
 .admin-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1022,7 +1046,8 @@ h2 {
 }
 
 .admin-form .form-header,
-.admin-form .primary-action {
+.admin-form .primary-action,
+.admin-form .wide-field {
   grid-column: 1 / -1;
 }
 

@@ -127,6 +127,7 @@ const defaultDocuments = [
     updatedAt: "2026-05-10",
     type: "PDF",
     status: "Current",
+    url: "",
   },
   {
     id: "trade-compliance-policy",
@@ -136,6 +137,7 @@ const defaultDocuments = [
     updatedAt: "2026-05-14",
     type: "PDF",
     status: "Current",
+    url: "",
   },
   {
     id: "leave-request-template",
@@ -145,6 +147,7 @@ const defaultDocuments = [
     updatedAt: "2026-05-06",
     type: "DOCX",
     status: "Template",
+    url: "",
   },
   {
     id: "equipment-procurement-policy",
@@ -154,6 +157,7 @@ const defaultDocuments = [
     updatedAt: "2026-04-29",
     type: "PDF",
     status: "In review",
+    url: "",
   },
   {
     id: "travel-expense-report",
@@ -163,6 +167,7 @@ const defaultDocuments = [
     updatedAt: "2026-04-18",
     type: "XLSX",
     status: "Template",
+    url: "",
   },
 ];
 
@@ -471,13 +476,26 @@ function normalizeEventRecords(records) {
   }));
 }
 
+function normalizeDocumentRecords(records) {
+  return normalizeSharedRecords(records, cloneDefaultDocuments).map((documentItem, index) => ({
+    id: documentItem.id || createId(`document-${index}`),
+    title: documentItem.title || "New document",
+    category: documentItem.category || "Category",
+    owner: documentItem.owner || "Owner",
+    updatedAt: documentItem.updatedAt || new Date().toISOString().slice(0, 10),
+    type: documentItem.type || "PDF",
+    status: documentItem.status || "Draft",
+    url: documentItem.url || "",
+  }));
+}
+
 function applySharedPortalData(data) {
   if (!data || typeof data !== "object") {
     return;
   }
 
   state.employees = normalizeSharedRecords(data.employees, cloneDefaultEmployees);
-  state.documents = normalizeSharedRecords(data.documents, cloneDefaultDocuments);
+  state.documents = normalizeDocumentRecords(data.documents);
   state.events = normalizeEventRecords(data.events);
   state.articles = normalizeSharedRecords(data.articles, cloneDefaultArticles);
   state.currentEmployeeId = state.employees[0]?.id || "";
@@ -635,6 +653,20 @@ function renderSummary() {
 
 function getSortedEvents() {
   return [...state.events].sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
+function getSafeDocumentUrl(url) {
+  const value = String(url || "").trim();
+
+  if (!value) {
+    return "";
+  }
+
+  if (value.startsWith("/") || value.startsWith("https://") || value.startsWith("http://")) {
+    return value;
+  }
+
+  return "";
 }
 
 function eventItemMarkup(event, { compact = false } = {}) {
@@ -814,8 +846,10 @@ function renderDocuments() {
   elements.documentEmptyState.hidden = filteredDocuments.length > 0;
 
   elements.documentGrid.innerHTML = filteredDocuments
-    .map(
-      (documentItem) => `
+    .map((documentItem) => {
+      const documentUrl = getSafeDocumentUrl(documentItem.url);
+
+      return `
         <article class="document-card">
           <div class="document-filetype">${escapeHtml(documentItem.type)}</div>
           <div>
@@ -826,9 +860,14 @@ function renderDocuments() {
             <span>${formatDate(documentItem.updatedAt)}</span>
             <span class="status-pill ${documentItem.status === "Current" ? "published" : "review"}">${escapeHtml(documentItem.status)}</span>
           </div>
+          ${
+            documentUrl
+              ? `<a class="document-action" href="${escapeHtml(documentUrl)}" target="_blank" rel="noopener">Open</a>`
+              : '<span class="document-action is-disabled">Link pending</span>'
+          }
         </article>
-      `,
-    )
+      `;
+    })
     .join("");
 }
 
@@ -996,6 +1035,7 @@ function createDocumentRecord() {
     updatedAt: new Date().toISOString().slice(0, 10),
     type: "PDF",
     status: "Draft",
+    url: "",
   };
 
   state.documents.unshift(documentItem);
@@ -1069,7 +1109,7 @@ function saveDocumentFromForm(event) {
   }
 
   const formData = new FormData(elements.documentForm);
-  ["title", "category", "owner", "updatedAt", "type", "status"].forEach((key) => {
+  ["title", "category", "owner", "updatedAt", "type", "status", "url"].forEach((key) => {
     documentItem[key] = String(formData.get(key) || "").trim();
   });
 
@@ -1128,7 +1168,7 @@ function setAdminTab(tab) {
 
 function initializeCollections() {
   state.employees = getStoredCollection(employeeStorageKey, cloneDefaultEmployees);
-  state.documents = getStoredCollection(documentStorageKey, cloneDefaultDocuments);
+  state.documents = normalizeDocumentRecords(getStoredCollection(documentStorageKey, cloneDefaultDocuments));
   state.events = normalizeEventRecords(getStoredCollection(eventStorageKey, cloneDefaultEvents));
   state.currentEmployeeId = state.employees[0]?.id || "";
   state.currentDocumentId = state.documents[0]?.id || "";
