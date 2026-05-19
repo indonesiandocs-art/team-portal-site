@@ -1,6 +1,6 @@
 const defaultEmployees = [
   { id: "lenar", name: "Lenar", role: "Partner, General Director", department: "Leadership", workMode: "not-set", location: "Global", email: "", phone: "", tone: "blue" },
-  { id: "dmitry", name: "Dmitry", role: "Partner", department: "Leadership", workMode: "not-set", location: "Global", email: "", phone: "", tone: "green" },
+  { id: "dmitry", name: "Dmitry", role: "Partner", department: "Leadership", workMode: "not-set", location: "Global", email: "brd@drnova.org", phone: "+905057677820", tone: "green" },
   { id: "elena", name: "Elena", role: "Director", department: "Operations", workMode: "not-set", location: "Head office", email: "", phone: "", tone: "pink" },
   { id: "andrey", name: "Andrey", role: "Senior Manager", department: "Operations", workMode: "not-set", location: "Head office", email: "", phone: "", tone: "yellow" },
   { id: "ekaterina", name: "Ekaterina", role: "Manager", department: "Operations", workMode: "not-set", location: "Head office", email: "", phone: "", tone: "blue" },
@@ -132,7 +132,16 @@ const defaultDocuments = [
 ];
 
 const defaultEvents = [
-  { id: "team-birthdays", type: "birthday", title: "Team birthdays", date: "2026-05-23", meta: "Add birthday dates in Admin" },
+  { id: "birthday-dmitry", type: "birthday", title: "Birthday: Dmitry", date: "2026-05-24", meta: "Leadership - Born 1980" },
+  { id: "birthday-vera", type: "birthday", title: "Birthday: Vera", date: "2026-06-13", meta: "Operations - Born 1990" },
+  { id: "birthday-julia", type: "birthday", title: "Birthday: Julia", date: "2026-07-12", meta: "Operations - Born 1983" },
+  { id: "birthday-veronika", type: "birthday", title: "Birthday: Veronika", date: "2026-07-20", meta: "Operations - Born 1995" },
+  { id: "birthday-iskander", type: "birthday", title: "Birthday: Iskander", date: "2026-08-14", meta: "International Management - Born 1978" },
+  { id: "birthday-lenar", type: "birthday", title: "Birthday: Lenar", date: "2026-09-23", meta: "Leadership - Born 1987" },
+  { id: "birthday-ekaterina", type: "birthday", title: "Birthday: Ekaterina", date: "2026-12-09", meta: "Operations - Born 1985" },
+  { id: "birthday-elena-director", type: "birthday", title: "Birthday: Elena", date: "2027-02-19", meta: "Operations Director - Born 1981" },
+  { id: "birthday-andrey", type: "birthday", title: "Birthday: Andrey", date: "2027-03-22", meta: "Operations - Born 1996" },
+  { id: "birthday-asila", type: "birthday", title: "Birthday: Asila", date: "2027-04-15", meta: "Operations - Born 1997" },
   { id: "vacation-calendar", type: "vacation", title: "Vacation calendar", date: "2026-05-27", meta: "Add approved vacations in Admin" },
   { id: "review-procurement-policy", type: "document", title: "Review procurement policy", date: "2026-05-30", meta: "IT" },
 ];
@@ -142,6 +151,8 @@ const eventTypeLabels = {
   vacation: "Vacation",
   document: "Reminder",
 };
+
+const managedBirthdayEvents = defaultEvents.filter((event) => event.type === "birthday");
 
 const articleStorageKey = "novaGroupKnowledgeArticles";
 const employeeStorageKey = "novaGroupEmployees";
@@ -471,6 +482,11 @@ function normalizeEmployeeRecords(records) {
       normalizedEmployee.role = "IT Manager";
     }
 
+    if (normalizedEmployee.id === "dmitry") {
+      normalizedEmployee.email = normalizedEmployee.email || "brd@drnova.org";
+      normalizedEmployee.phone = normalizedEmployee.phone || "+905057677820";
+    }
+
     return normalizedEmployee;
   });
 
@@ -487,13 +503,23 @@ function normalizeEmployeeRecords(records) {
 }
 
 function normalizeEventRecords(records) {
-  return normalizeSharedRecords(records, cloneDefaultEvents).map((event, index) => ({
-    id: event.id || createId(`event-${index}`),
-    type: event.type || "document",
-    title: event.title || "New event",
-    date: event.date || new Date().toISOString().slice(0, 10),
-    meta: event.meta || "Details",
-  }));
+  const normalizedEvents = normalizeSharedRecords(records, cloneDefaultEvents)
+    .filter((event) => event.id !== "team-birthdays")
+    .map((event, index) => ({
+      id: event.id || createId(`event-${index}`),
+      type: event.type || "document",
+      title: event.title || "New event",
+      date: event.date || new Date().toISOString().slice(0, 10),
+      meta: event.meta || "Details",
+    }));
+
+  managedBirthdayEvents.forEach((birthdayEvent) => {
+    if (!normalizedEvents.some((event) => event.id === birthdayEvent.id)) {
+      normalizedEvents.push({ ...birthdayEvent });
+    }
+  });
+
+  return normalizedEvents;
 }
 
 function normalizeDocumentRecords(records) {
