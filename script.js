@@ -273,6 +273,12 @@ const elements = {
   adminDocumentList: document.querySelector("#adminDocumentList"),
   adminAuthForm: document.querySelector("#adminAuthForm"),
   adminLockedPanel: document.querySelector("#adminLockedPanel"),
+  contentOverview: document.querySelector("#contentOverview"),
+  contentTeamCount: document.querySelector("#contentTeamCount"),
+  contentDocumentLinks: document.querySelector("#contentDocumentLinks"),
+  contentPublishedArticles: document.querySelector("#contentPublishedArticles"),
+  contentUpcomingEvents: document.querySelector("#contentUpcomingEvents"),
+  contentTaskList: document.querySelector("#contentTaskList"),
   adminTokenInput: document.querySelector("#adminTokenInput"),
   adminSyncStatus: document.querySelector("#adminSyncStatus"),
   employeeForm: document.querySelector("#employeeForm"),
@@ -378,6 +384,7 @@ function renderAdminGate() {
   const isUnlocked = state.adminUnlocked;
   elements.newAdminItemButton.hidden = !isUnlocked;
   elements.adminLockedPanel.hidden = isUnlocked;
+  elements.contentOverview.hidden = !isUnlocked;
   document.querySelector(".admin-tabs").hidden = !isUnlocked;
   document.querySelector(".admin-workspace").hidden = !isUnlocked;
   renderKnowledgeMode();
@@ -649,6 +656,55 @@ function renderSummary() {
   elements.officeEmployees.textContent = state.employees.filter((employee) => employee.workMode === "office").length;
   elements.remoteEmployees.textContent = state.employees.filter((employee) => employee.workMode === "remote").length;
   elements.departmentCount.textContent = new Set(state.employees.map((employee) => employee.department)).size;
+}
+
+function renderContentOverview() {
+  const linkedDocuments = state.documents.filter((documentItem) => getSafeDocumentUrl(documentItem.url)).length;
+  const publishedArticles = getPublishedArticles().length;
+  const upcomingEvents = getSortedEvents().length;
+  const openTasks = [];
+
+  elements.contentTeamCount.textContent = state.employees.length;
+  elements.contentDocumentLinks.textContent = `${linkedDocuments}/${state.documents.length}`;
+  elements.contentPublishedArticles.textContent = `${publishedArticles}/${state.articles.length}`;
+  elements.contentUpcomingEvents.textContent = upcomingEvents;
+
+  if (!state.employees.length) {
+    openTasks.push({ label: "Add team members", target: "team" });
+  }
+
+  if (linkedDocuments < state.documents.length) {
+    openTasks.push({ label: `Add links to ${state.documents.length - linkedDocuments} documents`, target: "documents" });
+  }
+
+  if (!publishedArticles) {
+    openTasks.push({ label: "Publish the first Knowledge Base article", target: "knowledge" });
+  }
+
+  if (!upcomingEvents) {
+    openTasks.push({ label: "Add birthdays and vacation dates", target: "events" });
+  }
+
+  if (!openTasks.length) {
+    elements.contentTaskList.innerHTML = `
+      <div class="content-task is-complete">
+        <strong>Core content is ready</strong>
+        <span>Keep it fresh as team details, documents, and dates change.</span>
+      </div>
+    `;
+    return;
+  }
+
+  elements.contentTaskList.innerHTML = openTasks
+    .map(
+      (task) => `
+        <button class="content-task" type="button" data-content-target="${task.target}">
+          <strong>${escapeHtml(task.label)}</strong>
+          <span>Open ${task.target === "knowledge" ? "Knowledge Base" : task.target}</span>
+        </button>
+      `,
+    )
+    .join("");
 }
 
 function getSortedEvents() {
@@ -981,6 +1037,7 @@ function refreshPortal() {
   renderDocuments();
   renderEvents();
   renderHome();
+  renderContentOverview();
   renderAdminLists();
   fillEmployeeForm(getCurrentEmployee());
   fillEventForm(getCurrentEvent());
@@ -1446,6 +1503,7 @@ function initializeKnowledgeBase() {
   state.currentArticleId = state.articles[0]?.id || "";
   loadArticle(state.currentArticleId);
   renderHome();
+  renderContentOverview();
 }
 
 elements.search.addEventListener("input", (event) => {
@@ -1580,6 +1638,20 @@ elements.documentCategoryFilter.addEventListener("change", (event) => {
 });
 elements.adminTabs.forEach((button) => {
   button.addEventListener("click", () => setAdminTab(button.dataset.adminTab));
+});
+elements.contentTaskList.addEventListener("click", (event) => {
+  const task = event.target.closest("[data-content-target]");
+
+  if (!task) {
+    return;
+  }
+
+  if (task.dataset.contentTarget === "knowledge") {
+    setActivePage("knowledge");
+    return;
+  }
+
+  setAdminTab(task.dataset.contentTarget);
 });
 elements.adminEmployeeList.addEventListener("click", (event) => {
   const item = event.target.closest("[data-employee-id]");

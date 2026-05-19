@@ -459,6 +459,39 @@
               <p>Enter the admin key to manage team records, events, documents, and Knowledge Base publishing.</p>
             </div>
 
+            <section class="content-overview" id="contentOverview" hidden>
+              <div class="panel-header compact-header">
+                <div>
+                  <h2>Content readiness</h2>
+                  <p>A quick check of what is ready and what should be filled next.</p>
+                </div>
+              </div>
+
+              <div class="content-score-grid" aria-label="Content readiness summary">
+                <article class="content-stat">
+                  <span>Team records</span>
+                  <strong id="contentTeamCount">0</strong>
+                </article>
+                <article class="content-stat">
+                  <span>Document links</span>
+                  <strong id="contentDocumentLinks">0/0</strong>
+                </article>
+                <article class="content-stat">
+                  <span>Published articles</span>
+                  <strong id="contentPublishedArticles">0/0</strong>
+                </article>
+                <article class="content-stat">
+                  <span>Upcoming dates</span>
+                  <strong id="contentUpcomingEvents">0</strong>
+                </article>
+              </div>
+
+              <div class="content-next">
+                <h3>Next to fill</h3>
+                <div class="content-task-list" id="contentTaskList"></div>
+              </div>
+            </section>
+
             <div class="admin-tabs" role="tablist" aria-label="Admin sections">
               <button class="admin-tab is-active" type="button" data-admin-tab="team" aria-pressed="true">Team</button>
               <button class="admin-tab" type="button" data-admin-tab="events" aria-pressed="false">Events</button>
