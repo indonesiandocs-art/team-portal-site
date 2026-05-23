@@ -132,16 +132,6 @@ const defaultDocuments = [
 ];
 
 const defaultEvents = [
-  { id: "birthday-dmitry", type: "birthday", title: "Birthday: Dmitry", date: "2026-05-24", meta: "Leadership - Born 1980" },
-  { id: "birthday-vera", type: "birthday", title: "Birthday: Vera", date: "2026-06-13", meta: "Operations - Born 1990" },
-  { id: "birthday-julia", type: "birthday", title: "Birthday: Julia", date: "2026-07-12", meta: "Operations - Born 1983" },
-  { id: "birthday-veronika", type: "birthday", title: "Birthday: Veronika", date: "2026-07-20", meta: "Operations - Born 1995" },
-  { id: "birthday-iskander", type: "birthday", title: "Birthday: Iskander", date: "2026-08-14", meta: "International Management - Born 1978" },
-  { id: "birthday-lenar", type: "birthday", title: "Birthday: Lenar", date: "2026-09-23", meta: "Leadership - Born 1987" },
-  { id: "birthday-ekaterina", type: "birthday", title: "Birthday: Ekaterina", date: "2026-12-09", meta: "Operations - Born 1985" },
-  { id: "birthday-elena-director", type: "birthday", title: "Birthday: Elena", date: "2027-02-19", meta: "Operations Director - Born 1981" },
-  { id: "birthday-andrey", type: "birthday", title: "Birthday: Andrey", date: "2027-03-22", meta: "Operations - Born 1996" },
-  { id: "birthday-asila", type: "birthday", title: "Birthday: Asila", date: "2027-04-15", meta: "Operations - Born 1997" },
   { id: "vacation-calendar", type: "vacation", title: "Vacation calendar", date: "2026-05-27", meta: "Add approved vacations in Admin" },
   { id: "review-procurement-policy", type: "document", title: "Review procurement policy", date: "2026-05-30", meta: "IT" },
 ];
@@ -152,7 +142,24 @@ const eventTypeLabels = {
   document: "Reminder",
 };
 
-const managedBirthdayEvents = defaultEvents.filter((event) => event.type === "birthday");
+const employeeBirthdaysById = {
+  lenar: "1987-09-23",
+  dmitry: "1980-05-24",
+  iskander: "1978-08-14",
+  vera: "1990-06-13",
+  andrey: "1996-03-22",
+  ekaterina: "1985-12-09",
+  julia: "1983-07-12",
+  elena: "1981-02-19",
+  veronika: "1995-07-20",
+  asila: "1997-04-15",
+};
+
+const legacyBirthdayEventIds = new Set([
+  "team-birthdays",
+  "birthday-elena-director",
+  ...Object.keys(employeeBirthdaysById).map((employeeId) => `birthday-${employeeId}`),
+]);
 
 const articleStorageKey = "novaGroupKnowledgeArticles";
 const employeeStorageKey = "novaGroupEmployees";
@@ -487,6 +494,12 @@ function normalizeEmployeeRecords(records) {
       normalizedEmployee.phone = normalizedEmployee.phone || "+905057677820";
     }
 
+    if (employeeBirthdaysById[normalizedEmployee.id]) {
+      normalizedEmployee.birthday = normalizedEmployee.birthday || employeeBirthdaysById[normalizedEmployee.id];
+    } else {
+      normalizedEmployee.birthday = normalizedEmployee.birthday || "";
+    }
+
     return normalizedEmployee;
   });
 
@@ -504,22 +517,18 @@ function normalizeEmployeeRecords(records) {
 
 function normalizeEventRecords(records) {
   const normalizedEvents = normalizeSharedRecords(records, cloneDefaultEvents)
-    .filter((event) => event.id !== "team-birthdays")
+    .filter((event) => !legacyBirthdayEventIds.has(event.id))
     .map((event, index) => ({
       id: event.id || createId(`event-${index}`),
+      employeeId: event.employeeId || "",
+      source: event.source || "",
       type: event.type || "document",
       title: event.title || "New event",
       date: event.date || new Date().toISOString().slice(0, 10),
       meta: event.meta || "Details",
     }));
 
-  managedBirthdayEvents.forEach((birthdayEvent) => {
-    if (!normalizedEvents.some((event) => event.id === birthdayEvent.id)) {
-      normalizedEvents.push({ ...birthdayEvent });
-    }
-  });
-
-  return normalizedEvents;
+  return syncBirthdayEventsFromEmployees(normalizedEvents);
 }
 
 function normalizeDocumentRecords(records) {
@@ -655,6 +664,58 @@ function formatDate(dateString) {
     day: "2-digit",
     month: "short",
   }).format(new Date(dateString));
+}
+
+function isValidBirthday(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(value || ""));
+}
+
+function getNextBirthdayDate(birthday) {
+  if (!isValidBirthday(birthday)) {
+    return "";
+  }
+
+  const [, monthValue, dayValue] = birthday.split("-").map(Number);
+  const today = new Date();
+  const todayDate = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+  let nextBirthday = new Date(Date.UTC(today.getFullYear(), monthValue - 1, dayValue));
+
+  if (nextBirthday < todayDate) {
+    nextBirthday = new Date(Date.UTC(today.getFullYear() + 1, monthValue - 1, dayValue));
+  }
+
+  return nextBirthday.toISOString().slice(0, 10);
+}
+
+function buildEmployeeBirthdayEvent(employee) {
+  if (!isValidBirthday(employee.birthday)) {
+    return null;
+  }
+
+  const birthYear = employee.birthday.slice(0, 4);
+  const roleDetails = employee.role === "Director" ? ` ${employee.role}` : "";
+
+  return {
+    id: `birthday-${employee.id}`,
+    employeeId: employee.id,
+    source: "employee-birthday",
+    type: "birthday",
+    title: `Birthday: ${employee.name}`,
+    date: getNextBirthdayDate(employee.birthday),
+    meta: `${employee.department}${roleDetails} - Born ${birthYear}`,
+  };
+}
+
+function syncBirthdayEventsFromEmployees(events, employees = state.employees) {
+  const birthdayEvents = employees.map(buildEmployeeBirthdayEvent).filter(Boolean);
+  const birthdayEventIds = new Set(birthdayEvents.map((event) => event.id));
+  const remainingEvents = events.filter((event) => (
+    event.source !== "employee-birthday" &&
+    !legacyBirthdayEventIds.has(event.id) &&
+    !birthdayEventIds.has(event.id)
+  ));
+
+  return [...remainingEvents, ...birthdayEvents];
 }
 
 function getFilteredEmployees() {
@@ -1073,6 +1134,7 @@ function fillEventForm(event) {
 }
 
 function refreshPortal() {
+  state.events = syncBirthdayEventsFromEmployees(state.events);
   renderDepartmentOptions();
   renderDocumentCategories();
   renderSummary();
@@ -1115,6 +1177,7 @@ function createEmployeeRecord() {
     location: "Location",
     email: "",
     phone: "",
+    birthday: "",
     tone: "blue",
   };
 
@@ -1173,7 +1236,7 @@ function saveEmployeeFromForm(event) {
   }
 
   const formData = new FormData(elements.employeeForm);
-  ["name", "role", "department", "location", "email", "phone", "tone"].forEach((key) => {
+  ["name", "role", "department", "location", "email", "phone", "birthday", "tone"].forEach((key) => {
     employee[key] = String(formData.get(key) || "").trim();
   });
 

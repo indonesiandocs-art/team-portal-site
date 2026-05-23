@@ -37,6 +37,7 @@ function cleanEmployee(item, index) {
     location: stringValue(item?.location, "Location"),
     email: stringValue(item?.email, "name@novagroup.trade"),
     phone: stringValue(item?.phone, "+00 000 000 000"),
+    birthday: stringValue(item?.birthday, ""),
     tone: stringValue(item?.tone, "blue"),
   };
 }
@@ -50,6 +51,19 @@ function cleanDocument(item, index) {
     updatedAt: stringValue(item?.updatedAt, new Date().toISOString().slice(0, 10)),
     type: stringValue(item?.type, "PDF"),
     status: stringValue(item?.status, "Draft"),
+    url: stringValue(item?.url, ""),
+  };
+}
+
+function cleanEvent(item, index) {
+  return {
+    id: stringValue(item?.id, `event-${index + 1}`),
+    employeeId: stringValue(item?.employeeId, ""),
+    source: stringValue(item?.source, ""),
+    type: stringValue(item?.type, "document"),
+    title: stringValue(item?.title, "New event"),
+    date: stringValue(item?.date, new Date().toISOString().slice(0, 10)),
+    meta: stringValue(item?.meta, "Details"),
   };
 }
 
@@ -67,6 +81,7 @@ function cleanPortalData(data) {
   return {
     employees: Array.isArray(data?.employees) ? data.employees.map(cleanEmployee) : [],
     documents: Array.isArray(data?.documents) ? data.documents.map(cleanDocument) : [],
+    events: Array.isArray(data?.events) ? data.events.map(cleanEvent) : [],
     articles: Array.isArray(data?.articles) ? data.articles.map(cleanArticle) : [],
     updatedAt: new Date().toISOString(),
   };
