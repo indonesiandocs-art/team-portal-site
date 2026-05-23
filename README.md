@@ -25,6 +25,7 @@ The production domain is `team.drnova.org`.
 The Worker uses:
 
 - `PORTAL_KV`: Workers KV namespace for shared portal content.
+- `PORTAL_ACCESS_CODE`: Shared employee access code required before the portal is served.
 - `ADMIN_TOKEN`: Worker secret used by the Admin page to publish changes.
 
-Do not store the admin token in the repository. Set or rotate it through Cloudflare Worker secrets.
+Do not store access codes or admin tokens in the repository. Set or rotate them through GitHub Actions secrets and Cloudflare Worker secrets.
