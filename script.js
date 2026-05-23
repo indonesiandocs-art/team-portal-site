@@ -870,19 +870,19 @@ function renderOrgChart() {
     "Legal",
     "Compliance",
     "Logistics",
+    "International Management",
+    "Relationship Management",
+    "Kazakhstan",
+    "Kyrgyzstan",
+  ].filter((department) => departmentPeople(department).length);
+  const dmitryDepartments = [
+    "IT",
     "China",
     "Turkey",
     "Indonesia",
     "Dubai",
     "Malaysia",
-    "Kazakhstan",
-    "Kyrgyzstan",
     "Nominees",
-  ].filter((department) => departmentPeople(department).length);
-  const dmitryDepartments = [
-    "International Management",
-    "Relationship Management",
-    "IT",
   ].filter((department) => departmentPeople(department).length);
 
   elements.orgChart.innerHTML = `
