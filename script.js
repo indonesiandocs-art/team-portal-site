@@ -175,6 +175,10 @@ const elements = {
   vacationRequestPanel: document.querySelector("#vacationRequestPanel"),
   vacationRequestForm: document.querySelector("#vacationRequestForm"),
   vacationRequestStatus: document.querySelector("#vacationRequestStatus"),
+  vacationYear: document.querySelector("#vacationYear"),
+  vacationCalendar: document.querySelector("#vacationCalendar"),
+  vacationLegend: document.querySelector("#vacationLegend"),
+  orgChart: document.querySelector("#orgChart"),
   addEmployeeButton: document.querySelector("#addEmployeeButton"),
   addDocumentButton: document.querySelector("#addDocumentButton"),
   newAdminItemButton: document.querySelector("#newAdminItemButton"),
@@ -698,6 +702,232 @@ function syncVacationEventsFromRequests(events, requests = state.vacationRequest
   return [...remainingEvents, ...vacationEvents];
 }
 
+function parseLocalDate(dateString) {
+  const [year, month, day] = String(dateString || "").split("-").map(Number);
+
+  if (!year || !month || !day) {
+    return null;
+  }
+
+  return new Date(year, month - 1, day);
+}
+
+function toDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getVacationColor(index) {
+  const colors = ["#f45b3f", "#0a7f83", "#315ccf", "#8a4bd1", "#c17a00", "#2f7d32", "#c53b73", "#57606f"];
+  return colors[index % colors.length];
+}
+
+function getApprovedVacationRanges() {
+  const approvedRequests = state.vacationRequests
+    .filter((request) => request.status === "approved" && isValidDateRange(request.startDate, request.endDate))
+    .map((request) => ({
+      id: request.id,
+      employeeName: request.employeeName,
+      startDate: request.startDate,
+      endDate: request.endDate,
+      note: request.note,
+      source: "request",
+    }));
+
+  const requestEventIds = new Set(approvedRequests.map((request) => `vacation-${request.id}`));
+  const manualEvents = state.events
+    .filter((event) => event.type === "vacation" && event.date && event.source !== "vacation-request" && !requestEventIds.has(event.id))
+    .map((event) => ({
+      id: event.id,
+      employeeName: event.title.replace(/\s+on vacation$/i, "").replace(/^Vacation:\s*/i, "") || event.title,
+      startDate: event.date,
+      endDate: event.date,
+      note: event.meta,
+      source: "event",
+    }));
+
+  return [...approvedRequests, ...manualEvents].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+}
+
+function vacationTouchesDay(vacation, dateKey) {
+  return vacation.startDate <= dateKey && vacation.endDate >= dateKey;
+}
+
+function renderVacationCalendar() {
+  const currentYear = new Date().getFullYear();
+  const monthNames = Array.from({ length: 12 }, (_, index) => (
+    new Intl.DateTimeFormat("en-GB", { month: "short" }).format(new Date(currentYear, index, 1))
+  ));
+  const weekDays = ["M", "T", "W", "T", "F", "S", "S"];
+  const vacations = getApprovedVacationRanges().filter((vacation) => {
+    const start = parseLocalDate(vacation.startDate);
+    const end = parseLocalDate(vacation.endDate);
+
+    return start && end && start.getFullYear() <= currentYear && end.getFullYear() >= currentYear;
+  });
+  const colorByName = new Map();
+
+  vacations.forEach((vacation) => {
+    if (!colorByName.has(vacation.employeeName)) {
+      colorByName.set(vacation.employeeName, getVacationColor(colorByName.size));
+    }
+  });
+
+  elements.vacationYear.textContent = String(currentYear);
+  elements.vacationLegend.innerHTML = colorByName.size
+    ? [...colorByName.entries()]
+      .map(([name, color]) => `
+        <span class="legend-item">
+          <span class="legend-dot" style="--vacation-color: ${color}"></span>
+          ${escapeHtml(name)}
+        </span>
+      `)
+      .join("")
+    : '<span class="empty-inline">No approved vacations for this year yet.</span>';
+
+  elements.vacationCalendar.innerHTML = monthNames
+    .map((monthName, monthIndex) => {
+      const firstDate = new Date(currentYear, monthIndex, 1);
+      const daysInMonth = new Date(currentYear, monthIndex + 1, 0).getDate();
+      const firstWeekday = (firstDate.getDay() + 6) % 7;
+      const blanks = Array.from({ length: firstWeekday }, () => '<span class="calendar-day is-empty"></span>').join("");
+      const days = Array.from({ length: daysInMonth }, (_, dayIndex) => {
+        const date = new Date(currentYear, monthIndex, dayIndex + 1);
+        const dateKey = toDateKey(date);
+        const dayVacations = vacations.filter((vacation) => vacationTouchesDay(vacation, dateKey));
+        const firstVacation = dayVacations[0];
+        const title = dayVacations
+          .map((vacation) => `${vacation.employeeName}: ${formatDateRange(vacation.startDate, vacation.endDate)}`)
+          .join("\n");
+        const color = firstVacation ? colorByName.get(firstVacation.employeeName) : "";
+
+        return `
+          <span class="calendar-day ${dayVacations.length ? "has-vacation" : ""}" style="${color ? `--vacation-color: ${color}` : ""}" title="${escapeHtml(title)}">
+            <span>${dayIndex + 1}</span>
+            ${dayVacations.length > 1 ? `<small>${dayVacations.length}</small>` : ""}
+          </span>
+        `;
+      }).join("");
+
+      return `
+        <article class="month-card">
+          <header>
+            <h3>${monthName}</h3>
+            <span>${vacations.filter((vacation) => {
+              const monthStart = `${currentYear}-${String(monthIndex + 1).padStart(2, "0")}-01`;
+              const monthEnd = `${currentYear}-${String(monthIndex + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+              return vacation.startDate <= monthEnd && vacation.endDate >= monthStart;
+            }).length}</span>
+          </header>
+          <div class="week-row">${weekDays.map((day) => `<span>${day}</span>`).join("")}</div>
+          <div class="month-grid">${blanks}${days}</div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function getEmployeeById(id) {
+  return state.employees.find((employee) => employee.id === id);
+}
+
+function departmentPeople(department) {
+  return state.employees.filter((employee) => employee.department === department);
+}
+
+function orgPersonMarkup(employeeId, fallbackName, fallbackRole) {
+  const employee = getEmployeeById(employeeId);
+
+  return `
+    <article class="org-person-card">
+      <span class="avatar" data-tone="${escapeHtml(employee?.tone || "blue")}">${initials(employee?.name || fallbackName)}</span>
+      <div>
+        <strong>${escapeHtml(employee?.name || fallbackName)}</strong>
+        <span>${escapeHtml(employee?.role || fallbackRole)}</span>
+      </div>
+    </article>
+  `;
+}
+
+function orgDepartmentMarkup(department) {
+  const people = departmentPeople(department);
+
+  return `
+    <article class="org-department-card">
+      <strong>${escapeHtml(department)}</strong>
+      <span>${people.length} team member${people.length === 1 ? "" : "s"}</span>
+      <small>${escapeHtml(people.slice(0, 4).map((employee) => employee.name).join(", ") || "Details pending")}${people.length > 4 ? ` +${people.length - 4}` : ""}</small>
+    </article>
+  `;
+}
+
+function renderOrgChart() {
+  const lenarDepartments = [
+    "Operations",
+    "Finance",
+    "Legal",
+    "Compliance",
+    "Logistics",
+    "China",
+    "Turkey",
+    "Indonesia",
+    "Dubai",
+    "Malaysia",
+    "Kazakhstan",
+    "Kyrgyzstan",
+    "Nominees",
+  ].filter((department) => departmentPeople(department).length);
+  const dmitryDepartments = [
+    "International Management",
+    "Relationship Management",
+    "IT",
+  ].filter((department) => departmentPeople(department).length);
+
+  elements.orgChart.innerHTML = `
+    <section class="org-layer">
+      <div class="org-layer-title">Partners</div>
+      <div class="org-node-row partners-row">
+        ${orgPersonMarkup("dmitry", "Dmitry", "Partner")}
+        ${orgPersonMarkup("lenar", "Lenar", "Partner")}
+      </div>
+    </section>
+
+    <section class="org-layer">
+      <div class="org-connector"></div>
+      <div class="org-layer-title">Executive management</div>
+      <div class="org-node-row">
+        ${orgPersonMarkup("lenar", "Lenar", "General Director")}
+      </div>
+    </section>
+
+    <section class="org-layer">
+      <div class="org-connector split"></div>
+      <div class="org-scope-grid">
+        <article class="org-scope">
+          <header>
+            <span>Draft scope</span>
+            <strong>Lenar</strong>
+          </header>
+          <div class="org-department-grid">
+            ${lenarDepartments.map(orgDepartmentMarkup).join("")}
+          </div>
+        </article>
+        <article class="org-scope">
+          <header>
+            <span>Draft scope</span>
+            <strong>Dmitry</strong>
+          </header>
+          <div class="org-department-grid">
+            ${dmitryDepartments.map(orgDepartmentMarkup).join("")}
+          </div>
+        </article>
+      </div>
+    </section>
+  `;
+}
+
 function getFilteredEmployees() {
   const query = normalize(state.search);
 
@@ -1156,6 +1386,8 @@ function refreshPortal() {
   renderEmployees();
   renderDocuments();
   renderEvents();
+  renderVacationCalendar();
+  renderOrgChart();
   renderHome();
   renderContentOverview();
   renderAdminLists();

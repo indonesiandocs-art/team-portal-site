@@ -30,6 +30,14 @@
             <span class="nav-icon" aria-hidden="true">E</span>
             <span>Events</span>
           </a>
+          <a class="nav-item" href="#vacations" data-nav-target="vacations">
+            <span class="nav-icon" aria-hidden="true">V</span>
+            <span>Vacations</span>
+          </a>
+          <a class="nav-item" href="#org" data-nav-target="org">
+            <span class="nav-icon" aria-hidden="true">O</span>
+            <span>Org chart</span>
+          </a>
           <a class="nav-item" href="#documents" data-nav-target="documents">
             <span class="nav-icon" aria-hidden="true">D</span>
             <span>Documents</span>
@@ -93,6 +101,14 @@
                 <a href="#events" data-nav-target="events" data-focus-vacation-request="true">
                   <strong>Request vacation</strong>
                   <span>Submit dates for admin approval</span>
+                </a>
+                <a href="#vacations" data-nav-target="vacations">
+                  <strong>Vacation calendar</strong>
+                  <span>See the full year plan at a glance</span>
+                </a>
+                <a href="#org" data-nav-target="org">
+                  <strong>Org chart</strong>
+                  <span>Understand reporting lines and departments</span>
                 </a>
                 <a href="#documents" data-nav-target="documents">
                   <strong>Get a document</strong>
@@ -316,6 +332,50 @@
                 <p class="form-status" id="vacationRequestStatus" aria-live="polite"></p>
               </form>
             </article>
+          </section>
+        </section>
+
+        <section class="page-view" id="vacations" data-page="vacations" hidden>
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Internal portal</p>
+              <h1>Vacation calendar</h1>
+            </div>
+            <a class="primary-action" href="#events" data-nav-target="events" data-focus-vacation-request="true">
+              <span aria-hidden="true">+</span>
+              Request vacation
+            </a>
+          </header>
+
+          <section class="workspace-panel wide-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Year overview</h2>
+                <p>Approved vacations from January to December of the current year.</p>
+              </div>
+              <div class="year-chip" id="vacationYear"></div>
+            </div>
+            <div class="vacation-legend" id="vacationLegend"></div>
+            <div class="year-calendar" id="vacationCalendar"></div>
+          </section>
+        </section>
+
+        <section class="page-view" id="org" data-page="org" hidden>
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Internal portal</p>
+              <h1>Organization chart</h1>
+            </div>
+          </header>
+
+          <section class="workspace-panel wide-panel">
+            <div class="panel-header compact-header">
+              <div>
+                <h2>Leadership and departments</h2>
+                <p>Draft structure for review before final reporting lines are confirmed.</p>
+              </div>
+            </div>
+            <div class="org-chart" id="orgChart"></div>
           </section>
         </section>
 
