@@ -745,33 +745,16 @@ h2 {
   padding: 14px;
 }
 
+.org-person-card div,
 .org-person-card strong,
-.org-person-card span {
+.org-person-card div > span {
   display: block;
+  min-width: 0;
 }
 
-.org-person-card span:last-child {
+.org-person-card div > span {
   color: var(--muted);
   font-size: 13px;
-}
-
-.org-person-card.is-featured {
-  width: 100%;
-  border-color: rgba(244, 91, 63, 0.34);
-  background: #fff8f5;
-}
-
-.org-featured-leader {
-  display: grid;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.org-featured-leader > span {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 850;
-  text-transform: uppercase;
 }
 
 .org-connector {

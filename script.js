@@ -892,17 +892,15 @@ function departmentPeople(department) {
   return state.employees.filter((employee) => employee.department === department);
 }
 
-function orgPersonMarkup(employeeId, fallbackName, fallbackRole, options = {}) {
+function orgPersonMarkup(employeeId, fallbackName, fallbackRole) {
   const employee = getEmployeeById(employeeId);
-  const cardClassName = options.className ? ` ${options.className}` : "";
-  const role = options.role || employee?.role || fallbackRole;
 
   return `
-    <article class="org-person-card${cardClassName}">
+    <article class="org-person-card">
       <span class="avatar" data-tone="${escapeHtml(employee?.tone || "blue")}">${initials(employee?.name || fallbackName)}</span>
       <div>
         <strong>${escapeHtml(employee?.name || fallbackName)}</strong>
-        <span>${escapeHtml(role)}</span>
+        <span>${escapeHtml(employee?.role || fallbackRole)}</span>
       </div>
     </article>
   `;
@@ -967,10 +965,6 @@ function renderOrgChart() {
             <span>Draft scope</span>
             <strong>Lenar</strong>
           </header>
-          <div class="org-featured-leader">
-            <span>Operations lead</span>
-            ${orgPersonMarkup("elena", "Elena", "Operations Director", { role: "Operations Director", className: "is-featured" })}
-          </div>
           <div class="org-department-grid">
             ${lenarDepartments.map(orgDepartmentMarkup).join("")}
           </div>
