@@ -575,7 +575,7 @@ h2 {
   font-weight: 900;
 }
 
-.vacation-legend {
+.calendar-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -600,7 +600,7 @@ h2 {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--vacation-color);
+  background: var(--calendar-color);
 }
 
 .empty-inline {
@@ -683,10 +683,10 @@ h2 {
   visibility: hidden;
 }
 
-.calendar-day.has-vacation {
-  border-color: color-mix(in srgb, var(--vacation-color), #ffffff 45%);
+.calendar-day.has-calendar-item {
+  border-color: color-mix(in srgb, var(--calendar-color), #ffffff 45%);
   color: #ffffff;
-  background: var(--vacation-color);
+  background: var(--calendar-color);
 }
 
 .calendar-day small {
@@ -753,6 +753,25 @@ h2 {
 .org-person-card span:last-child {
   color: var(--muted);
   font-size: 13px;
+}
+
+.org-person-card.is-featured {
+  width: 100%;
+  border-color: rgba(244, 91, 63, 0.34);
+  background: #fff8f5;
+}
+
+.org-featured-leader {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.org-featured-leader > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  text-transform: uppercase;
 }
 
 .org-connector {

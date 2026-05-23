@@ -175,9 +175,9 @@ const elements = {
   vacationRequestPanel: document.querySelector("#vacationRequestPanel"),
   vacationRequestForm: document.querySelector("#vacationRequestForm"),
   vacationRequestStatus: document.querySelector("#vacationRequestStatus"),
-  vacationYear: document.querySelector("#vacationYear"),
-  vacationCalendar: document.querySelector("#vacationCalendar"),
-  vacationLegend: document.querySelector("#vacationLegend"),
+  calendarYear: document.querySelector("#calendarYear"),
+  companyCalendar: document.querySelector("#companyCalendar"),
+  calendarLegend: document.querySelector("#calendarLegend"),
   orgChart: document.querySelector("#orgChart"),
   addEmployeeButton: document.querySelector("#addEmployeeButton"),
   addDocumentButton: document.querySelector("#addDocumentButton"),
@@ -724,70 +724,123 @@ function getVacationColor(index) {
   return colors[index % colors.length];
 }
 
-function getApprovedVacationRanges() {
+function getCalendarItems() {
   const approvedRequests = state.vacationRequests
     .filter((request) => request.status === "approved" && isValidDateRange(request.startDate, request.endDate))
     .map((request) => ({
       id: request.id,
-      employeeName: request.employeeName,
+      type: "vacation",
+      title: `${request.employeeName} on vacation`,
+      label: request.employeeName,
       startDate: request.startDate,
       endDate: request.endDate,
-      note: request.note,
+      meta: request.note || "Approved vacation",
+      colorKey: `vacation:${request.employeeName}`,
       source: "request",
     }));
 
   const requestEventIds = new Set(approvedRequests.map((request) => `vacation-${request.id}`));
-  const manualEvents = state.events
-    .filter((event) => event.type === "vacation" && event.date && event.source !== "vacation-request" && !requestEventIds.has(event.id))
+  const eventItems = state.events
+    .filter((event) => event.date && event.source !== "vacation-request" && !requestEventIds.has(event.id))
     .map((event) => ({
       id: event.id,
-      employeeName: event.title.replace(/\s+on vacation$/i, "").replace(/^Vacation:\s*/i, "") || event.title,
+      type: event.type,
+      title: event.title,
+      label: event.type === "vacation"
+        ? event.title.replace(/\s+on vacation$/i, "").replace(/^Vacation:\s*/i, "") || event.title
+        : eventTypeLabels[event.type] || "Reminder",
       startDate: event.date,
       endDate: event.date,
-      note: event.meta,
+      meta: event.meta,
+      colorKey: event.type === "vacation"
+        ? `vacation:${event.title.replace(/\s+on vacation$/i, "").replace(/^Vacation:\s*/i, "") || event.title}`
+        : event.type,
       source: "event",
     }));
 
-  return [...approvedRequests, ...manualEvents].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+  return [...approvedRequests, ...eventItems].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 }
 
-function vacationTouchesDay(vacation, dateKey) {
-  return vacation.startDate <= dateKey && vacation.endDate >= dateKey;
+function calendarItemTouchesDay(item, dateKey) {
+  return item.startDate <= dateKey && item.endDate >= dateKey;
 }
 
-function renderVacationCalendar() {
+function getCalendarColor(item, vacationIndexByKey) {
+  if (item.type === "birthday") {
+    return "#c53b73";
+  }
+
+  if (item.type === "document") {
+    return "#315ccf";
+  }
+
+  if (item.type === "vacation") {
+    return getVacationColor(vacationIndexByKey.get(item.colorKey) || 0);
+  }
+
+  return "#0a7f83";
+}
+
+function getCalendarLegendLabel(item) {
+  if (item.type === "birthday") {
+    return "Birthdays";
+  }
+
+  if (item.type === "document") {
+    return "Reminders";
+  }
+
+  return item.type === "vacation" ? item.label : (eventTypeLabels[item.type] || "Events");
+}
+
+function renderCompanyCalendar() {
   const currentYear = new Date().getFullYear();
   const monthNames = Array.from({ length: 12 }, (_, index) => (
     new Intl.DateTimeFormat("en-GB", { month: "short" }).format(new Date(currentYear, index, 1))
   ));
   const weekDays = ["M", "T", "W", "T", "F", "S", "S"];
-  const vacations = getApprovedVacationRanges().filter((vacation) => {
-    const start = parseLocalDate(vacation.startDate);
-    const end = parseLocalDate(vacation.endDate);
+  const calendarItems = getCalendarItems().filter((item) => {
+    const start = parseLocalDate(item.startDate);
+    const end = parseLocalDate(item.endDate);
 
     return start && end && start.getFullYear() <= currentYear && end.getFullYear() >= currentYear;
   });
-  const colorByName = new Map();
+  const vacationIndexByKey = new Map();
 
-  vacations.forEach((vacation) => {
-    if (!colorByName.has(vacation.employeeName)) {
-      colorByName.set(vacation.employeeName, getVacationColor(colorByName.size));
+  calendarItems
+    .filter((item) => item.type === "vacation")
+    .forEach((item) => {
+      if (!vacationIndexByKey.has(item.colorKey)) {
+        vacationIndexByKey.set(item.colorKey, vacationIndexByKey.size);
+      }
+    });
+
+  const legendByKey = new Map();
+
+  calendarItems.forEach((item) => {
+    const legendKey = item.type === "vacation" ? item.colorKey : item.type;
+
+    if (!legendByKey.has(legendKey)) {
+      legendByKey.set(legendKey, {
+        label: getCalendarLegendLabel(item),
+        color: getCalendarColor(item, vacationIndexByKey),
+      });
     }
   });
 
-  elements.vacationYear.textContent = String(currentYear);
-  elements.vacationLegend.innerHTML = colorByName.size
-    ? [...colorByName.entries()]
-      .map(([name, color]) => `
+  elements.calendarYear.textContent = String(currentYear);
+  elements.calendarLegend.innerHTML = legendByKey.size
+    ? [...legendByKey.values()]
+      .map((legendItem) => `
         <span class="legend-item">
-          <span class="legend-dot" style="--vacation-color: ${color}"></span>
-          ${escapeHtml(name)}
+          <span class="legend-dot" style="--calendar-color: ${legendItem.color}"></span>
+          ${escapeHtml(legendItem.label)}
         </span>
       `)
       .join("")
-    : '<span class="empty-inline">No approved vacations for this year yet.</span>';
+    : '<span class="empty-inline">No calendar items for this year yet.</span>';
 
-  elements.vacationCalendar.innerHTML = monthNames
+  elements.companyCalendar.innerHTML = monthNames
     .map((monthName, monthIndex) => {
       const firstDate = new Date(currentYear, monthIndex, 1);
       const daysInMonth = new Date(currentYear, monthIndex + 1, 0).getDate();
@@ -796,30 +849,32 @@ function renderVacationCalendar() {
       const days = Array.from({ length: daysInMonth }, (_, dayIndex) => {
         const date = new Date(currentYear, monthIndex, dayIndex + 1);
         const dateKey = toDateKey(date);
-        const dayVacations = vacations.filter((vacation) => vacationTouchesDay(vacation, dateKey));
-        const firstVacation = dayVacations[0];
-        const title = dayVacations
-          .map((vacation) => `${vacation.employeeName}: ${formatDateRange(vacation.startDate, vacation.endDate)}`)
+        const dayItems = calendarItems.filter((item) => calendarItemTouchesDay(item, dateKey));
+        const firstItem = dayItems[0];
+        const title = dayItems
+          .map((item) => {
+            const dateRange = item.startDate === item.endDate ? formatDate(item.startDate) : formatDateRange(item.startDate, item.endDate);
+            return `${item.title}: ${dateRange}${item.meta ? ` · ${item.meta}` : ""}`;
+          })
           .join("\n");
-        const color = firstVacation ? colorByName.get(firstVacation.employeeName) : "";
+        const color = firstItem ? getCalendarColor(firstItem, vacationIndexByKey) : "";
 
         return `
-          <span class="calendar-day ${dayVacations.length ? "has-vacation" : ""}" style="${color ? `--vacation-color: ${color}` : ""}" title="${escapeHtml(title)}">
+          <span class="calendar-day ${dayItems.length ? "has-calendar-item" : ""}" style="${color ? `--calendar-color: ${color}` : ""}" title="${escapeHtml(title)}">
             <span>${dayIndex + 1}</span>
-            ${dayVacations.length > 1 ? `<small>${dayVacations.length}</small>` : ""}
+            ${dayItems.length > 1 ? `<small>${dayItems.length}</small>` : ""}
           </span>
         `;
       }).join("");
+      const monthStart = `${currentYear}-${String(monthIndex + 1).padStart(2, "0")}-01`;
+      const monthEnd = `${currentYear}-${String(monthIndex + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+      const monthItemCount = calendarItems.filter((item) => item.startDate <= monthEnd && item.endDate >= monthStart).length;
 
       return `
         <article class="month-card">
           <header>
             <h3>${monthName}</h3>
-            <span>${vacations.filter((vacation) => {
-              const monthStart = `${currentYear}-${String(monthIndex + 1).padStart(2, "0")}-01`;
-              const monthEnd = `${currentYear}-${String(monthIndex + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
-              return vacation.startDate <= monthEnd && vacation.endDate >= monthStart;
-            }).length}</span>
+            <span>${monthItemCount}</span>
           </header>
           <div class="week-row">${weekDays.map((day) => `<span>${day}</span>`).join("")}</div>
           <div class="month-grid">${blanks}${days}</div>
@@ -837,15 +892,17 @@ function departmentPeople(department) {
   return state.employees.filter((employee) => employee.department === department);
 }
 
-function orgPersonMarkup(employeeId, fallbackName, fallbackRole) {
+function orgPersonMarkup(employeeId, fallbackName, fallbackRole, options = {}) {
   const employee = getEmployeeById(employeeId);
+  const cardClassName = options.className ? ` ${options.className}` : "";
+  const role = options.role || employee?.role || fallbackRole;
 
   return `
-    <article class="org-person-card">
+    <article class="org-person-card${cardClassName}">
       <span class="avatar" data-tone="${escapeHtml(employee?.tone || "blue")}">${initials(employee?.name || fallbackName)}</span>
       <div>
         <strong>${escapeHtml(employee?.name || fallbackName)}</strong>
-        <span>${escapeHtml(employee?.role || fallbackRole)}</span>
+        <span>${escapeHtml(role)}</span>
       </div>
     </article>
   `;
@@ -910,6 +967,10 @@ function renderOrgChart() {
             <span>Draft scope</span>
             <strong>Lenar</strong>
           </header>
+          <div class="org-featured-leader">
+            <span>Operations lead</span>
+            ${orgPersonMarkup("elena", "Elena", "Operations Director", { role: "Operations Director", className: "is-featured" })}
+          </div>
           <div class="org-department-grid">
             ${lenarDepartments.map(orgDepartmentMarkup).join("")}
           </div>
@@ -1386,7 +1447,7 @@ function refreshPortal() {
   renderEmployees();
   renderDocuments();
   renderEvents();
-  renderVacationCalendar();
+  renderCompanyCalendar();
   renderOrgChart();
   renderHome();
   renderContentOverview();
@@ -1672,8 +1733,9 @@ function setView(view) {
 }
 
 function setActivePage(page) {
-  const pageExists = [...elements.pageViews].some((view) => view.dataset.page === page);
-  const activePage = pageExists ? page : "home";
+  const requestedPage = page === "vacations" ? "calendar" : page;
+  const pageExists = [...elements.pageViews].some((view) => view.dataset.page === requestedPage);
+  const activePage = pageExists ? requestedPage : "home";
 
   elements.pageViews.forEach((view) => {
     const isActive = view.dataset.page === activePage;

@@ -30,9 +30,9 @@
             <span class="nav-icon" aria-hidden="true">E</span>
             <span>Events</span>
           </a>
-          <a class="nav-item" href="#vacations" data-nav-target="vacations">
-            <span class="nav-icon" aria-hidden="true">V</span>
-            <span>Vacations</span>
+          <a class="nav-item" href="#calendar" data-nav-target="calendar">
+            <span class="nav-icon" aria-hidden="true">C</span>
+            <span>Calendar</span>
           </a>
           <a class="nav-item" href="#org" data-nav-target="org">
             <span class="nav-icon" aria-hidden="true">O</span>
@@ -102,9 +102,9 @@
                   <strong>Request vacation</strong>
                   <span>Submit dates for admin approval</span>
                 </a>
-                <a href="#vacations" data-nav-target="vacations">
-                  <strong>Vacation calendar</strong>
-                  <span>See the full year plan at a glance</span>
+                <a href="#calendar" data-nav-target="calendar">
+                  <strong>Company calendar</strong>
+                  <span>See vacations, birthdays, and reminders</span>
                 </a>
                 <a href="#org" data-nav-target="org">
                   <strong>Org chart</strong>
@@ -335,11 +335,11 @@
           </section>
         </section>
 
-        <section class="page-view" id="vacations" data-page="vacations" hidden>
+        <section class="page-view" id="calendar" data-page="calendar" hidden>
           <header class="page-header">
             <div>
               <p class="eyebrow">Internal portal</p>
-              <h1>Vacation calendar</h1>
+              <h1>Company calendar</h1>
             </div>
             <a class="primary-action" href="#events" data-nav-target="events" data-focus-vacation-request="true">
               <span aria-hidden="true">+</span>
@@ -351,12 +351,12 @@
             <div class="panel-header">
               <div>
                 <h2>Year overview</h2>
-                <p>Approved vacations from January to December of the current year.</p>
+                <p>Approved vacations, birthdays, and internal reminders from January to December.</p>
               </div>
-              <div class="year-chip" id="vacationYear"></div>
+              <div class="year-chip" id="calendarYear"></div>
             </div>
-            <div class="vacation-legend" id="vacationLegend"></div>
-            <div class="year-calendar" id="vacationCalendar"></div>
+            <div class="calendar-legend" id="calendarLegend"></div>
+            <div class="year-calendar" id="companyCalendar"></div>
           </section>
         </section>
 
