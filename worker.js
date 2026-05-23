@@ -478,10 +478,6 @@ export default {
       return handleVacationRequest(request, env);
     }
 
-    if (url.pathname === "/") {
-      return env.ASSETS.fetch(new Request(new URL("/index.html", url), request));
-    }
-
     return env.ASSETS.fetch(request);
   },
 };
