@@ -30,10 +30,6 @@
             <span class="nav-icon" aria-hidden="true">E</span>
             <span>Events</span>
           </a>
-          <a class="nav-item" href="#knowledge" data-nav-target="knowledge">
-            <span class="nav-icon" aria-hidden="true">K</span>
-            <span>Knowledge Base</span>
-          </a>
           <a class="nav-item" href="#documents" data-nav-target="documents">
             <span class="nav-icon" aria-hidden="true">D</span>
             <span>Documents</span>
@@ -64,8 +60,8 @@
               <strong id="homeEmployees">0</strong>
             </article>
             <article class="metric">
-              <span>Articles</span>
-              <strong id="homeArticles">0</strong>
+              <span>Upcoming dates</span>
+              <strong id="homeEvents">0</strong>
             </article>
             <article class="metric">
               <span>Documents</span>
@@ -90,13 +86,13 @@
                   <strong>Find a team member</strong>
                   <span>Roles, departments, locations, contacts</span>
                 </a>
-                <a href="#knowledge" data-nav-target="knowledge">
-                  <strong>Open a procedure</strong>
-                  <span>Operations playbooks and internal guides</span>
-                </a>
                 <a href="#events" data-nav-target="events">
                   <strong>Check upcoming dates</strong>
                   <span>Birthdays, vacations, reviews, and reminders</span>
+                </a>
+                <a href="#events" data-nav-target="events" data-focus-vacation-request="true">
+                  <strong>Request vacation</strong>
+                  <span>Submit dates for admin approval</span>
                 </a>
                 <a href="#documents" data-nav-target="documents">
                   <strong>Get a document</strong>
@@ -104,7 +100,7 @@
                 </a>
                 <a href="#admin" data-nav-target="admin">
                   <strong>Manage content</strong>
-                  <span>Team profiles, articles, and documents</span>
+                  <span>Team profiles, dates, and documents</span>
                 </a>
               </div>
             </article>
@@ -122,11 +118,16 @@
             <article class="workspace-panel">
               <div class="panel-header compact-header">
                 <div>
-                  <h2>Recent articles</h2>
-                  <p>Recently updated internal materials.</p>
+                  <h2>Vacation request</h2>
+                  <p>Send preferred vacation dates for approval.</p>
                 </div>
               </div>
-              <div class="compact-list" id="recentArticles"></div>
+              <div class="compact-list">
+                <a class="compact-item" href="#events" data-nav-target="events" data-focus-vacation-request="true">
+                  <strong>Submit request</strong>
+                  <span>Admin approval adds it to the shared vacation list</span>
+                </a>
+              </div>
             </article>
 
             <article class="workspace-panel">
@@ -231,6 +232,10 @@
               <p class="eyebrow">Internal portal</p>
               <h1>Events</h1>
             </div>
+            <button class="primary-action" id="requestVacationButton" type="button">
+              <span aria-hidden="true">+</span>
+              Request vacation
+            </button>
           </header>
 
           <section class="summary-grid" aria-label="Events summary">
@@ -282,91 +287,35 @@
               </div>
               <div class="compact-list" id="leaveList"></div>
             </article>
-          </section>
-        </section>
 
-        <section class="page-view" id="knowledge" data-page="knowledge" hidden>
-          <header class="page-header">
-            <div>
-              <p class="eyebrow">Internal portal</p>
-              <h1>Knowledge Base</h1>
-            </div>
-          </header>
-
-          <section class="workspace-panel knowledge-panel">
-            <div class="panel-header">
-              <div>
-                <h2>Company knowledge</h2>
-                <p>Published procedures, playbooks, and internal guidance.</p>
+            <article class="workspace-panel vacation-request-panel" id="vacationRequestPanel">
+              <div class="panel-header compact-header">
+                <div>
+                  <h2>Request vacation</h2>
+                  <p>Choose preferred dates and send them for admin approval.</p>
+                </div>
               </div>
-              <button class="secondary-action" id="newArticleButton" type="button">
-                <span aria-hidden="true">+</span>
-                New article
-              </button>
-            </div>
-
-            <div class="knowledge-layout">
-              <aside class="article-sidebar" aria-label="Knowledge base articles">
-                <label class="search-field">
-                  <span class="visually-hidden">Search articles</span>
-                  <input id="articleSearch" type="search" placeholder="Search articles" autocomplete="off" />
+              <form class="request-form" id="vacationRequestForm">
+                <label>
+                  <span>Your name</span>
+                  <input name="employeeName" type="text" placeholder="Name" required />
                 </label>
-                <div class="article-list" id="articleList"></div>
-              </aside>
-
-              <article class="reader-shell" id="articleReader">
-                <div class="reader-topbar">
-                  <span class="status-pill published" id="articleReaderStatus">Published</span>
-                  <span id="articleReaderDate"></span>
-                </div>
-                <h2 id="articleReaderTitle"></h2>
-                <div class="article-reader-body" id="articleReaderBody"></div>
-              </article>
-
-              <article class="editor-shell" id="articleEditorShell">
-                <div class="editor-topbar">
-                  <label class="title-field">
-                    <span class="visually-hidden">Article title</span>
-                    <input id="articleTitle" type="text" placeholder="Article title" />
-                  </label>
-                  <label class="select-field compact-field">
-                    <span>Status</span>
-                    <select id="articleStatus">
-                      <option value="draft">Draft</option>
-                      <option value="review">In review</option>
-                      <option value="published">Published</option>
-                    </select>
-                  </label>
-                </div>
-
-                <div class="editor-toolbar" role="toolbar" aria-label="Article formatting">
-                  <select id="blockFormat" aria-label="Text style">
-                    <option value="P">Text</option>
-                    <option value="H2">Heading</option>
-                    <option value="H3">Subheading</option>
-                    <option value="BLOCKQUOTE">Quote</option>
-                  </select>
-                  <span class="toolbar-divider" aria-hidden="true"></span>
-                  <button class="tool-button" type="button" data-command="bold" aria-label="Bold" title="Bold">B</button>
-                  <button class="tool-button" type="button" data-command="italic" aria-label="Italic" title="Italic">I</button>
-                  <button class="tool-button" type="button" data-command="underline" aria-label="Underline" title="Underline">U</button>
-                  <span class="toolbar-divider" aria-hidden="true"></span>
-                  <button class="tool-button" type="button" data-command="insertUnorderedList" aria-label="Bulleted list" title="Bulleted list">•</button>
-                  <button class="tool-button" type="button" data-command="insertOrderedList" aria-label="Numbered list" title="Numbered list">1.</button>
-                  <button class="tool-button" type="button" data-action="link" aria-label="Insert link" title="Insert link">↗</button>
-                  <button class="tool-button" type="button" data-action="image" aria-label="Add image" title="Add image">▧</button>
-                  <button class="tool-button" type="button" data-command="removeFormat" aria-label="Clear formatting" title="Clear formatting">Tx</button>
-                  <input class="visually-hidden" id="imageUpload" type="file" accept="image/*" />
-                </div>
-
-                <div class="article-editor" id="articleEditor" contenteditable="true" aria-label="Article body"></div>
-
-                <div class="editor-footer">
-                  <span class="save-status" id="saveStatus">Changes saved</span>
-                  <button class="primary-action" id="saveArticleButton" type="button">Save</button>
-                </div>
-              </article>
-            </div>
+                <label>
+                  <span>Start date</span>
+                  <input name="startDate" type="date" required />
+                </label>
+                <label>
+                  <span>End date</span>
+                  <input name="endDate" type="date" required />
+                </label>
+                <label class="wide-field">
+                  <span>Comment</span>
+                  <input name="note" type="text" placeholder="Optional" />
+                </label>
+                <button class="primary-action" type="submit">Send request</button>
+                <p class="form-status" id="vacationRequestStatus" aria-live="polite"></p>
+              </form>
+            </article>
           </section>
         </section>
 
@@ -445,7 +394,7 @@
 
             <div class="admin-locked" id="adminLockedPanel">
               <strong>Protected management area</strong>
-              <p>Enter the admin key to manage team records, events, documents, and Knowledge Base publishing.</p>
+              <p>Enter the admin key to manage team records, events, documents, and vacation requests.</p>
             </div>
 
             <section class="content-overview" id="contentOverview" hidden>
@@ -466,8 +415,8 @@
                   <strong id="contentDocumentLinks">0/0</strong>
                 </article>
                 <article class="content-stat">
-                  <span>Published articles</span>
-                  <strong id="contentPublishedArticles">0/0</strong>
+                  <span>Pending vacations</span>
+                  <strong id="contentPendingVacations">0</strong>
                 </article>
                 <article class="content-stat">
                   <span>Upcoming dates</span>
@@ -484,8 +433,8 @@
             <div class="admin-tabs" role="tablist" aria-label="Admin sections">
               <button class="admin-tab is-active" type="button" data-admin-tab="team" aria-pressed="true">Team</button>
               <button class="admin-tab" type="button" data-admin-tab="events" aria-pressed="false">Events</button>
+              <button class="admin-tab" type="button" data-admin-tab="vacations" aria-pressed="false">Vacation requests</button>
               <button class="admin-tab" type="button" data-admin-tab="documents" aria-pressed="false">Documents</button>
-              <button class="admin-tab" type="button" data-admin-tab="knowledge" aria-pressed="false">Knowledge Base</button>
             </div>
 
             <div class="admin-workspace">
@@ -628,14 +577,12 @@
                 </form>
               </section>
 
-              <section class="admin-section" data-admin-section="knowledge" hidden>
-                <div class="admin-module knowledge-admin-module">
-                  <span class="module-icon">K</span>
-                  <div>
-                    <h3>Knowledge Base editor</h3>
-                    <p>Articles are edited in the Knowledge Base section. Categories, permissions, and publishing workflow will become the next backend-backed layer.</p>
+              <section class="admin-section single-column-section" data-admin-section="vacations" hidden>
+                <div class="admin-list-panel">
+                  <div class="admin-list-header">
+                    <h3>Vacation requests</h3>
                   </div>
-                  <a class="secondary-action" href="#knowledge" data-nav-target="knowledge">Open editor</a>
+                  <div class="admin-record-list vacation-request-list" id="adminVacationRequestList"></div>
                 </div>
               </section>
             </div>

@@ -33,51 +33,6 @@ const defaultEmployees = [
   { id: "cholpon", name: "Cholpon", role: "Kyrgyzstan Accountant", department: "Kyrgyzstan", workMode: "not-set", location: "Kyrgyzstan", email: "", phone: "", tone: "pink" },
 ];
 
-const articleStatusLabels = {
-  draft: "Draft",
-  review: "In review",
-  published: "Published",
-};
-
-const defaultArticles = [
-  {
-    id: "welcome",
-    title: "New team member onboarding",
-    status: "published",
-    updatedAt: "2026-05-18",
-    content: `
-      <h2>First working day</h2>
-      <p>Confirm access to email, calendar, team chat, the CRM, and operational systems.</p>
-      <ul>
-        <li>Complete your employee profile in the portal.</li>
-        <li>Meet your manager and primary cross-functional contacts.</li>
-        <li>Review the two-week onboarding checklist.</li>
-      </ul>
-    `,
-  },
-  {
-    id: "trade-compliance",
-    title: "Trade compliance checklist",
-    status: "review",
-    updatedAt: "2026-05-12",
-    content: `
-      <h2>Before confirming a shipment</h2>
-      <p>Check counterparties, destination requirements, product classification, and supporting documentation.</p>
-      <blockquote>Escalate any sanctions, restricted-party, or end-use uncertainty before a commercial commitment is made.</blockquote>
-    `,
-  },
-  {
-    id: "equipment",
-    title: "Requesting work equipment",
-    status: "draft",
-    updatedAt: "2026-05-08",
-    content: `
-      <h2>Available requests</h2>
-      <p>Laptop, monitor, headset, secure access token, and workplace accessories can be requested through IT.</p>
-    `,
-  },
-];
-
 const defaultDocuments = [
   {
     id: "certificate-incorporation",
@@ -132,7 +87,6 @@ const defaultDocuments = [
 ];
 
 const defaultEvents = [
-  { id: "vacation-calendar", type: "vacation", title: "Vacation calendar", date: "2026-05-27", meta: "Add approved vacations in Admin" },
   { id: "review-procurement-policy", type: "document", title: "Review procurement policy", date: "2026-05-30", meta: "IT" },
 ];
 
@@ -160,20 +114,21 @@ const legacyBirthdayEventIds = new Set([
   "birthday-elena-director",
   ...Object.keys(employeeBirthdaysById).map((employeeId) => `birthday-${employeeId}`),
 ]);
+const legacyEventIds = new Set(["vacation-calendar"]);
 
-const articleStorageKey = "novaGroupKnowledgeArticles";
 const employeeStorageKey = "novaGroupEmployees";
 const documentStorageKey = "novaGroupDocuments";
 const eventStorageKey = "novaGroupEvents";
+const vacationRequestStorageKey = "novaGroupVacationRequests";
 const adminTokenStorageKey = "novaGroupAdminToken";
 const portalDataEndpoint = "/api/portal-data";
 const adminCheckEndpoint = "/api/admin-check";
+const vacationRequestEndpoint = "/api/vacation-request";
 
 const state = {
   search: "",
   department: "all",
   view: "table",
-  articleSearch: "",
   documentSearch: "",
   documentCategory: "all",
   adminTab: "team",
@@ -183,12 +138,10 @@ const state = {
   employees: [],
   documents: [],
   events: [],
-  currentArticleId: "",
-  articles: [],
+  vacationRequests: [],
   adminToken: "",
   adminUnlocked: false,
   sharedBackendAvailable: false,
-  saveTimer: 0,
 };
 
 const elements = {
@@ -206,7 +159,7 @@ const elements = {
   navItems: document.querySelectorAll(".section-nav [data-nav-target]"),
   pageViews: document.querySelectorAll("[data-page]"),
   homeEmployees: document.querySelector("#homeEmployees"),
-  homeArticles: document.querySelector("#homeArticles"),
+  homeEvents: document.querySelector("#homeEvents"),
   homeDocuments: document.querySelector("#homeDocuments"),
   homeVacations: document.querySelector("#homeVacations"),
   eventList: document.querySelector("#eventList"),
@@ -217,24 +170,11 @@ const elements = {
   eventsPageList: document.querySelector("#eventsPageList"),
   birthdayList: document.querySelector("#birthdayList"),
   leaveList: document.querySelector("#leaveList"),
-  recentArticles: document.querySelector("#recentArticles"),
   featuredDocuments: document.querySelector("#featuredDocuments"),
-  articleSearch: document.querySelector("#articleSearch"),
-  articleList: document.querySelector("#articleList"),
-  articleReader: document.querySelector("#articleReader"),
-  articleReaderStatus: document.querySelector("#articleReaderStatus"),
-  articleReaderDate: document.querySelector("#articleReaderDate"),
-  articleReaderTitle: document.querySelector("#articleReaderTitle"),
-  articleReaderBody: document.querySelector("#articleReaderBody"),
-  articleEditorShell: document.querySelector("#articleEditorShell"),
-  articleTitle: document.querySelector("#articleTitle"),
-  articleStatus: document.querySelector("#articleStatus"),
-  articleEditor: document.querySelector("#articleEditor"),
-  blockFormat: document.querySelector("#blockFormat"),
-  imageUpload: document.querySelector("#imageUpload"),
-  newArticleButton: document.querySelector("#newArticleButton"),
-  saveArticleButton: document.querySelector("#saveArticleButton"),
-  saveStatus: document.querySelector("#saveStatus"),
+  requestVacationButton: document.querySelector("#requestVacationButton"),
+  vacationRequestPanel: document.querySelector("#vacationRequestPanel"),
+  vacationRequestForm: document.querySelector("#vacationRequestForm"),
+  vacationRequestStatus: document.querySelector("#vacationRequestStatus"),
   addEmployeeButton: document.querySelector("#addEmployeeButton"),
   addDocumentButton: document.querySelector("#addDocumentButton"),
   newAdminItemButton: document.querySelector("#newAdminItemButton"),
@@ -252,9 +192,10 @@ const elements = {
   contentOverview: document.querySelector("#contentOverview"),
   contentTeamCount: document.querySelector("#contentTeamCount"),
   contentDocumentLinks: document.querySelector("#contentDocumentLinks"),
-  contentPublishedArticles: document.querySelector("#contentPublishedArticles"),
+  contentPendingVacations: document.querySelector("#contentPendingVacations"),
   contentUpcomingEvents: document.querySelector("#contentUpcomingEvents"),
   contentTaskList: document.querySelector("#contentTaskList"),
+  adminVacationRequestList: document.querySelector("#adminVacationRequestList"),
   adminTokenInput: document.querySelector("#adminTokenInput"),
   adminSyncStatus: document.querySelector("#adminSyncStatus"),
   employeeForm: document.querySelector("#employeeForm"),
@@ -288,10 +229,6 @@ function escapeHtml(value) {
   const container = document.createElement("div");
   container.textContent = value;
   return container.innerHTML;
-}
-
-function cloneDefaultArticles() {
-  return JSON.parse(JSON.stringify(defaultArticles));
 }
 
 function cloneDefaultEmployees() {
@@ -360,20 +297,12 @@ function renderAdminGate() {
   const isUnlocked = state.adminUnlocked;
   elements.addEmployeeButton.hidden = !isUnlocked;
   elements.addDocumentButton.hidden = !isUnlocked;
-  elements.newAdminItemButton.hidden = !isUnlocked;
+  elements.newAdminItemButton.hidden = !isUnlocked || state.adminTab === "vacations";
   elements.adminLockedPanel.hidden = isUnlocked;
   elements.contentOverview.hidden = !isUnlocked;
   document.querySelector(".admin-tabs").hidden = !isUnlocked;
   document.querySelector(".admin-workspace").hidden = !isUnlocked;
-  renderKnowledgeMode();
 
-  if (!isUnlocked && state.articles.length && !getVisibleArticles().some((article) => article.id === state.currentArticleId)) {
-    loadArticle(state.currentArticleId);
-    renderHome();
-    return;
-  }
-
-  renderArticles();
   renderHome();
 }
 
@@ -436,7 +365,7 @@ function getPortalDataPayload() {
     employees: state.employees,
     documents: state.documents,
     events: state.events,
-    articles: state.articles,
+    vacationRequests: state.vacationRequests,
   };
 }
 
@@ -444,7 +373,7 @@ function saveLocalPortalData() {
   saveCollection(employeeStorageKey, state.employees);
   saveCollection(documentStorageKey, state.documents);
   saveCollection(eventStorageKey, state.events);
-  saveArticles();
+  saveCollection(vacationRequestStorageKey, state.vacationRequests);
 }
 
 function normalizeSharedRecords(records, fallback) {
@@ -517,10 +446,11 @@ function normalizeEmployeeRecords(records) {
 
 function normalizeEventRecords(records) {
   const normalizedEvents = normalizeSharedRecords(records, cloneDefaultEvents)
-    .filter((event) => !legacyBirthdayEventIds.has(event.id))
+    .filter((event) => !legacyBirthdayEventIds.has(event.id) && !legacyEventIds.has(event.id))
     .map((event, index) => ({
       id: event.id || createId(`event-${index}`),
       employeeId: event.employeeId || "",
+      requestId: event.requestId || "",
       source: event.source || "",
       type: event.type || "document",
       title: event.title || "New event",
@@ -529,6 +459,19 @@ function normalizeEventRecords(records) {
     }));
 
   return syncBirthdayEventsFromEmployees(normalizedEvents);
+}
+
+function normalizeVacationRequests(records) {
+  return (Array.isArray(records) ? records : []).map((request, index) => ({
+    id: request.id || createId(`vacation-request-${index}`),
+    employeeName: request.employeeName || "Team member",
+    startDate: request.startDate || new Date().toISOString().slice(0, 10),
+    endDate: request.endDate || request.startDate || new Date().toISOString().slice(0, 10),
+    note: request.note || "",
+    status: ["pending", "approved", "rejected"].includes(request.status) ? request.status : "pending",
+    submittedAt: request.submittedAt || new Date().toISOString(),
+    reviewedAt: request.reviewedAt || "",
+  }));
 }
 
 function normalizeDocumentRecords(records) {
@@ -552,14 +495,12 @@ function applySharedPortalData(data) {
   state.employees = normalizeEmployeeRecords(data.employees);
   state.documents = normalizeDocumentRecords(data.documents);
   state.events = normalizeEventRecords(data.events);
-  state.articles = normalizeSharedRecords(data.articles, cloneDefaultArticles);
+  state.vacationRequests = normalizeVacationRequests(data.vacationRequests);
   state.currentEmployeeId = state.employees[0]?.id || "";
   state.currentDocumentId = state.documents[0]?.id || "";
   state.currentEventId = state.events[0]?.id || "";
-  state.currentArticleId = state.articles[0]?.id || "";
   saveLocalPortalData();
   refreshPortal();
-  loadArticle(state.currentArticleId);
 }
 
 async function loadSharedPortalData() {
@@ -666,6 +607,18 @@ function formatDate(dateString) {
   }).format(new Date(dateString));
 }
 
+function formatDateRange(startDate, endDate) {
+  if (!startDate || !endDate || startDate === endDate) {
+    return formatDate(startDate || endDate);
+  }
+
+  return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+}
+
+function isValidDateRange(startDate, endDate) {
+  return Boolean(startDate && endDate && new Date(startDate) <= new Date(endDate));
+}
+
 function isValidBirthday(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(String(value || ""));
 }
@@ -718,6 +671,33 @@ function syncBirthdayEventsFromEmployees(events, employees = state.employees) {
   return [...remainingEvents, ...birthdayEvents];
 }
 
+function buildVacationEventFromRequest(request) {
+  if (request.status !== "approved" || !isValidDateRange(request.startDate, request.endDate)) {
+    return null;
+  }
+
+  return {
+    id: `vacation-${request.id}`,
+    requestId: request.id,
+    source: "vacation-request",
+    type: "vacation",
+    title: `${request.employeeName} on vacation`,
+    date: request.startDate,
+    meta: `${formatDateRange(request.startDate, request.endDate)} · Approved vacation`,
+  };
+}
+
+function syncVacationEventsFromRequests(events, requests = state.vacationRequests) {
+  const vacationEvents = requests.map(buildVacationEventFromRequest).filter(Boolean);
+  const vacationEventIds = new Set(vacationEvents.map((event) => event.id));
+  const remainingEvents = events.filter((event) => (
+    event.source !== "vacation-request" &&
+    !vacationEventIds.has(event.id)
+  ));
+
+  return [...remainingEvents, ...vacationEvents];
+}
+
 function getFilteredEmployees() {
   const query = normalize(state.search);
 
@@ -758,13 +738,13 @@ function renderSummary() {
 
 function renderContentOverview() {
   const linkedDocuments = state.documents.filter((documentItem) => getSafeDocumentUrl(documentItem.url)).length;
-  const publishedArticles = getPublishedArticles().length;
   const upcomingEvents = getSortedEvents().length;
+  const pendingVacations = state.vacationRequests.filter((request) => request.status === "pending").length;
   const openTasks = [];
 
   elements.contentTeamCount.textContent = state.employees.length;
   elements.contentDocumentLinks.textContent = `${linkedDocuments}/${state.documents.length}`;
-  elements.contentPublishedArticles.textContent = `${publishedArticles}/${state.articles.length}`;
+  elements.contentPendingVacations.textContent = pendingVacations;
   elements.contentUpcomingEvents.textContent = upcomingEvents;
 
   if (!state.employees.length) {
@@ -775,8 +755,8 @@ function renderContentOverview() {
     openTasks.push({ label: `Add links to ${state.documents.length - linkedDocuments} documents`, target: "documents" });
   }
 
-  if (!publishedArticles) {
-    openTasks.push({ label: "Publish the first Knowledge Base article", target: "knowledge" });
+  if (pendingVacations) {
+    openTasks.push({ label: `Review ${pendingVacations} vacation request${pendingVacations === 1 ? "" : "s"}`, target: "vacations" });
   }
 
   if (!upcomingEvents) {
@@ -798,7 +778,7 @@ function renderContentOverview() {
       (task) => `
         <button class="content-task" type="button" data-content-target="${task.target}">
           <strong>${escapeHtml(task.label)}</strong>
-          <span>Open ${task.target === "knowledge" ? "Knowledge Base" : task.target}</span>
+          <span>Open ${task.target === "vacations" ? "Vacation requests" : task.target}</span>
         </button>
       `,
     )
@@ -861,28 +841,13 @@ function renderEvents() {
 function renderHome() {
   const events = getSortedEvents();
   const vacationEvents = events.filter((event) => event.type === "vacation");
-  const visibleArticles = getVisibleArticles();
-  const recentArticles = [...visibleArticles]
-    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-    .slice(0, 3);
 
   elements.homeEmployees.textContent = state.employees.length;
-  elements.homeArticles.textContent = visibleArticles.length;
+  elements.homeEvents.textContent = events.length;
   elements.homeDocuments.textContent = state.documents.length;
   elements.homeVacations.textContent = vacationEvents.length;
 
   elements.eventList.innerHTML = events.map((event) => eventItemMarkup(event)).join("");
-
-  elements.recentArticles.innerHTML = recentArticles
-    .map(
-      (article) => `
-        <a class="compact-item" href="#knowledge" data-nav-target="knowledge" data-open-article="${article.id}">
-          <strong>${escapeHtml(article.title || "Untitled")}</strong>
-          <span>${articleStatusLabels[article.status]} · ${formatDate(article.updatedAt)}</span>
-        </a>
-      `,
-    )
-    .join("");
 
   elements.featuredDocuments.innerHTML = state.documents
     .slice(0, 3)
@@ -1082,10 +1047,59 @@ function renderAdminDocuments() {
     .join("");
 }
 
+function vacationRequestMarkup(request) {
+  const isPending = request.status === "pending";
+
+  return `
+    <div class="vacation-request-card" data-vacation-request-id="${escapeHtml(request.id)}">
+      <div>
+        <strong>${escapeHtml(request.employeeName)}</strong>
+        <span>${formatDateRange(request.startDate, request.endDate)}</span>
+        ${request.note ? `<small>${escapeHtml(request.note)}</small>` : ""}
+      </div>
+      <span class="status-pill ${request.status === "approved" ? "published" : request.status === "rejected" ? "review" : ""}">
+        ${escapeHtml(request.status)}
+      </span>
+      ${
+        isPending
+          ? `<div class="request-actions">
+              <button class="secondary-action" type="button" data-vacation-action="approve">Approve</button>
+              <button class="danger-action" type="button" data-vacation-action="reject">Reject</button>
+            </div>`
+          : ""
+      }
+    </div>
+  `;
+}
+
+function renderAdminVacationRequests() {
+  const requests = [...state.vacationRequests].sort((a, b) => {
+    if (a.status === "pending" && b.status !== "pending") {
+      return -1;
+    }
+
+    if (a.status !== "pending" && b.status === "pending") {
+      return 1;
+    }
+
+    return new Date(b.submittedAt) - new Date(a.submittedAt);
+  });
+
+  elements.adminVacationRequestList.innerHTML = requests.length
+    ? requests.map(vacationRequestMarkup).join("")
+    : `
+      <div class="empty-panel">
+        <strong>No vacation requests</strong>
+        <span>Submitted requests will appear here for approval.</span>
+      </div>
+    `;
+}
+
 function renderAdminLists() {
   renderAdminEmployees();
   renderAdminEvents();
   renderAdminDocuments();
+  renderAdminVacationRequests();
 }
 
 function fillEmployeeForm(employee) {
@@ -1135,6 +1149,7 @@ function fillEventForm(event) {
 
 function refreshPortal() {
   state.events = syncBirthdayEventsFromEmployees(state.events);
+  state.events = syncVacationEventsFromRequests(state.events);
   renderDepartmentOptions();
   renderDocumentCategories();
   renderSummary();
@@ -1280,6 +1295,78 @@ function saveDocumentFromForm(event) {
   void publishPortalData();
 }
 
+async function submitVacationRequest(event) {
+  event.preventDefault();
+
+  const formData = new FormData(elements.vacationRequestForm);
+  const request = {
+    id: createId("vacation-request"),
+    employeeName: String(formData.get("employeeName") || "").trim(),
+    startDate: String(formData.get("startDate") || "").trim(),
+    endDate: String(formData.get("endDate") || "").trim(),
+    note: String(formData.get("note") || "").trim(),
+    status: "pending",
+    submittedAt: new Date().toISOString(),
+    reviewedAt: "",
+  };
+
+  if (!request.employeeName || !isValidDateRange(request.startDate, request.endDate)) {
+    elements.vacationRequestStatus.textContent = "Check the name and vacation dates.";
+    elements.vacationRequestStatus.dataset.status = "error";
+    return;
+  }
+
+  elements.vacationRequestStatus.textContent = "Sending request...";
+  elements.vacationRequestStatus.dataset.status = "idle";
+
+  if (state.sharedBackendAvailable && window.fetch && window.location.protocol !== "file:") {
+    try {
+      const response = await fetch(vacationRequestEndpoint, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with ${response.status}`);
+      }
+
+      const payload = await response.json();
+      state.vacationRequests = normalizeVacationRequests(payload.vacationRequests);
+      elements.vacationRequestForm.reset();
+      elements.vacationRequestStatus.textContent = "Request sent for approval.";
+      elements.vacationRequestStatus.dataset.status = "ready";
+      refreshPortal();
+      return;
+    } catch {
+      elements.vacationRequestStatus.textContent = "Could not send request. Try again later.";
+      elements.vacationRequestStatus.dataset.status = "error";
+      return;
+    }
+  }
+
+  state.vacationRequests.unshift(request);
+  saveLocalPortalData();
+  elements.vacationRequestForm.reset();
+  elements.vacationRequestStatus.textContent = "Request saved in this browser.";
+  elements.vacationRequestStatus.dataset.status = "ready";
+  refreshPortal();
+}
+
+function reviewVacationRequest(requestId, status) {
+  const request = state.vacationRequests.find((item) => item.id === requestId);
+
+  if (!request || request.status !== "pending") {
+    return;
+  }
+
+  request.status = status;
+  request.reviewedAt = new Date().toISOString();
+
+  refreshPortal();
+  void publishPortalData();
+}
+
 function deleteEmployeeRecord() {
   if (state.employees.length <= 1 || !window.confirm("Delete this team member?")) {
     return;
@@ -1315,6 +1402,7 @@ function deleteEventRecord() {
 
 function setAdminTab(tab) {
   state.adminTab = tab;
+  elements.newAdminItemButton.hidden = !state.adminUnlocked || tab === "vacations";
 
   elements.adminTabs.forEach((button) => {
     const isActive = button.dataset.adminTab === tab;
@@ -1333,6 +1421,7 @@ function initializeCollections() {
   state.employees = normalizeEmployeeRecords(getStoredCollection(employeeStorageKey, cloneDefaultEmployees));
   state.documents = normalizeDocumentRecords(getStoredCollection(documentStorageKey, cloneDefaultDocuments));
   state.events = normalizeEventRecords(getStoredCollection(eventStorageKey, cloneDefaultEvents));
+  state.vacationRequests = normalizeVacationRequests(getStoredCollection(vacationRequestStorageKey, () => []));
   state.currentEmployeeId = state.employees[0]?.id || "";
   state.currentDocumentId = state.documents[0]?.id || "";
   state.currentEventId = state.events[0]?.id || "";
@@ -1371,245 +1460,11 @@ function setActivePage(page) {
   }
 }
 
-function getStoredArticles() {
-  let savedArticles = "";
-
-  try {
-    savedArticles = window.localStorage?.getItem(articleStorageKey);
-  } catch {
-    return cloneDefaultArticles();
-  }
-
-  if (!savedArticles) {
-    return cloneDefaultArticles();
-  }
-
-  try {
-    const parsedArticles = JSON.parse(savedArticles);
-    return Array.isArray(parsedArticles) && parsedArticles.length ? parsedArticles : cloneDefaultArticles();
-  } catch {
-    return cloneDefaultArticles();
-  }
-}
-
-function saveArticles() {
-  try {
-    window.localStorage?.setItem(articleStorageKey, JSON.stringify(state.articles));
-  } catch {
-    elements.saveStatus.textContent = "Saving is unavailable";
-  }
-}
-
-function getCurrentArticle() {
-  return state.articles.find((article) => article.id === state.currentArticleId);
-}
-
-function getPublishedArticles() {
-  return state.articles.filter((article) => article.status === "published");
-}
-
-function getVisibleArticles() {
-  return state.adminUnlocked ? state.articles : getPublishedArticles();
-}
-
-function renderKnowledgeMode() {
-  const canEdit = state.adminUnlocked;
-
-  elements.newArticleButton.hidden = !canEdit;
-  elements.articleReader.hidden = canEdit;
-  elements.articleEditorShell.hidden = !canEdit;
-  elements.articleTitle.disabled = !canEdit;
-  elements.articleStatus.disabled = !canEdit;
-  elements.articleEditor.contentEditable = canEdit ? "true" : "false";
-  elements.blockFormat.disabled = !canEdit;
-  elements.saveArticleButton.disabled = !canEdit;
-  document.querySelectorAll(".editor-toolbar button").forEach((button) => {
-    button.disabled = !canEdit;
-  });
-}
-
-function renderArticles() {
-  const query = normalize(state.articleSearch);
-  const visibleArticles = getVisibleArticles();
-  const filteredArticles = visibleArticles.filter((article) =>
-    normalize(`${article.title} ${state.adminUnlocked ? article.status : ""} ${article.content.replace(/<[^>]*>/g, " ")}`).includes(query),
-  );
-
-  if (!filteredArticles.length) {
-    elements.articleList.innerHTML = `
-      <div class="article-empty">
-        <strong>No published articles yet</strong>
-        <span>Published knowledge base articles will appear here.</span>
-      </div>
-    `;
-    return;
-  }
-
-  elements.articleList.innerHTML = filteredArticles
-    .map(
-      (article) => `
-        <button class="article-item ${article.id === state.currentArticleId ? "is-active" : ""}" type="button" data-article-id="${article.id}">
-          <strong>${escapeHtml(article.title || "Untitled")}</strong>
-          <span class="article-meta">
-            ${state.adminUnlocked ? `<span class="status-pill ${article.status}">${articleStatusLabels[article.status]}</span>` : ""}
-            <span>${formatDate(article.updatedAt)}</span>
-          </span>
-        </button>
-      `,
-    )
-    .join("");
-}
-
-function loadArticle(articleId) {
-  renderKnowledgeMode();
-
-  const visibleArticles = getVisibleArticles();
-  const article = visibleArticles.find((item) => item.id === articleId) || visibleArticles[0];
-
-  if (!article) {
-    state.currentArticleId = "";
-    elements.articleReaderStatus.textContent = "Published";
-    elements.articleReaderStatus.className = "status-pill published";
-    elements.articleReaderDate.textContent = "";
-    elements.articleReaderTitle.textContent = "No published articles yet";
-    elements.articleReaderBody.innerHTML = "<p>Published knowledge base articles will appear here.</p>";
-    elements.articleTitle.value = "";
-    elements.articleStatus.value = "draft";
-    elements.articleEditor.innerHTML = "";
-    elements.saveStatus.textContent = "Nothing to edit";
-    renderArticles();
-    return;
-  }
-
-  state.currentArticleId = article.id;
-  elements.articleReaderStatus.textContent = articleStatusLabels[article.status] || "Published";
-  elements.articleReaderStatus.className = `status-pill ${article.status}`;
-  elements.articleReaderDate.textContent = formatDate(article.updatedAt);
-  elements.articleReaderTitle.textContent = article.title || "Untitled";
-  elements.articleReaderBody.innerHTML = article.content || "<p></p>";
-  elements.articleTitle.value = article.title;
-  elements.articleStatus.value = article.status;
-  elements.articleEditor.innerHTML = article.content;
-  elements.saveStatus.textContent = "Changes saved";
-  renderArticles();
-}
-
-function persistCurrentArticle({ silent = false } = {}) {
-  if (!state.adminUnlocked) {
-    return;
-  }
-
-  const article = getCurrentArticle();
-
-  if (!article) {
-    return;
-  }
-
-  article.title = elements.articleTitle.value.trim() || "Untitled";
-  article.status = elements.articleStatus.value;
-  article.content = elements.articleEditor.innerHTML;
-  article.updatedAt = new Date().toISOString().slice(0, 10);
-  saveArticles();
-  renderArticles();
-  renderHome();
-  void publishPortalData({ silent });
-
-  if (!silent) {
-    elements.saveStatus.textContent = "Changes saved";
-  }
-}
-
-function scheduleArticleSave() {
-  if (!state.adminUnlocked) {
-    return;
-  }
-
-  elements.saveStatus.textContent = "Saving...";
-  window.clearTimeout(state.saveTimer);
-  state.saveTimer = window.setTimeout(() => persistCurrentArticle(), 450);
-}
-
-function createArticle() {
-  if (!state.adminUnlocked) {
-    return;
-  }
-
-  persistCurrentArticle({ silent: true });
-
-  const article = {
-    id: `article-${Date.now()}`,
-    title: "New article",
-    status: "draft",
-    updatedAt: new Date().toISOString().slice(0, 10),
-    content: "<p></p>",
-  };
-
-  state.articles.unshift(article);
-  saveArticles();
-  loadArticle(article.id);
-  void publishPortalData({ silent: true });
-  elements.articleTitle.focus();
-  elements.articleTitle.select();
-}
-
-function runEditorCommand(command, value = null) {
-  if (!state.adminUnlocked) {
-    return;
-  }
-
-  elements.articleEditor.focus();
-  document.execCommand(command, false, value);
-  scheduleArticleSave();
-  updateToolbarState();
-}
-
-function insertLink() {
-  if (!state.adminUnlocked) {
-    return;
-  }
-
-  const url = window.prompt("Link URL");
-
-  if (!url) {
-    return;
-  }
-
-  runEditorCommand("createLink", url);
-}
-
-function insertImage(file) {
-  if (!state.adminUnlocked || !file) {
-    return;
-  }
-
-  const reader = new FileReader();
-
-  reader.addEventListener("load", () => {
-    const alt = escapeHtml(file.name.replace(/\.[^.]+$/, ""));
-    const imageMarkup = `<figure><img src="${reader.result}" alt="${alt}" /><figcaption>${alt}</figcaption></figure><p></p>`;
-    runEditorCommand("insertHTML", imageMarkup);
-    elements.imageUpload.value = "";
-  });
-
-  reader.readAsDataURL(file);
-}
-
-function updateToolbarState() {
-  document.querySelectorAll("[data-command]").forEach((button) => {
-    const command = button.dataset.command;
-
-    if (["bold", "italic", "underline"].includes(command)) {
-      button.classList.toggle("is-active", document.queryCommandState(command));
-    }
-  });
-}
-
-function initializeKnowledgeBase() {
-  state.articles = getStoredArticles();
-  state.currentArticleId = state.articles[0]?.id || "";
-  loadArticle(state.currentArticleId);
-  renderHome();
-  renderContentOverview();
+function focusVacationRequestForm() {
+  window.setTimeout(() => {
+    elements.vacationRequestPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    elements.vacationRequestForm.elements.employeeName.focus();
+  }, 80);
 }
 
 elements.search.addEventListener("input", (event) => {
@@ -1643,8 +1498,8 @@ document.addEventListener("click", (event) => {
   event.preventDefault();
   setActivePage(link.dataset.navTarget);
 
-  if (link.dataset.openArticle) {
-    loadArticle(link.dataset.openArticle);
+  if (link.dataset.focusVacationRequest) {
+    focusVacationRequestForm();
   }
 });
 
@@ -1652,54 +1507,8 @@ window.addEventListener("hashchange", () => {
   setActivePage(window.location.hash.replace("#", ""));
 });
 
-elements.articleSearch.addEventListener("input", (event) => {
-  state.articleSearch = event.target.value;
-  renderArticles();
-});
-
-elements.articleList.addEventListener("click", (event) => {
-  const item = event.target.closest("[data-article-id]");
-
-  if (!item) {
-    return;
-  }
-
-  if (state.adminUnlocked) {
-    persistCurrentArticle({ silent: true });
-  }
-
-  loadArticle(item.dataset.articleId);
-});
-
-elements.articleTitle.addEventListener("input", scheduleArticleSave);
-elements.articleStatus.addEventListener("change", scheduleArticleSave);
-elements.articleEditor.addEventListener("input", scheduleArticleSave);
-elements.articleEditor.addEventListener("keyup", updateToolbarState);
-elements.articleEditor.addEventListener("mouseup", updateToolbarState);
-document.addEventListener("selectionchange", () => {
-  if (document.activeElement === elements.articleEditor) {
-    updateToolbarState();
-  }
-});
-
-elements.blockFormat.addEventListener("change", (event) => {
-  runEditorCommand("formatBlock", event.target.value);
-  event.target.value = "P";
-});
-
-document.querySelectorAll("[data-command]").forEach((button) => {
-  button.addEventListener("click", () => runEditorCommand(button.dataset.command));
-});
-
-document.querySelector('[data-action="link"]').addEventListener("click", insertLink);
-document.querySelector('[data-action="image"]').addEventListener("click", () => {
-  if (state.adminUnlocked) {
-    elements.imageUpload.click();
-  }
-});
-elements.imageUpload.addEventListener("change", (event) => insertImage(event.target.files[0]));
-elements.newArticleButton.addEventListener("click", createArticle);
-elements.saveArticleButton.addEventListener("click", () => persistCurrentArticle());
+elements.requestVacationButton.addEventListener("click", focusVacationRequestForm);
+elements.vacationRequestForm.addEventListener("submit", submitVacationRequest);
 elements.addEmployeeButton.addEventListener("click", () => {
   if (!state.adminUnlocked) {
     setActivePage("admin");
@@ -1731,12 +1540,6 @@ elements.newAdminItemButton.addEventListener("click", () => {
     return;
   }
 
-  if (state.adminTab === "knowledge") {
-    setActivePage("knowledge");
-    createArticle();
-    return;
-  }
-
   createEmployeeRecord();
 });
 elements.documentSearch.addEventListener("input", (event) => {
@@ -1754,11 +1557,6 @@ elements.contentTaskList.addEventListener("click", (event) => {
   const task = event.target.closest("[data-content-target]");
 
   if (!task) {
-    return;
-  }
-
-  if (task.dataset.contentTarget === "knowledge") {
-    setActivePage("knowledge");
     return;
   }
 
@@ -1785,6 +1583,19 @@ elements.adminDocumentList.addEventListener("click", (event) => {
     selectDocument(item.dataset.documentId);
   }
 });
+elements.adminVacationRequestList.addEventListener("click", (event) => {
+  const actionButton = event.target.closest("[data-vacation-action]");
+  const requestCard = event.target.closest("[data-vacation-request-id]");
+
+  if (!actionButton || !requestCard) {
+    return;
+  }
+
+  reviewVacationRequest(
+    requestCard.dataset.vacationRequestId,
+    actionButton.dataset.vacationAction === "approve" ? "approved" : "rejected",
+  );
+});
 elements.employeeForm.addEventListener("submit", saveEmployeeFromForm);
 elements.eventForm.addEventListener("submit", saveEventFromForm);
 elements.documentForm.addEventListener("submit", saveDocumentFromForm);
@@ -1809,7 +1620,6 @@ async function initializePortal() {
   setAdminTab(state.adminTab);
   renderAdminGate();
   refreshPortal();
-  initializeKnowledgeBase();
   setActivePage(window.location.hash.replace("#", "") || "home");
   await loadSharedPortalData();
 }

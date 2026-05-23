@@ -27,6 +27,10 @@ function stringValue(value, fallback = "") {
   return typeof value === "string" ? value.trim() : fallback;
 }
 
+function isValidDateRange(startDate, endDate) {
+  return Boolean(startDate && endDate && new Date(startDate) <= new Date(endDate));
+}
+
 function cleanEmployee(item, index) {
   return {
     id: stringValue(item?.id, `team-${index + 1}`),
@@ -59,6 +63,7 @@ function cleanEvent(item, index) {
   return {
     id: stringValue(item?.id, `event-${index + 1}`),
     employeeId: stringValue(item?.employeeId, ""),
+    requestId: stringValue(item?.requestId, ""),
     source: stringValue(item?.source, ""),
     type: stringValue(item?.type, "document"),
     title: stringValue(item?.title, "New event"),
@@ -67,13 +72,18 @@ function cleanEvent(item, index) {
   };
 }
 
-function cleanArticle(item, index) {
+function cleanVacationRequest(item, index) {
+  const status = stringValue(item?.status, "pending");
+
   return {
-    id: stringValue(item?.id, `article-${index + 1}`),
-    title: stringValue(item?.title, "Untitled"),
-    status: stringValue(item?.status, "draft"),
-    updatedAt: stringValue(item?.updatedAt, new Date().toISOString().slice(0, 10)),
-    content: stringValue(item?.content, "<p></p>"),
+    id: stringValue(item?.id, `vacation-request-${index + 1}`),
+    employeeName: stringValue(item?.employeeName, "Team member"),
+    startDate: stringValue(item?.startDate, new Date().toISOString().slice(0, 10)),
+    endDate: stringValue(item?.endDate, stringValue(item?.startDate, new Date().toISOString().slice(0, 10))),
+    note: stringValue(item?.note, ""),
+    status: ["pending", "approved", "rejected"].includes(status) ? status : "pending",
+    submittedAt: stringValue(item?.submittedAt, new Date().toISOString()),
+    reviewedAt: stringValue(item?.reviewedAt, ""),
   };
 }
 
@@ -82,7 +92,7 @@ function cleanPortalData(data) {
     employees: Array.isArray(data?.employees) ? data.employees.map(cleanEmployee) : [],
     documents: Array.isArray(data?.documents) ? data.documents.map(cleanDocument) : [],
     events: Array.isArray(data?.events) ? data.events.map(cleanEvent) : [],
-    articles: Array.isArray(data?.articles) ? data.articles.map(cleanArticle) : [],
+    vacationRequests: Array.isArray(data?.vacationRequests) ? data.vacationRequests.map(cleanVacationRequest) : [],
     updatedAt: new Date().toISOString(),
   };
 }
@@ -124,6 +134,47 @@ async function handlePortalData(request, env) {
   return jsonResponse({ error: "Method not allowed" }, 405);
 }
 
+async function handleVacationRequest(request, env) {
+  if (!env.PORTAL_KV) {
+    return jsonResponse({ error: "Shared storage is not configured" }, 503);
+  }
+
+  if (request.method !== "POST") {
+    return jsonResponse({ error: "Method not allowed" }, 405);
+  }
+
+  try {
+    const existingData = (await env.PORTAL_KV.get(DATA_KEY, "json")) || {};
+    const currentRequests = Array.isArray(existingData.vacationRequests) ? existingData.vacationRequests : [];
+    const body = await readJsonBody(request);
+
+    if (!stringValue(body?.employeeName) || !isValidDateRange(body?.startDate, body?.endDate)) {
+      return jsonResponse({ error: "Check the name and vacation dates" }, 400);
+    }
+
+    const nextRequest = cleanVacationRequest(
+      {
+        ...body,
+        id: crypto.randomUUID(),
+        status: "pending",
+        submittedAt: new Date().toISOString(),
+        reviewedAt: "",
+      },
+      currentRequests.length,
+    );
+    const data = {
+      ...existingData,
+      vacationRequests: [nextRequest, ...currentRequests].map(cleanVacationRequest),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await env.PORTAL_KV.put(DATA_KEY, JSON.stringify(data));
+    return jsonResponse({ ok: true, vacationRequests: data.vacationRequests });
+  } catch (error) {
+    return jsonResponse({ error: error.message || "Could not submit vacation request" }, 400);
+  }
+}
+
 function handleAdminCheck(request, env) {
   if (request.method !== "POST") {
     return jsonResponse({ error: "Method not allowed" }, 405);
@@ -146,6 +197,10 @@ export default {
 
     if (url.pathname === "/api/portal-data") {
       return handlePortalData(request, env);
+    }
+
+    if (url.pathname === "/api/vacation-request") {
+      return handleVacationRequest(request, env);
     }
 
     if (url.pathname === "/") {

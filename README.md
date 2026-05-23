@@ -4,12 +4,13 @@ Frontend and Cloudflare Worker backend for the Nova Group internal team portal.
 
 ## Current scope
 
-- Home dashboard with quick links, metrics, upcoming events, recent articles, and key documents.
-- Team directory with search, department filters, work-mode filters, table view, and card view.
-- Knowledge Base with article list, rich-text editor, formatting controls, links, and image upload.
+- Home dashboard with quick links, metrics, upcoming events, vacation requests, and key documents.
+- Team directory with search, department filters, table view, and card view.
 - Documents section with search, category filters, and document cards.
-- Admin section for editing team records, document records, and Knowledge Base articles.
+- Events section with birthdays, approved vacations, reminders, and a simple vacation request form.
+- Admin section for editing team records, event records, document records, and vacation approvals.
 - Shared Cloudflare KV storage through the `/api/portal-data` Worker API.
+- Public vacation request intake through the `/api/vacation-request` Worker API.
 - Responsive layout for desktop and mobile screens.
 
 ## Local preview
