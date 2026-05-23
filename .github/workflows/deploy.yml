@@ -2,36 +2,35 @@ name: Deploy to Cloudflare
 
 on:
   push:
-      branches:
-            - main
-              workflow_dispatch:
+    branches:
+      - main
+  workflow_dispatch:
 
-              jobs:
-                deploy:
-                    runs-on: ubuntu-latest
-                        permissions:
-                              contents: read
-                                  steps:
-                                        - name: Checkout
-                                                uses: actions/checkout@v4
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-                                                      - name: Prepare static files
-                                                              run: |
-                                                                        mkdir -p dist
-                                                                                  cp index.html styles.css script.js dist/
-                                                                                            cp -R assets dist/assets
+      - name: Prepare static files
+        run: |
+          mkdir -p dist
+          cp index.html styles.css script.js dist/
+          cp -R assets dist/assets
 
-                                                                                                  - name: Deploy Worker
-                                                                                                          uses: cloudflare/wrangler-action@v3
-                                                                                                                  with:
-                                                                                                                            apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                                                                                                                                      accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                                                                                                                                                wranglerVersion: 4.20.0
-                                                                                                                                                          command: deploy
-                                                                                                                                                                    secrets: |
-                                                                                                                                                                                ADMIN_TOKEN
-                                                                                                                                                                                            PORTAL_ACCESS_CODE
-                                                                                                                                                                                                    env:
-                                                                                                                                                                                                              ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
-                                                                                                                                                                                                                        PORTAL_ACCESS_CODE: ${{ secrets.PORTAL_ACCESS_CODE }}
-                                                                                                                                                                                                                        
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.20.0"
+          command: deploy
+          secrets: |
+            ADMIN_TOKEN
+            PORTAL_ACCESS_CODE
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          PORTAL_ACCESS_CODE: ${{ secrets.PORTAL_ACCESS_CODE }}
