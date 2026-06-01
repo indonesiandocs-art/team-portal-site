@@ -90,6 +90,8 @@ const defaultEvents = [
   { id: "review-procurement-policy", type: "document", title: "Review procurement policy", date: "2026-05-30", meta: "IT" },
 ];
 
+const defaultExternalContacts = [];
+
 const eventTypeLabels = {
   birthday: "Birthday",
   vacation: "Vacation",
@@ -119,6 +121,7 @@ const legacyEventIds = new Set(["vacation-calendar"]);
 const employeeStorageKey = "novaGroupEmployees";
 const documentStorageKey = "novaGroupDocuments";
 const eventStorageKey = "novaGroupEvents";
+const externalContactStorageKey = "novaGroupExternalContacts";
 const vacationRequestStorageKey = "novaGroupVacationRequests";
 const adminTokenStorageKey = "novaGroupAdminToken";
 const portalDataEndpoint = "/api/portal-data";
@@ -131,11 +134,15 @@ const state = {
   view: "table",
   documentSearch: "",
   documentCategory: "all",
+  externalContactSearch: "",
+  externalContactCategory: "all",
   adminTab: "team",
   currentEmployeeId: "",
+  currentExternalContactId: "",
   currentDocumentId: "",
   currentEventId: "",
   employees: [],
+  externalContacts: [],
   documents: [],
   events: [],
   vacationRequests: [],
@@ -179,6 +186,14 @@ const elements = {
   companyCalendar: document.querySelector("#companyCalendar"),
   calendarLegend: document.querySelector("#calendarLegend"),
   orgChart: document.querySelector("#orgChart"),
+  externalContactSearch: document.querySelector("#externalContactSearch"),
+  externalContactCategoryFilter: document.querySelector("#externalContactCategoryFilter"),
+  externalContactGrid: document.querySelector("#externalContactGrid"),
+  externalContactEmptyState: document.querySelector("#externalContactEmptyState"),
+  externalContactTotal: document.querySelector("#externalContactTotal"),
+  externalBirthdayTotal: document.querySelector("#externalBirthdayTotal"),
+  externalCategoryTotal: document.querySelector("#externalCategoryTotal"),
+  externalPendingContacts: document.querySelector("#externalPendingContacts"),
   addEmployeeButton: document.querySelector("#addEmployeeButton"),
   addDocumentButton: document.querySelector("#addDocumentButton"),
   newAdminItemButton: document.querySelector("#newAdminItemButton"),
@@ -189,6 +204,7 @@ const elements = {
   adminTabs: document.querySelectorAll("[data-admin-tab]"),
   adminSections: document.querySelectorAll("[data-admin-section]"),
   adminEmployeeList: document.querySelector("#adminEmployeeList"),
+  adminExternalContactList: document.querySelector("#adminExternalContactList"),
   adminEventList: document.querySelector("#adminEventList"),
   adminDocumentList: document.querySelector("#adminDocumentList"),
   adminAuthForm: document.querySelector("#adminAuthForm"),
@@ -206,6 +222,10 @@ const elements = {
   employeeFormTitle: document.querySelector("#employeeFormTitle"),
   createEmployeeRecordButton: document.querySelector("#createEmployeeRecordButton"),
   deleteEmployeeButton: document.querySelector("#deleteEmployeeButton"),
+  externalContactForm: document.querySelector("#externalContactForm"),
+  externalContactFormTitle: document.querySelector("#externalContactFormTitle"),
+  createExternalContactRecordButton: document.querySelector("#createExternalContactRecordButton"),
+  deleteExternalContactButton: document.querySelector("#deleteExternalContactButton"),
   eventForm: document.querySelector("#eventForm"),
   eventFormTitle: document.querySelector("#eventFormTitle"),
   createEventRecordButton: document.querySelector("#createEventRecordButton"),
@@ -245,6 +265,10 @@ function cloneDefaultDocuments() {
 
 function cloneDefaultEvents() {
   return JSON.parse(JSON.stringify(defaultEvents));
+}
+
+function cloneDefaultExternalContacts() {
+  return JSON.parse(JSON.stringify(defaultExternalContacts));
 }
 
 function getStoredCollection(storageKey, fallbackFactory) {
@@ -367,6 +391,7 @@ async function verifyAdminAccess({ silent = false } = {}) {
 function getPortalDataPayload() {
   return {
     employees: state.employees,
+    externalContacts: state.externalContacts,
     documents: state.documents,
     events: state.events,
     vacationRequests: state.vacationRequests,
@@ -375,6 +400,7 @@ function getPortalDataPayload() {
 
 function saveLocalPortalData() {
   saveCollection(employeeStorageKey, state.employees);
+  saveCollection(externalContactStorageKey, state.externalContacts);
   saveCollection(documentStorageKey, state.documents);
   saveCollection(eventStorageKey, state.events);
   saveCollection(vacationRequestStorageKey, state.vacationRequests);
@@ -454,6 +480,7 @@ function normalizeEventRecords(records) {
     .map((event, index) => ({
       id: event.id || createId(`event-${index}`),
       employeeId: event.employeeId || "",
+      externalContactId: event.externalContactId || "",
       requestId: event.requestId || "",
       source: event.source || "",
       type: event.type || "document",
@@ -463,6 +490,49 @@ function normalizeEventRecords(records) {
     }));
 
   return syncBirthdayEventsFromEmployees(normalizedEvents);
+}
+
+function normalizeBirthdayValue(value) {
+  const rawValue = String(value || "").trim();
+
+  if (!rawValue) {
+    return "";
+  }
+
+  const isoMatch = rawValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (isoMatch) {
+    return `${isoMatch[2]}-${isoMatch[3]}`;
+  }
+
+  const monthDayMatch = rawValue.match(/^(\d{2})-(\d{2})$/);
+
+  if (monthDayMatch) {
+    return rawValue;
+  }
+
+  const dotMatch = rawValue.match(/^(\d{1,2})\.(\d{1,2})(?:\.\d{2,4})?$/);
+
+  if (dotMatch) {
+    return `${dotMatch[2].padStart(2, "0")}-${dotMatch[1].padStart(2, "0")}`;
+  }
+
+  return rawValue;
+}
+
+function normalizeExternalContactRecords(records) {
+  return normalizeSharedRecords(records, cloneDefaultExternalContacts).map((contact, index) => ({
+    id: contact.id || createId(`external-contact-${index}`),
+    name: contact.name || "New external contact",
+    company: contact.company || "Company",
+    category: contact.category || "Partner",
+    role: contact.role || "Role",
+    owner: contact.owner || "Relationship owner",
+    birthday: normalizeBirthdayValue(contact.birthday),
+    email: contact.email || "",
+    phone: contact.phone || "",
+    notes: contact.notes || "",
+  }));
 }
 
 function normalizeVacationRequests(records) {
@@ -497,10 +567,12 @@ function applySharedPortalData(data) {
   }
 
   state.employees = normalizeEmployeeRecords(data.employees);
+  state.externalContacts = normalizeExternalContactRecords(data.externalContacts);
   state.documents = normalizeDocumentRecords(data.documents);
   state.events = normalizeEventRecords(data.events);
   state.vacationRequests = normalizeVacationRequests(data.vacationRequests);
   state.currentEmployeeId = state.employees[0]?.id || "";
+  state.currentExternalContactId = state.externalContacts[0]?.id || "";
   state.currentDocumentId = state.documents[0]?.id || "";
   state.currentEventId = state.events[0]?.id || "";
   saveLocalPortalData();
@@ -627,12 +699,49 @@ function isValidBirthday(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(String(value || ""));
 }
 
-function getNextBirthdayDate(birthday) {
-  if (!isValidBirthday(birthday)) {
+function isValidMonthDay(value) {
+  const match = String(value || "").match(/^(\d{2})-(\d{2})$/);
+
+  if (!match) {
+    return false;
+  }
+
+  const month = Number(match[1]);
+  const day = Number(match[2]);
+
+  return month >= 1 && month <= 12 && day >= 1 && day <= 31;
+}
+
+function getBirthdayMonthDay(value) {
+  if (isValidBirthday(value)) {
+    return value.slice(5);
+  }
+
+  if (isValidMonthDay(value)) {
+    return value;
+  }
+
+  return "";
+}
+
+function formatBirthdayValue(value) {
+  const monthDay = getBirthdayMonthDay(value);
+
+  if (!monthDay) {
     return "";
   }
 
-  const [, monthValue, dayValue] = birthday.split("-").map(Number);
+  return formatDate(`2000-${monthDay}`);
+}
+
+function getNextBirthdayDate(birthday) {
+  const monthDay = getBirthdayMonthDay(birthday);
+
+  if (!monthDay) {
+    return "";
+  }
+
+  const [monthValue, dayValue] = monthDay.split("-").map(Number);
   const today = new Date();
   const todayDate = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
   let nextBirthday = new Date(Date.UTC(today.getFullYear(), monthValue - 1, dayValue));
@@ -669,6 +778,33 @@ function syncBirthdayEventsFromEmployees(events, employees = state.employees) {
   const remainingEvents = events.filter((event) => (
     event.source !== "employee-birthday" &&
     !legacyBirthdayEventIds.has(event.id) &&
+    !birthdayEventIds.has(event.id)
+  ));
+
+  return [...remainingEvents, ...birthdayEvents];
+}
+
+function buildExternalBirthdayEvent(contact) {
+  if (!getBirthdayMonthDay(contact.birthday)) {
+    return null;
+  }
+
+  return {
+    id: `external-birthday-${contact.id}`,
+    externalContactId: contact.id,
+    source: "external-birthday",
+    type: "birthday",
+    title: `External birthday: ${contact.name}`,
+    date: getNextBirthdayDate(contact.birthday),
+    meta: `${contact.category} · ${contact.company} · Owner: ${contact.owner}`,
+  };
+}
+
+function syncBirthdayEventsFromExternalContacts(events, contacts = state.externalContacts) {
+  const birthdayEvents = contacts.map(buildExternalBirthdayEvent).filter(Boolean);
+  const birthdayEventIds = new Set(birthdayEvents.map((event) => event.id));
+  const remainingEvents = events.filter((event) => (
+    event.source !== "external-birthday" &&
     !birthdayEventIds.has(event.id)
   ));
 
@@ -983,6 +1119,85 @@ function renderOrgChart() {
   `;
 }
 
+function getFilteredExternalContacts() {
+  const query = normalize(state.externalContactSearch);
+
+  return state.externalContacts.filter((contact) => {
+    const matchesSearch = [contact.name, contact.company, contact.category, contact.role, contact.owner, contact.notes]
+      .map(normalize)
+      .some((value) => value.includes(query));
+    const matchesCategory = state.externalContactCategory === "all" || contact.category === state.externalContactCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+}
+
+function renderExternalContactCategories() {
+  const categories = [...new Set(state.externalContacts.map((contact) => contact.category))].filter(Boolean).sort();
+
+  elements.externalContactCategoryFilter.innerHTML = '<option value="all">All categories</option>';
+
+  categories.forEach((category) => {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category;
+    elements.externalContactCategoryFilter.append(option);
+  });
+
+  if (![...elements.externalContactCategoryFilter.options].some((option) => option.value === state.externalContactCategory)) {
+    state.externalContactCategory = "all";
+  }
+
+  elements.externalContactCategoryFilter.value = state.externalContactCategory;
+}
+
+function externalContactContactMarkup(contact) {
+  const email = String(contact.email || "").trim();
+  const phone = String(contact.phone || "").trim();
+
+  if (!email && !phone) {
+    return '<span class="subtle">Contact pending</span>';
+  }
+
+  return `
+    <span class="contact-list">
+      ${email ? `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>` : ""}
+      ${phone ? `<span class="subtle">${escapeHtml(phone)}</span>` : ""}
+    </span>
+  `;
+}
+
+function renderExternalContacts() {
+  const filteredContacts = getFilteredExternalContacts();
+  const contactsWithBirthdays = state.externalContacts.filter((contact) => getBirthdayMonthDay(contact.birthday));
+
+  elements.externalContactTotal.textContent = state.externalContacts.length;
+  elements.externalBirthdayTotal.textContent = contactsWithBirthdays.length;
+  elements.externalCategoryTotal.textContent = new Set(state.externalContacts.map((contact) => contact.category).filter(Boolean)).size;
+  elements.externalPendingContacts.textContent = state.externalContacts.filter((contact) => !contact.email && !contact.phone).length;
+  elements.externalContactEmptyState.hidden = filteredContacts.length > 0;
+
+  elements.externalContactGrid.innerHTML = filteredContacts
+    .map((contact) => `
+      <article class="external-contact-card">
+        <header>
+          <div>
+            <h3>${escapeHtml(contact.name)}</h3>
+            <p>${escapeHtml(contact.company)} · ${escapeHtml(contact.role)}</p>
+          </div>
+          <span class="status-pill published">${escapeHtml(contact.category)}</span>
+        </header>
+        <div class="card-meta">
+          <div class="meta-row"><span>Owner</span><strong>${escapeHtml(contact.owner)}</strong></div>
+          <div class="meta-row"><span>Birthday</span><strong>${getBirthdayMonthDay(contact.birthday) ? escapeHtml(formatBirthdayValue(contact.birthday)) : "Not set"}</strong></div>
+        </div>
+        ${externalContactContactMarkup(contact)}
+        ${contact.notes ? `<p class="external-note">${escapeHtml(contact.notes)}</p>` : ""}
+      </article>
+    `)
+    .join("");
+}
+
 function getFilteredEmployees() {
   const query = normalize(state.search);
 
@@ -1034,6 +1249,10 @@ function renderContentOverview() {
 
   if (!state.employees.length) {
     openTasks.push({ label: "Add team members", target: "team" });
+  }
+
+  if (!state.externalContacts.length) {
+    openTasks.push({ label: "Add external contacts", target: "external" });
   }
 
   if (linkedDocuments < state.documents.length) {
@@ -1180,7 +1399,7 @@ function employeeBirthdayMarkup(employee) {
     return '<span class="subtle">Not set</span>';
   }
 
-  return `<span class="birthday-cell">${formatDate(employee.birthday)}</span>`;
+  return `<span class="birthday-cell">${formatBirthdayValue(employee.birthday)}</span>`;
 }
 
 function renderTable(filteredEmployees) {
@@ -1294,6 +1513,10 @@ function getCurrentEmployee() {
   return state.employees.find((employee) => employee.id === state.currentEmployeeId);
 }
 
+function getCurrentExternalContact() {
+  return state.externalContacts.find((contact) => contact.id === state.currentExternalContactId);
+}
+
 function getCurrentDocument() {
   return state.documents.find((documentItem) => documentItem.id === state.currentDocumentId);
 }
@@ -1313,6 +1536,26 @@ function renderAdminEmployees() {
       `,
     )
     .join("");
+}
+
+function renderAdminExternalContacts() {
+  elements.adminExternalContactList.innerHTML = state.externalContacts.length
+    ? state.externalContacts
+      .map(
+        (contact) => `
+          <button class="admin-record ${contact.id === state.currentExternalContactId ? "is-active" : ""}" type="button" data-external-contact-id="${contact.id}">
+            <strong>${escapeHtml(contact.name)}</strong>
+            <span>${escapeHtml(contact.category)} · ${escapeHtml(contact.company)}</span>
+          </button>
+        `,
+      )
+      .join("")
+    : `
+      <div class="empty-panel">
+        <strong>No external contacts</strong>
+        <span>Add bankers, lawyers, accountants, partners, and other key contacts.</span>
+      </div>
+    `;
 }
 
 function renderAdminEvents() {
@@ -1391,6 +1634,7 @@ function renderAdminVacationRequests() {
 
 function renderAdminLists() {
   renderAdminEmployees();
+  renderAdminExternalContacts();
   renderAdminEvents();
   renderAdminDocuments();
   renderAdminVacationRequests();
@@ -1404,6 +1648,23 @@ function fillEmployeeForm(employee) {
   elements.employeeFormTitle.textContent = `Edit ${employee.name}`;
   Object.entries(employee).forEach(([key, value]) => {
     const field = elements.employeeForm.elements[key];
+
+    if (field) {
+      field.value = value;
+    }
+  });
+}
+
+function fillExternalContactForm(contact) {
+  if (!contact) {
+    elements.externalContactFormTitle.textContent = "Edit external contact";
+    elements.externalContactForm.reset();
+    return;
+  }
+
+  elements.externalContactFormTitle.textContent = `Edit ${contact.name}`;
+  Object.entries(contact).forEach(([key, value]) => {
+    const field = elements.externalContactForm.elements[key];
 
     if (field) {
       field.value = value;
@@ -1443,11 +1704,14 @@ function fillEventForm(event) {
 
 function refreshPortal() {
   state.events = syncBirthdayEventsFromEmployees(state.events);
+  state.events = syncBirthdayEventsFromExternalContacts(state.events);
   state.events = syncVacationEventsFromRequests(state.events);
   renderDepartmentOptions();
   renderDocumentCategories();
+  renderExternalContactCategories();
   renderSummary();
   renderEmployees();
+  renderExternalContacts();
   renderDocuments();
   renderEvents();
   renderCompanyCalendar();
@@ -1456,6 +1720,7 @@ function refreshPortal() {
   renderContentOverview();
   renderAdminLists();
   fillEmployeeForm(getCurrentEmployee());
+  fillExternalContactForm(getCurrentExternalContact());
   fillEventForm(getCurrentEvent());
   fillDocumentForm(getCurrentDocument());
 }
@@ -1464,6 +1729,12 @@ function selectEmployee(employeeId) {
   state.currentEmployeeId = employeeId;
   renderAdminEmployees();
   fillEmployeeForm(getCurrentEmployee());
+}
+
+function selectExternalContact(contactId) {
+  state.currentExternalContactId = contactId;
+  renderAdminExternalContacts();
+  fillExternalContactForm(getCurrentExternalContact());
 }
 
 function selectDocument(documentId) {
@@ -1498,6 +1769,28 @@ function createEmployeeRecord() {
   void publishPortalData({ silent: true });
   elements.employeeForm.elements.name.focus();
   elements.employeeForm.elements.name.select();
+}
+
+function createExternalContactRecord() {
+  const contact = {
+    id: createId("external-contact"),
+    name: "New external contact",
+    company: "Company",
+    category: "Partner",
+    role: "Role",
+    owner: "Relationship owner",
+    birthday: "",
+    email: "",
+    phone: "",
+    notes: "",
+  };
+
+  state.externalContacts.unshift(contact);
+  state.currentExternalContactId = contact.id;
+  refreshPortal();
+  void publishPortalData({ silent: true });
+  elements.externalContactForm.elements.name.focus();
+  elements.externalContactForm.elements.name.select();
 }
 
 function createDocumentRecord() {
@@ -1550,6 +1843,25 @@ function saveEmployeeFromForm(event) {
   ["name", "role", "department", "location", "email", "phone", "birthday", "tone"].forEach((key) => {
     employee[key] = String(formData.get(key) || "").trim();
   });
+
+  refreshPortal();
+  void publishPortalData();
+}
+
+function saveExternalContactFromForm(event) {
+  event.preventDefault();
+
+  const contact = getCurrentExternalContact();
+
+  if (!contact) {
+    return;
+  }
+
+  const formData = new FormData(elements.externalContactForm);
+  ["name", "company", "category", "role", "owner", "email", "phone", "notes"].forEach((key) => {
+    contact[key] = String(formData.get(key) || "").trim();
+  });
+  contact.birthday = normalizeBirthdayValue(formData.get("birthday"));
 
   refreshPortal();
   void publishPortalData();
@@ -1674,6 +1986,19 @@ function deleteEmployeeRecord() {
   void publishPortalData();
 }
 
+function deleteExternalContactRecord() {
+  const contact = getCurrentExternalContact();
+
+  if (!contact || !window.confirm("Delete this external contact?")) {
+    return;
+  }
+
+  state.externalContacts = state.externalContacts.filter((item) => item.id !== state.currentExternalContactId);
+  state.currentExternalContactId = state.externalContacts[0]?.id || "";
+  refreshPortal();
+  void publishPortalData();
+}
+
 function deleteDocumentRecord() {
   if (state.documents.length <= 1 || !window.confirm("Delete this document?")) {
     return;
@@ -1715,10 +2040,12 @@ function setAdminTab(tab) {
 
 function initializeCollections() {
   state.employees = normalizeEmployeeRecords(getStoredCollection(employeeStorageKey, cloneDefaultEmployees));
+  state.externalContacts = normalizeExternalContactRecords(getStoredCollection(externalContactStorageKey, cloneDefaultExternalContacts));
   state.documents = normalizeDocumentRecords(getStoredCollection(documentStorageKey, cloneDefaultDocuments));
   state.events = normalizeEventRecords(getStoredCollection(eventStorageKey, cloneDefaultEvents));
   state.vacationRequests = normalizeVacationRequests(getStoredCollection(vacationRequestStorageKey, () => []));
   state.currentEmployeeId = state.employees[0]?.id || "";
+  state.currentExternalContactId = state.externalContacts[0]?.id || "";
   state.currentDocumentId = state.documents[0]?.id || "";
   state.currentEventId = state.events[0]?.id || "";
 }
@@ -1827,6 +2154,11 @@ elements.addDocumentButton.addEventListener("click", () => {
   createDocumentRecord();
 });
 elements.newAdminItemButton.addEventListener("click", () => {
+  if (state.adminTab === "external") {
+    createExternalContactRecord();
+    return;
+  }
+
   if (state.adminTab === "events") {
     createEventRecord();
     return;
@@ -1847,6 +2179,14 @@ elements.documentCategoryFilter.addEventListener("change", (event) => {
   state.documentCategory = event.target.value;
   renderDocuments();
 });
+elements.externalContactSearch.addEventListener("input", (event) => {
+  state.externalContactSearch = event.target.value;
+  renderExternalContacts();
+});
+elements.externalContactCategoryFilter.addEventListener("change", (event) => {
+  state.externalContactCategory = event.target.value;
+  renderExternalContacts();
+});
 elements.adminTabs.forEach((button) => {
   button.addEventListener("click", () => setAdminTab(button.dataset.adminTab));
 });
@@ -1864,6 +2204,13 @@ elements.adminEmployeeList.addEventListener("click", (event) => {
 
   if (item) {
     selectEmployee(item.dataset.employeeId);
+  }
+});
+elements.adminExternalContactList.addEventListener("click", (event) => {
+  const item = event.target.closest("[data-external-contact-id]");
+
+  if (item) {
+    selectExternalContact(item.dataset.externalContactId);
   }
 });
 elements.adminEventList.addEventListener("click", (event) => {
@@ -1894,12 +2241,15 @@ elements.adminVacationRequestList.addEventListener("click", (event) => {
   );
 });
 elements.employeeForm.addEventListener("submit", saveEmployeeFromForm);
+elements.externalContactForm.addEventListener("submit", saveExternalContactFromForm);
 elements.eventForm.addEventListener("submit", saveEventFromForm);
 elements.documentForm.addEventListener("submit", saveDocumentFromForm);
 elements.createEmployeeRecordButton.addEventListener("click", createEmployeeRecord);
+elements.createExternalContactRecordButton.addEventListener("click", createExternalContactRecord);
 elements.createEventRecordButton.addEventListener("click", createEventRecord);
 elements.createDocumentRecordButton.addEventListener("click", createDocumentRecord);
 elements.deleteEmployeeButton.addEventListener("click", deleteEmployeeRecord);
+elements.deleteExternalContactButton.addEventListener("click", deleteExternalContactRecord);
 elements.deleteEventButton.addEventListener("click", deleteEventRecord);
 elements.deleteDocumentButton.addEventListener("click", deleteDocumentRecord);
 elements.adminAuthForm.addEventListener("submit", async (event) => {

@@ -1173,6 +1173,49 @@ h2 {
   background: var(--accent-soft);
 }
 
+.external-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.external-contact-card {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.external-contact-card header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.external-contact-card h3 {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+
+.external-contact-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.external-contact-card .status-pill {
+  flex: 0 0 auto;
+}
+
+.external-note {
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
 .documents-toolbar {
   grid-template-columns: minmax(260px, 1fr) minmax(190px, 240px);
 }
@@ -1565,6 +1608,7 @@ h2 {
   .summary-grid,
   .content-score-grid,
   .employees-grid,
+  .external-contact-grid,
   .dashboard-grid,
   .year-calendar,
   .admin-grid,
@@ -1609,6 +1653,7 @@ h2 {
   .content-score-grid,
   .toolbar,
   .employees-grid,
+  .external-contact-grid,
   .dashboard-grid,
   .quick-links,
   .year-calendar,

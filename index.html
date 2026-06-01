@@ -38,6 +38,10 @@
             <span class="nav-icon" aria-hidden="true">O</span>
             <span>Org chart</span>
           </a>
+          <a class="nav-item" href="#external" data-nav-target="external">
+            <span class="nav-icon" aria-hidden="true">X</span>
+            <span>External contacts</span>
+          </a>
           <a class="nav-item" href="#documents" data-nav-target="documents">
             <span class="nav-icon" aria-hidden="true">D</span>
             <span>Documents</span>
@@ -109,6 +113,10 @@
                 <a href="#org" data-nav-target="org">
                   <strong>Org chart</strong>
                   <span>Understand reporting lines and departments</span>
+                </a>
+                <a href="#external" data-nav-target="external">
+                  <strong>External contacts</strong>
+                  <span>Partners, bankers, lawyers, accountants</span>
                 </a>
                 <a href="#documents" data-nav-target="documents">
                   <strong>Get a document</strong>
@@ -380,6 +388,62 @@
           </section>
         </section>
 
+        <section class="page-view" id="external" data-page="external" hidden>
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Internal portal</p>
+              <h1>External contacts</h1>
+            </div>
+          </header>
+
+          <section class="summary-grid" aria-label="External contacts summary">
+            <article class="metric">
+              <span>Contacts</span>
+              <strong id="externalContactTotal">0</strong>
+            </article>
+            <article class="metric">
+              <span>Birthdays</span>
+              <strong id="externalBirthdayTotal">0</strong>
+            </article>
+            <article class="metric">
+              <span>Categories</span>
+              <strong id="externalCategoryTotal">0</strong>
+            </article>
+            <article class="metric">
+              <span>Contact pending</span>
+              <strong id="externalPendingContacts">0</strong>
+            </article>
+          </section>
+
+          <section class="workspace-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Partner directory</h2>
+                <p>Bankers, lawyers, accountants, consultants, and key counterparties.</p>
+              </div>
+            </div>
+
+            <div class="toolbar documents-toolbar" aria-label="External contact filters">
+              <label class="search-field">
+                <span class="visually-hidden">Search external contacts</span>
+                <input id="externalContactSearch" type="search" placeholder="Search by name, company, role, or owner" autocomplete="off" />
+              </label>
+              <label class="select-field">
+                <span>Category</span>
+                <select id="externalContactCategoryFilter">
+                  <option value="all">All categories</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="external-contact-grid" id="externalContactGrid"></div>
+            <div class="empty-state" id="externalContactEmptyState" hidden>
+              <strong>No external contacts found</strong>
+              <span>Add key partners and contacts from the Admin section.</span>
+            </div>
+          </section>
+        </section>
+
         <section class="page-view" id="documents" data-page="documents" hidden>
           <header class="page-header">
             <div>
@@ -455,7 +519,7 @@
 
             <div class="admin-locked" id="adminLockedPanel">
               <strong>Protected management area</strong>
-              <p>Enter the admin key to manage team records, events, documents, and vacation requests.</p>
+              <p>Enter the admin key to manage team records, external contacts, events, documents, and vacation requests.</p>
             </div>
 
             <section class="content-overview" id="contentOverview" hidden>
@@ -493,6 +557,7 @@
 
             <div class="admin-tabs" role="tablist" aria-label="Admin sections">
               <button class="admin-tab is-active" type="button" data-admin-tab="team" aria-pressed="true">Team</button>
+              <button class="admin-tab" type="button" data-admin-tab="external" aria-pressed="false">External contacts</button>
               <button class="admin-tab" type="button" data-admin-tab="events" aria-pressed="false">Events</button>
               <button class="admin-tab" type="button" data-admin-tab="vacations" aria-pressed="false">Vacation requests</button>
               <button class="admin-tab" type="button" data-admin-tab="documents" aria-pressed="false">Documents</button>
@@ -551,6 +616,67 @@
                     </select>
                   </label>
                   <button class="primary-action" type="submit">Save team member</button>
+                </form>
+              </section>
+
+              <section class="admin-section" data-admin-section="external" hidden>
+                <div class="admin-list-panel">
+                  <div class="admin-list-header">
+                    <h3>External contacts</h3>
+                    <button class="secondary-action" id="createExternalContactRecordButton" type="button">New</button>
+                  </div>
+                  <div class="admin-record-list" id="adminExternalContactList"></div>
+                </div>
+
+                <form class="admin-form" id="externalContactForm">
+                  <div class="form-header">
+                    <h3 id="externalContactFormTitle">Edit external contact</h3>
+                    <button class="danger-action" id="deleteExternalContactButton" type="button">Delete</button>
+                  </div>
+                  <label>
+                    <span>Name</span>
+                    <input name="name" type="text" required />
+                  </label>
+                  <label>
+                    <span>Company</span>
+                    <input name="company" type="text" required />
+                  </label>
+                  <label>
+                    <span>Category</span>
+                    <select name="category">
+                      <option value="Bank">Bank</option>
+                      <option value="Legal">Legal</option>
+                      <option value="Accounting">Accounting</option>
+                      <option value="Partner">Partner</option>
+                      <option value="Consultant">Consultant</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Role</span>
+                    <input name="role" type="text" required />
+                  </label>
+                  <label>
+                    <span>Relationship owner</span>
+                    <input name="owner" type="text" required />
+                  </label>
+                  <label>
+                    <span>Birthday</span>
+                    <input name="birthday" type="text" placeholder="DD.MM or YYYY-MM-DD" />
+                  </label>
+                  <label>
+                    <span>Email</span>
+                    <input name="email" type="email" />
+                  </label>
+                  <label>
+                    <span>Phone</span>
+                    <input name="phone" type="text" />
+                  </label>
+                  <label class="wide-field">
+                    <span>Notes</span>
+                    <input name="notes" type="text" placeholder="Greeting owner, context, or follow-up note" />
+                  </label>
+                  <button class="primary-action" type="submit">Save external contact</button>
                 </form>
               </section>
 

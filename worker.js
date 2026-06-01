@@ -124,12 +124,28 @@ function cleanEvent(item, index) {
   return {
     id: stringValue(item?.id, `event-${index + 1}`),
     employeeId: stringValue(item?.employeeId, ""),
+    externalContactId: stringValue(item?.externalContactId, ""),
     requestId: stringValue(item?.requestId, ""),
     source: stringValue(item?.source, ""),
     type: stringValue(item?.type, "document"),
     title: stringValue(item?.title, "New event"),
     date: stringValue(item?.date, new Date().toISOString().slice(0, 10)),
     meta: stringValue(item?.meta, "Details"),
+  };
+}
+
+function cleanExternalContact(item, index) {
+  return {
+    id: stringValue(item?.id, `external-contact-${index + 1}`),
+    name: stringValue(item?.name, "New external contact"),
+    company: stringValue(item?.company, "Company"),
+    category: stringValue(item?.category, "Partner"),
+    role: stringValue(item?.role, "Role"),
+    owner: stringValue(item?.owner, "Relationship owner"),
+    birthday: stringValue(item?.birthday, ""),
+    email: stringValue(item?.email, ""),
+    phone: stringValue(item?.phone, ""),
+    notes: stringValue(item?.notes, ""),
   };
 }
 
@@ -151,6 +167,7 @@ function cleanVacationRequest(item, index) {
 function cleanPortalData(data) {
   return {
     employees: Array.isArray(data?.employees) ? data.employees.map(cleanEmployee) : [],
+    externalContacts: Array.isArray(data?.externalContacts) ? data.externalContacts.map(cleanExternalContact) : [],
     documents: Array.isArray(data?.documents) ? data.documents.map(cleanDocument) : [],
     events: Array.isArray(data?.events) ? data.events.map(cleanEvent) : [],
     vacationRequests: Array.isArray(data?.vacationRequests) ? data.vacationRequests.map(cleanVacationRequest) : [],
