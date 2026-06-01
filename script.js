@@ -1175,6 +1175,14 @@ function employeeContactMarkup(employee) {
   `;
 }
 
+function employeeBirthdayMarkup(employee) {
+  if (!isValidBirthday(employee.birthday)) {
+    return '<span class="subtle">Not set</span>';
+  }
+
+  return `<span class="birthday-cell">${formatDate(employee.birthday)}</span>`;
+}
+
 function renderTable(filteredEmployees) {
   elements.tableBody.innerHTML = filteredEmployees
     .map(
@@ -1184,6 +1192,7 @@ function renderTable(filteredEmployees) {
           <td><strong>${escapeHtml(employee.role)}</strong></td>
           <td>${escapeHtml(employee.department)}</td>
           <td>${employeeContactMarkup(employee)}</td>
+          <td>${employeeBirthdayMarkup(employee)}</td>
         </tr>
       `,
     )
