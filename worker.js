@@ -535,6 +535,10 @@ export default {
       return handlePortalLogout();
     }
 
+    if (url.pathname === "/api/radar-items" && isAuthorized(request, env)) {
+      return handleRadarItems(request, env);
+    }
+
     const isAllowed = await hasPortalAccess(request, env);
 
     if (!isAllowed) {
