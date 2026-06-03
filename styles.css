@@ -32,7 +32,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -1173,6 +1174,26 @@ h2 {
   background: var(--accent-soft);
 }
 
+.status-pill.critical {
+  color: #8d2418;
+  background: #ffe1dc;
+}
+
+.status-pill.high {
+  color: #7a3419;
+  background: #ffe8d8;
+}
+
+.status-pill.medium {
+  color: #1b4782;
+  background: var(--blue-soft);
+}
+
+.status-pill.background {
+  color: #52606d;
+  background: #edf2f7;
+}
+
 .external-contact-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1303,6 +1324,132 @@ h2 {
   border-color: var(--line);
   color: var(--muted);
   background: #f7f9fc;
+}
+
+.radar-toolbar {
+  grid-template-columns: minmax(260px, 1fr) minmax(150px, 180px) minmax(150px, 180px) minmax(170px, 210px);
+}
+
+.radar-feed {
+  display: grid;
+  gap: 12px;
+}
+
+.radar-card {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.radar-card[data-importance="critical"] {
+  border-left-color: #c43f2a;
+}
+
+.radar-card[data-importance="high"] {
+  border-left-color: #e0672e;
+}
+
+.radar-card[data-importance="medium"] {
+  border-left-color: #376faa;
+}
+
+.radar-card header,
+.radar-card footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.radar-card h3 {
+  margin: 6px 0 0;
+  font-size: 19px;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.radar-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.radar-card-meta span {
+  min-height: 22px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: var(--muted);
+  background: #f6f8fb;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.radar-summary {
+  margin: 0;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.radar-decision-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.radar-decision-grid div,
+.radar-typology {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fbfcfe;
+}
+
+.radar-decision-grid span,
+.radar-typology span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.radar-decision-grid strong,
+.radar-typology p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.radar-card footer {
+  padding-top: 2px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.radar-card footer span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.radar-card footer a {
+  flex: 0 0 auto;
+  color: var(--accent-dark);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.radar-card footer a:hover {
+  text-decoration: underline;
 }
 
 .admin-grid {
@@ -1486,19 +1633,31 @@ h2 {
 }
 
 .admin-form input,
-.admin-form select {
+.admin-form select,
+.admin-form textarea {
   width: 100%;
-  height: 42px;
   min-width: 0;
-  padding: 0 12px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
   color: var(--ink);
   background: #ffffff;
 }
 
+.admin-form input,
+.admin-form select {
+  height: 42px;
+  padding: 0 12px;
+}
+
+.admin-form textarea {
+  min-height: 92px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
 .admin-form input:focus,
-.admin-form select:focus {
+.admin-form select:focus,
+.admin-form textarea:focus {
   outline: 3px solid rgba(244, 91, 63, 0.16);
   border-color: var(--accent);
 }
@@ -1621,7 +1780,8 @@ h2 {
   }
 
   .toolbar,
-  .documents-toolbar {
+  .documents-toolbar,
+  .radar-toolbar {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -1664,6 +1824,19 @@ h2 {
   .admin-grid,
   .admin-section,
   .documents-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .radar-card header,
+  .radar-card footer {
+    display: grid;
+  }
+
+  .radar-card footer a {
+    justify-self: start;
+  }
+
+  .radar-decision-grid {
     grid-template-columns: 1fr;
   }
 

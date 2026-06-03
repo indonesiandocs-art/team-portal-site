@@ -92,10 +92,61 @@ const defaultEvents = [
 
 const defaultExternalContacts = [];
 
+const defaultRadarItems = [
+  {
+    id: "china-ofac-foreign-bank-guidance",
+    region: "China",
+    category: "Sanctions",
+    importance: "high",
+    signalType: "Regulatory guidance",
+    title: "OFAC усиливает давление на иностранные банки по операциям, связанным с Россией",
+    summary: "Иностранные банки должны выявлять операции, которые могут поддерживать российскую военно-промышленную базу, включая непрямые платежи через третьи страны.",
+    impact: "Платежи через Китай могут получать больше вопросов, если товар, маршрут или контрагент похожи на чувствительный российский сектор.",
+    action: "Заранее готовить полный торговый файл: контракт, инвойс, логистику, конечного пользователя, назначение товара, источник средств и санкционный скрининг.",
+    typology: "Недобросовестные компании часто вставляют третьестранные торговые фирмы или новые юрлица, чтобы скрыть реального российского конечного пользователя.",
+    bank: "",
+    jurisdiction: "China",
+    sourceTitle: "OFAC advisory for foreign financial institutions",
+    sourceUrl: "https://ofac.treasury.gov/system/files/2024-06/russia_advisory_foreign_financial_institutions_updated_20240612.pdf",
+    publishedAt: "2024-06-12",
+    status: "published",
+  },
+  {
+    id: "china-bank-document-role-hk",
+    region: "China",
+    category: "Documents",
+    importance: "medium",
+    signalType: "Bank due diligence",
+    title: "Банки могут отдельно проверять гонконгские компании, которые видны только в платежной цепочке",
+    summary: "Если HK-компания не имеет понятной коммерческой роли, она может выглядеть для банка как платежная прослойка, а не реальный участник торговли.",
+    impact: "Платеж может задержаться, если покупатель, плательщик, грузовой маршрут и получатель денег не складываются в единую экономическую историю.",
+    action: "Документировать роль HK-компании в сделке: маржу, договорную функцию, логистику, собственников и связь с поставщиком и покупателем.",
+    typology: "Недобросовестные участники используют тонкие посреднические компании, чтобы принимать деньги за одного клиента и платить поставщикам за другого.",
+    bank: "",
+    jurisdiction: "Hong Kong / China",
+    sourceTitle: "Internal compliance baseline",
+    sourceUrl: "",
+    publishedAt: new Date().toISOString().slice(0, 10),
+    status: "published",
+  },
+];
+
 const eventTypeLabels = {
   birthday: "Birthday",
   vacation: "Vacation",
   document: "Reminder",
+};
+
+const radarImportanceLabels = {
+  critical: "Critical",
+  high: "High",
+  medium: "Medium",
+  background: "Background",
+};
+
+const legacyRadarTitlesById = {
+  "china-ofac-foreign-bank-guidance": "OFAC keeps pressure on foreign banks handling Russia-linked transactions",
+  "china-bank-document-role-hk": "Banks may question Hong Kong companies that only appear in the payment chain",
 };
 
 const employeeBirthdaysById = {
@@ -123,6 +174,7 @@ const documentStorageKey = "novaGroupDocuments";
 const eventStorageKey = "novaGroupEvents";
 const externalContactStorageKey = "novaGroupExternalContacts";
 const vacationRequestStorageKey = "novaGroupVacationRequests";
+const radarStorageKey = "novaGroupRadarItems";
 const adminTokenStorageKey = "novaGroupAdminToken";
 const portalDataEndpoint = "/api/portal-data";
 const adminCheckEndpoint = "/api/admin-check";
@@ -136,15 +188,21 @@ const state = {
   documentCategory: "all",
   externalContactSearch: "",
   externalContactCategory: "all",
+  radarSearch: "",
+  radarRegion: "China",
+  radarImportance: "all",
+  radarCategory: "all",
   adminTab: "team",
   currentEmployeeId: "",
   currentExternalContactId: "",
   currentDocumentId: "",
   currentEventId: "",
+  currentRadarId: "",
   employees: [],
   externalContacts: [],
   documents: [],
   events: [],
+  radarItems: [],
   vacationRequests: [],
   adminToken: "",
   adminUnlocked: false,
@@ -201,12 +259,23 @@ const elements = {
   documentCategoryFilter: document.querySelector("#documentCategoryFilter"),
   documentGrid: document.querySelector("#documentGrid"),
   documentEmptyState: document.querySelector("#documentEmptyState"),
+  radarSearch: document.querySelector("#radarSearch"),
+  radarRegionFilter: document.querySelector("#radarRegionFilter"),
+  radarImportanceFilter: document.querySelector("#radarImportanceFilter"),
+  radarCategoryFilter: document.querySelector("#radarCategoryFilter"),
+  radarFeed: document.querySelector("#radarFeed"),
+  radarEmptyState: document.querySelector("#radarEmptyState"),
+  radarPublishedTotal: document.querySelector("#radarPublishedTotal"),
+  radarHighTotal: document.querySelector("#radarHighTotal"),
+  radarBankTotal: document.querySelector("#radarBankTotal"),
+  radarRegionTotal: document.querySelector("#radarRegionTotal"),
   adminTabs: document.querySelectorAll("[data-admin-tab]"),
   adminSections: document.querySelectorAll("[data-admin-section]"),
   adminEmployeeList: document.querySelector("#adminEmployeeList"),
   adminExternalContactList: document.querySelector("#adminExternalContactList"),
   adminEventList: document.querySelector("#adminEventList"),
   adminDocumentList: document.querySelector("#adminDocumentList"),
+  adminRadarList: document.querySelector("#adminRadarList"),
   adminAuthForm: document.querySelector("#adminAuthForm"),
   adminLockedPanel: document.querySelector("#adminLockedPanel"),
   contentOverview: document.querySelector("#contentOverview"),
@@ -214,6 +283,7 @@ const elements = {
   contentDocumentLinks: document.querySelector("#contentDocumentLinks"),
   contentPendingVacations: document.querySelector("#contentPendingVacations"),
   contentUpcomingEvents: document.querySelector("#contentUpcomingEvents"),
+  contentRadarSignals: document.querySelector("#contentRadarSignals"),
   contentTaskList: document.querySelector("#contentTaskList"),
   adminVacationRequestList: document.querySelector("#adminVacationRequestList"),
   adminTokenInput: document.querySelector("#adminTokenInput"),
@@ -234,6 +304,10 @@ const elements = {
   documentFormTitle: document.querySelector("#documentFormTitle"),
   createDocumentRecordButton: document.querySelector("#createDocumentRecordButton"),
   deleteDocumentButton: document.querySelector("#deleteDocumentButton"),
+  radarForm: document.querySelector("#radarForm"),
+  radarFormTitle: document.querySelector("#radarFormTitle"),
+  createRadarRecordButton: document.querySelector("#createRadarRecordButton"),
+  deleteRadarButton: document.querySelector("#deleteRadarButton"),
 };
 
 function initials(name) {
@@ -269,6 +343,10 @@ function cloneDefaultEvents() {
 
 function cloneDefaultExternalContacts() {
   return JSON.parse(JSON.stringify(defaultExternalContacts));
+}
+
+function cloneDefaultRadarItems() {
+  return JSON.parse(JSON.stringify(defaultRadarItems));
 }
 
 function getStoredCollection(storageKey, fallbackFactory) {
@@ -393,6 +471,7 @@ function getPortalDataPayload() {
     employees: state.employees,
     externalContacts: state.externalContacts,
     documents: state.documents,
+    radarItems: state.radarItems,
     events: state.events,
     vacationRequests: state.vacationRequests,
   };
@@ -403,6 +482,7 @@ function saveLocalPortalData() {
   saveCollection(externalContactStorageKey, state.externalContacts);
   saveCollection(documentStorageKey, state.documents);
   saveCollection(eventStorageKey, state.events);
+  saveCollection(radarStorageKey, state.radarItems);
   saveCollection(vacationRequestStorageKey, state.vacationRequests);
 }
 
@@ -561,6 +641,39 @@ function normalizeDocumentRecords(records) {
   }));
 }
 
+function normalizeRadarRecords(records) {
+  const defaultItemsById = new Map(cloneDefaultRadarItems().map((item) => [item.id, item]));
+
+  return normalizeSharedRecords(records, cloneDefaultRadarItems).map((item, index) => {
+    const importance = item.importance || "medium";
+    const status = item.status || "published";
+    const defaultItem = defaultItemsById.get(item.id);
+
+    if (defaultItem && item.title === legacyRadarTitlesById[item.id]) {
+      return defaultItem;
+    }
+
+    return {
+      id: item.id || createId(`radar-${index}`),
+      region: item.region || "China",
+      category: item.category || "Banking",
+      importance: Object.hasOwn(radarImportanceLabels, importance) ? importance : "medium",
+      signalType: item.signalType || "Bank behavior",
+      title: item.title || "New radar signal",
+      summary: item.summary || "Short signal summary",
+      impact: item.impact || "Business impact to assess",
+      action: item.action || "Recommended action to review",
+      typology: item.typology || "",
+      bank: item.bank || "",
+      jurisdiction: item.jurisdiction || "China",
+      sourceTitle: item.sourceTitle || "",
+      sourceUrl: item.sourceUrl || "",
+      publishedAt: item.publishedAt || new Date().toISOString().slice(0, 10),
+      status: ["published", "draft"].includes(status) ? status : "published",
+    };
+  });
+}
+
 function applySharedPortalData(data) {
   if (!data || typeof data !== "object") {
     return;
@@ -569,12 +682,14 @@ function applySharedPortalData(data) {
   state.employees = normalizeEmployeeRecords(data.employees);
   state.externalContacts = normalizeExternalContactRecords(data.externalContacts);
   state.documents = normalizeDocumentRecords(data.documents);
+  state.radarItems = normalizeRadarRecords(data.radarItems);
   state.events = normalizeEventRecords(data.events);
   state.vacationRequests = normalizeVacationRequests(data.vacationRequests);
   state.currentEmployeeId = state.employees[0]?.id || "";
   state.currentExternalContactId = state.externalContacts[0]?.id || "";
   state.currentDocumentId = state.documents[0]?.id || "";
   state.currentEventId = state.events[0]?.id || "";
+  state.currentRadarId = state.radarItems[0]?.id || "";
   saveLocalPortalData();
   refreshPortal();
 }
@@ -1240,12 +1355,14 @@ function renderContentOverview() {
   const linkedDocuments = state.documents.filter((documentItem) => getSafeDocumentUrl(documentItem.url)).length;
   const upcomingEvents = getSortedEvents().length;
   const pendingVacations = state.vacationRequests.filter((request) => request.status === "pending").length;
+  const publishedRadarSignals = getSortedRadarItems().length;
   const openTasks = [];
 
   elements.contentTeamCount.textContent = state.employees.length;
   elements.contentDocumentLinks.textContent = `${linkedDocuments}/${state.documents.length}`;
   elements.contentPendingVacations.textContent = pendingVacations;
   elements.contentUpcomingEvents.textContent = upcomingEvents;
+  elements.contentRadarSignals.textContent = publishedRadarSignals;
 
   if (!state.employees.length) {
     openTasks.push({ label: "Add team members", target: "team" });
@@ -1265,6 +1382,10 @@ function renderContentOverview() {
 
   if (!upcomingEvents) {
     openTasks.push({ label: "Add birthdays and vacation dates", target: "events" });
+  }
+
+  if (!publishedRadarSignals) {
+    openTasks.push({ label: "Add first payment radar signal", target: "radar" });
   }
 
   if (!openTasks.length) {
@@ -1509,6 +1630,130 @@ function renderDocuments() {
     .join("");
 }
 
+function getSortedRadarItems({ includeDrafts = false } = {}) {
+  return [...state.radarItems]
+    .filter((item) => includeDrafts || item.status === "published")
+    .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+}
+
+function renderRadarFilters() {
+  const publishedItems = getSortedRadarItems();
+  const regions = [...new Set(publishedItems.map((item) => item.region || "China"))].sort();
+  const categories = [...new Set(publishedItems.map((item) => item.category || "Banking"))].sort();
+
+  elements.radarRegionFilter.innerHTML = '<option value="all">All regions</option>';
+  regions.forEach((region) => {
+    const option = document.createElement("option");
+    option.value = region;
+    option.textContent = region;
+    elements.radarRegionFilter.append(option);
+  });
+
+  elements.radarCategoryFilter.innerHTML = '<option value="all">All categories</option>';
+  categories.forEach((category) => {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category;
+    elements.radarCategoryFilter.append(option);
+  });
+
+  if (![...elements.radarRegionFilter.options].some((option) => option.value === state.radarRegion)) {
+    state.radarRegion = regions.includes("China") ? "China" : "all";
+  }
+
+  if (![...elements.radarCategoryFilter.options].some((option) => option.value === state.radarCategory)) {
+    state.radarCategory = "all";
+  }
+
+  elements.radarRegionFilter.value = state.radarRegion;
+  elements.radarCategoryFilter.value = state.radarCategory;
+  elements.radarImportanceFilter.value = state.radarImportance;
+}
+
+function getFilteredRadarItems() {
+  const query = normalize(state.radarSearch);
+
+  return getSortedRadarItems().filter((item) => {
+    const matchesSearch = [
+      item.title,
+      item.summary,
+      item.impact,
+      item.action,
+      item.typology,
+      item.bank,
+      item.jurisdiction,
+      item.sourceTitle,
+      item.signalType,
+    ]
+      .map(normalize)
+      .some((value) => value.includes(query));
+    const matchesRegion = state.radarRegion === "all" || item.region === state.radarRegion;
+    const matchesImportance = state.radarImportance === "all" || item.importance === state.radarImportance;
+    const matchesCategory = state.radarCategory === "all" || item.category === state.radarCategory;
+
+    return matchesSearch && matchesRegion && matchesImportance && matchesCategory;
+  });
+}
+
+function radarItemMarkup(item) {
+  const sourceUrl = getSafeDocumentUrl(item.sourceUrl);
+
+  return `
+    <article class="radar-card" data-importance="${escapeHtml(item.importance)}">
+      <header>
+        <div>
+          <div class="radar-card-meta">
+            <span>${escapeHtml(item.region)}</span>
+            <span>${escapeHtml(item.category)}</span>
+            <span>${formatDate(item.publishedAt)}</span>
+          </div>
+          <h3>${escapeHtml(item.title)}</h3>
+        </div>
+        <span class="status-pill ${escapeHtml(item.importance)}">${radarImportanceLabels[item.importance] || "Medium"}</span>
+      </header>
+      <p class="radar-summary">${escapeHtml(item.summary)}</p>
+      <div class="radar-decision-grid">
+        <div>
+          <span>Impact</span>
+          <strong>${escapeHtml(item.impact)}</strong>
+        </div>
+        <div>
+          <span>Action</span>
+          <strong>${escapeHtml(item.action)}</strong>
+        </div>
+      </div>
+      ${
+        item.typology
+          ? `<div class="radar-typology">
+              <span>Typology</span>
+              <p>${escapeHtml(item.typology)}</p>
+            </div>`
+          : ""
+      }
+      <footer>
+        <span>${escapeHtml([item.signalType, item.bank, item.jurisdiction].filter(Boolean).join(" · "))}</span>
+        ${
+          sourceUrl
+            ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener">${escapeHtml(item.sourceTitle || "Source")}</a>`
+            : `<span>${escapeHtml(item.sourceTitle || "Source pending")}</span>`
+        }
+      </footer>
+    </article>
+  `;
+}
+
+function renderRadar() {
+  const publishedItems = getSortedRadarItems();
+  const filteredItems = getFilteredRadarItems();
+
+  elements.radarPublishedTotal.textContent = publishedItems.length;
+  elements.radarHighTotal.textContent = publishedItems.filter((item) => ["critical", "high"].includes(item.importance)).length;
+  elements.radarBankTotal.textContent = publishedItems.filter((item) => normalize(item.category) === "banking" || normalize(item.signalType).includes("bank")).length;
+  elements.radarRegionTotal.textContent = new Set(publishedItems.map((item) => item.region)).size;
+  elements.radarEmptyState.hidden = filteredItems.length > 0;
+  elements.radarFeed.innerHTML = filteredItems.map(radarItemMarkup).join("");
+}
+
 function getCurrentEmployee() {
   return state.employees.find((employee) => employee.id === state.currentEmployeeId);
 }
@@ -1523,6 +1768,10 @@ function getCurrentDocument() {
 
 function getCurrentEvent() {
   return state.events.find((event) => event.id === state.currentEventId);
+}
+
+function getCurrentRadarItem() {
+  return state.radarItems.find((item) => item.id === state.currentRadarId);
 }
 
 function renderAdminEmployees() {
@@ -1584,6 +1833,26 @@ function renderAdminDocuments() {
     .join("");
 }
 
+function renderAdminRadar() {
+  elements.adminRadarList.innerHTML = state.radarItems.length
+    ? getSortedRadarItems({ includeDrafts: true })
+      .map(
+        (item) => `
+          <button class="admin-record ${item.id === state.currentRadarId ? "is-active" : ""}" type="button" data-radar-id="${escapeHtml(item.id)}">
+            <strong>${escapeHtml(item.title)}</strong>
+            <span>${escapeHtml(item.region)} · ${radarImportanceLabels[item.importance] || "Medium"} · ${escapeHtml(item.status)}</span>
+          </button>
+        `,
+      )
+      .join("")
+    : `
+      <div class="empty-panel">
+        <strong>No radar signals</strong>
+        <span>Add China banking, sanctions, typology, and payment-route signals.</span>
+      </div>
+    `;
+}
+
 function vacationRequestMarkup(request) {
   const isPending = request.status === "pending";
 
@@ -1637,6 +1906,7 @@ function renderAdminLists() {
   renderAdminExternalContacts();
   renderAdminEvents();
   renderAdminDocuments();
+  renderAdminRadar();
   renderAdminVacationRequests();
 }
 
@@ -1702,6 +1972,23 @@ function fillEventForm(event) {
   });
 }
 
+function fillRadarForm(item) {
+  if (!item) {
+    elements.radarFormTitle.textContent = "Edit radar signal";
+    elements.radarForm.reset();
+    return;
+  }
+
+  elements.radarFormTitle.textContent = `Edit ${item.title}`;
+  Object.entries(item).forEach(([key, value]) => {
+    const field = elements.radarForm.elements[key];
+
+    if (field) {
+      field.value = value;
+    }
+  });
+}
+
 function refreshPortal() {
   state.events = syncBirthdayEventsFromEmployees(state.events);
   state.events = syncBirthdayEventsFromExternalContacts(state.events);
@@ -1709,10 +1996,12 @@ function refreshPortal() {
   renderDepartmentOptions();
   renderDocumentCategories();
   renderExternalContactCategories();
+  renderRadarFilters();
   renderSummary();
   renderEmployees();
   renderExternalContacts();
   renderDocuments();
+  renderRadar();
   renderEvents();
   renderCompanyCalendar();
   renderOrgChart();
@@ -1723,6 +2012,7 @@ function refreshPortal() {
   fillExternalContactForm(getCurrentExternalContact());
   fillEventForm(getCurrentEvent());
   fillDocumentForm(getCurrentDocument());
+  fillRadarForm(getCurrentRadarItem());
 }
 
 function selectEmployee(employeeId) {
@@ -1747,6 +2037,12 @@ function selectEvent(eventId) {
   state.currentEventId = eventId;
   renderAdminEvents();
   fillEventForm(getCurrentEvent());
+}
+
+function selectRadarItem(radarId) {
+  state.currentRadarId = radarId;
+  renderAdminRadar();
+  fillRadarForm(getCurrentRadarItem());
 }
 
 function createEmployeeRecord() {
@@ -1830,6 +2126,34 @@ function createEventRecord() {
   elements.eventForm.elements.title.select();
 }
 
+function createRadarRecord() {
+  const item = {
+    id: createId("radar"),
+    region: "China",
+    category: "Banking",
+    importance: "medium",
+    signalType: "Bank behavior",
+    title: "New China payment signal",
+    summary: "One-sentence signal summary",
+    impact: "Business impact to assess",
+    action: "Recommended action to review",
+    typology: "",
+    bank: "",
+    jurisdiction: "China",
+    sourceTitle: "",
+    sourceUrl: "",
+    publishedAt: new Date().toISOString().slice(0, 10),
+    status: "draft",
+  };
+
+  state.radarItems.unshift(item);
+  state.currentRadarId = item.id;
+  refreshPortal();
+  void publishPortalData({ silent: true });
+  elements.radarForm.elements.title.focus();
+  elements.radarForm.elements.title.select();
+}
+
 function saveEmployeeFromForm(event) {
   event.preventDefault();
 
@@ -1897,6 +2221,40 @@ function saveDocumentFromForm(event) {
   const formData = new FormData(elements.documentForm);
   ["title", "category", "owner", "updatedAt", "type", "status", "url"].forEach((key) => {
     documentItem[key] = String(formData.get(key) || "").trim();
+  });
+
+  refreshPortal();
+  void publishPortalData();
+}
+
+function saveRadarFromForm(event) {
+  event.preventDefault();
+
+  const item = getCurrentRadarItem();
+
+  if (!item) {
+    return;
+  }
+
+  const formData = new FormData(elements.radarForm);
+  [
+    "title",
+    "region",
+    "category",
+    "importance",
+    "signalType",
+    "bank",
+    "jurisdiction",
+    "publishedAt",
+    "status",
+    "summary",
+    "impact",
+    "action",
+    "typology",
+    "sourceTitle",
+    "sourceUrl",
+  ].forEach((key) => {
+    item[key] = String(formData.get(key) || "").trim();
   });
 
   refreshPortal();
@@ -2021,6 +2379,19 @@ function deleteEventRecord() {
   void publishPortalData();
 }
 
+function deleteRadarRecord() {
+  const item = getCurrentRadarItem();
+
+  if (!item || !window.confirm("Delete this radar signal?")) {
+    return;
+  }
+
+  state.radarItems = state.radarItems.filter((radarItem) => radarItem.id !== state.currentRadarId);
+  state.currentRadarId = state.radarItems[0]?.id || "";
+  refreshPortal();
+  void publishPortalData();
+}
+
 function setAdminTab(tab) {
   state.adminTab = tab;
   elements.newAdminItemButton.hidden = !state.adminUnlocked || tab === "vacations";
@@ -2042,12 +2413,14 @@ function initializeCollections() {
   state.employees = normalizeEmployeeRecords(getStoredCollection(employeeStorageKey, cloneDefaultEmployees));
   state.externalContacts = normalizeExternalContactRecords(getStoredCollection(externalContactStorageKey, cloneDefaultExternalContacts));
   state.documents = normalizeDocumentRecords(getStoredCollection(documentStorageKey, cloneDefaultDocuments));
+  state.radarItems = normalizeRadarRecords(getStoredCollection(radarStorageKey, cloneDefaultRadarItems));
   state.events = normalizeEventRecords(getStoredCollection(eventStorageKey, cloneDefaultEvents));
   state.vacationRequests = normalizeVacationRequests(getStoredCollection(vacationRequestStorageKey, () => []));
   state.currentEmployeeId = state.employees[0]?.id || "";
   state.currentExternalContactId = state.externalContacts[0]?.id || "";
   state.currentDocumentId = state.documents[0]?.id || "";
   state.currentEventId = state.events[0]?.id || "";
+  state.currentRadarId = state.radarItems[0]?.id || "";
 }
 
 function setView(view) {
@@ -2125,6 +2498,10 @@ document.addEventListener("click", (event) => {
   if (link.dataset.focusVacationRequest) {
     focusVacationRequestForm();
   }
+
+  if (link.dataset.adminTabTarget) {
+    setAdminTab(link.dataset.adminTabTarget);
+  }
 });
 
 window.addEventListener("hashchange", () => {
@@ -2169,6 +2546,11 @@ elements.newAdminItemButton.addEventListener("click", () => {
     return;
   }
 
+  if (state.adminTab === "radar") {
+    createRadarRecord();
+    return;
+  }
+
   createEmployeeRecord();
 });
 elements.documentSearch.addEventListener("input", (event) => {
@@ -2186,6 +2568,22 @@ elements.externalContactSearch.addEventListener("input", (event) => {
 elements.externalContactCategoryFilter.addEventListener("change", (event) => {
   state.externalContactCategory = event.target.value;
   renderExternalContacts();
+});
+elements.radarSearch.addEventListener("input", (event) => {
+  state.radarSearch = event.target.value;
+  renderRadar();
+});
+elements.radarRegionFilter.addEventListener("change", (event) => {
+  state.radarRegion = event.target.value;
+  renderRadar();
+});
+elements.radarImportanceFilter.addEventListener("change", (event) => {
+  state.radarImportance = event.target.value;
+  renderRadar();
+});
+elements.radarCategoryFilter.addEventListener("change", (event) => {
+  state.radarCategory = event.target.value;
+  renderRadar();
 });
 elements.adminTabs.forEach((button) => {
   button.addEventListener("click", () => setAdminTab(button.dataset.adminTab));
@@ -2227,6 +2625,13 @@ elements.adminDocumentList.addEventListener("click", (event) => {
     selectDocument(item.dataset.documentId);
   }
 });
+elements.adminRadarList.addEventListener("click", (event) => {
+  const item = event.target.closest("[data-radar-id]");
+
+  if (item) {
+    selectRadarItem(item.dataset.radarId);
+  }
+});
 elements.adminVacationRequestList.addEventListener("click", (event) => {
   const actionButton = event.target.closest("[data-vacation-action]");
   const requestCard = event.target.closest("[data-vacation-request-id]");
@@ -2244,14 +2649,17 @@ elements.employeeForm.addEventListener("submit", saveEmployeeFromForm);
 elements.externalContactForm.addEventListener("submit", saveExternalContactFromForm);
 elements.eventForm.addEventListener("submit", saveEventFromForm);
 elements.documentForm.addEventListener("submit", saveDocumentFromForm);
+elements.radarForm.addEventListener("submit", saveRadarFromForm);
 elements.createEmployeeRecordButton.addEventListener("click", createEmployeeRecord);
 elements.createExternalContactRecordButton.addEventListener("click", createExternalContactRecord);
 elements.createEventRecordButton.addEventListener("click", createEventRecord);
 elements.createDocumentRecordButton.addEventListener("click", createDocumentRecord);
+elements.createRadarRecordButton.addEventListener("click", createRadarRecord);
 elements.deleteEmployeeButton.addEventListener("click", deleteEmployeeRecord);
 elements.deleteExternalContactButton.addEventListener("click", deleteExternalContactRecord);
 elements.deleteEventButton.addEventListener("click", deleteEventRecord);
 elements.deleteDocumentButton.addEventListener("click", deleteDocumentRecord);
+elements.deleteRadarButton.addEventListener("click", deleteRadarRecord);
 elements.adminAuthForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   state.adminToken = elements.adminTokenInput.value.trim();

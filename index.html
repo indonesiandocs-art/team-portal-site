@@ -46,6 +46,10 @@
             <span class="nav-icon" aria-hidden="true">D</span>
             <span>Documents</span>
           </a>
+          <a class="nav-item" href="#radar" data-nav-target="radar">
+            <span class="nav-icon" aria-hidden="true">R</span>
+            <span>Payment radar</span>
+          </a>
           <a class="nav-item" href="#admin" data-nav-target="admin">
             <span class="nav-icon" aria-hidden="true">A</span>
             <span>Admin</span>
@@ -121,6 +125,10 @@
                 <a href="#documents" data-nav-target="documents">
                   <strong>Get a document</strong>
                   <span>Templates, policies, and compliance files</span>
+                </a>
+                <a href="#radar" data-nav-target="radar">
+                  <strong>Payment radar</strong>
+                  <span>China banking signals, risk patterns, and actions</span>
                 </a>
                 <a href="#admin" data-nav-target="admin">
                   <strong>Manage content</strong>
@@ -485,6 +493,78 @@
           </section>
         </section>
 
+        <section class="page-view" id="radar" data-page="radar" hidden>
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Compliance radar</p>
+              <h1>Payment risk signals</h1>
+            </div>
+            <a class="primary-action" href="#admin" data-nav-target="admin" data-admin-tab-target="radar">
+              <span aria-hidden="true">+</span>
+              Add signal
+            </a>
+          </header>
+
+          <section class="summary-grid" aria-label="Payment radar summary">
+            <article class="metric">
+              <span>Published</span>
+              <strong id="radarPublishedTotal">0</strong>
+            </article>
+            <article class="metric">
+              <span>High risk</span>
+              <strong id="radarHighTotal">0</strong>
+            </article>
+            <article class="metric">
+              <span>Bank signals</span>
+              <strong id="radarBankTotal">0</strong>
+            </article>
+            <article class="metric">
+              <span>Regions</span>
+              <strong id="radarRegionTotal">0</strong>
+            </article>
+          </section>
+
+          <section class="workspace-panel">
+            <div class="panel-header">
+              <div>
+                <h2>China payment radar</h2>
+                <p>Short signals that affect banks, routes, documents, and sanctions-risk patterns.</p>
+              </div>
+            </div>
+
+            <div class="toolbar radar-toolbar" aria-label="Payment radar filters">
+              <label class="search-field">
+                <span class="visually-hidden">Search radar signals</span>
+                <input id="radarSearch" type="search" placeholder="Search by bank, risk, action, or source" autocomplete="off" />
+              </label>
+              <label class="select-field">
+                <span>Region</span>
+                <select id="radarRegionFilter"></select>
+              </label>
+              <label class="select-field">
+                <span>Importance</span>
+                <select id="radarImportanceFilter">
+                  <option value="all">All levels</option>
+                  <option value="critical">Critical</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="background">Background</option>
+                </select>
+              </label>
+              <label class="select-field">
+                <span>Category</span>
+                <select id="radarCategoryFilter"></select>
+              </label>
+            </div>
+
+            <div class="radar-feed" id="radarFeed"></div>
+            <div class="empty-state" id="radarEmptyState" hidden>
+              <strong>No radar signals found</strong>
+              <span>Try another filter or add the first China signal in Admin.</span>
+            </div>
+          </section>
+        </section>
+
         <section class="page-view" id="admin" data-page="admin" hidden>
           <header class="page-header">
             <div>
@@ -547,6 +627,10 @@
                   <span>Upcoming dates</span>
                   <strong id="contentUpcomingEvents">0</strong>
                 </article>
+                <article class="content-stat">
+                  <span>Radar signals</span>
+                  <strong id="contentRadarSignals">0</strong>
+                </article>
               </div>
 
               <div class="content-next">
@@ -561,6 +645,7 @@
               <button class="admin-tab" type="button" data-admin-tab="events" aria-pressed="false">Events</button>
               <button class="admin-tab" type="button" data-admin-tab="vacations" aria-pressed="false">Vacation requests</button>
               <button class="admin-tab" type="button" data-admin-tab="documents" aria-pressed="false">Documents</button>
+              <button class="admin-tab" type="button" data-admin-tab="radar" aria-pressed="false">Payment radar</button>
             </div>
 
             <div class="admin-workspace">
@@ -761,6 +846,104 @@
                     <input name="url" type="url" placeholder="https://..." />
                   </label>
                   <button class="primary-action" type="submit">Save document</button>
+                </form>
+              </section>
+
+              <section class="admin-section" data-admin-section="radar" hidden>
+                <div class="admin-list-panel">
+                  <div class="admin-list-header">
+                    <h3>Radar signals</h3>
+                    <button class="secondary-action" id="createRadarRecordButton" type="button">New</button>
+                  </div>
+                  <div class="admin-record-list" id="adminRadarList"></div>
+                </div>
+
+                <form class="admin-form" id="radarForm">
+                  <div class="form-header">
+                    <h3 id="radarFormTitle">Edit radar signal</h3>
+                    <button class="danger-action" id="deleteRadarButton" type="button">Delete</button>
+                  </div>
+                  <label>
+                    <span>Title</span>
+                    <input name="title" type="text" required />
+                  </label>
+                  <label>
+                    <span>Region</span>
+                    <select name="region">
+                      <option value="China">China</option>
+                      <option value="Middle East">Middle East</option>
+                      <option value="Indonesia">Indonesia</option>
+                      <option value="Malaysia">Malaysia</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Importance</span>
+                    <select name="importance">
+                      <option value="critical">Critical</option>
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="background">Background</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Category</span>
+                    <select name="category">
+                      <option value="Banking">Banking</option>
+                      <option value="Sanctions">Sanctions</option>
+                      <option value="Typology">Typology</option>
+                      <option value="Documents">Documents</option>
+                      <option value="Payment route">Payment route</option>
+                      <option value="Platform">Platform</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Signal type</span>
+                    <input name="signalType" type="text" required />
+                  </label>
+                  <label>
+                    <span>Bank</span>
+                    <input name="bank" type="text" placeholder="Bank of China, ICBC, regional bank..." />
+                  </label>
+                  <label>
+                    <span>Jurisdiction</span>
+                    <input name="jurisdiction" type="text" required />
+                  </label>
+                  <label>
+                    <span>Published</span>
+                    <input name="publishedAt" type="date" required />
+                  </label>
+                  <label>
+                    <span>Status</span>
+                    <select name="status">
+                      <option value="published">Published</option>
+                      <option value="draft">Draft</option>
+                    </select>
+                  </label>
+                  <label class="wide-field">
+                    <span>Signal summary</span>
+                    <textarea name="summary" rows="3" required></textarea>
+                  </label>
+                  <label class="wide-field">
+                    <span>Business impact</span>
+                    <textarea name="impact" rows="3" required></textarea>
+                  </label>
+                  <label class="wide-field">
+                    <span>Recommended action</span>
+                    <textarea name="action" rows="3" required></textarea>
+                  </label>
+                  <label class="wide-field">
+                    <span>Typology note</span>
+                    <textarea name="typology" rows="3" placeholder="How bad actors try to bypass bank requirements, and why it matters"></textarea>
+                  </label>
+                  <label>
+                    <span>Source title</span>
+                    <input name="sourceTitle" type="text" />
+                  </label>
+                  <label class="wide-field">
+                    <span>Source URL</span>
+                    <input name="sourceUrl" type="url" placeholder="https://..." />
+                  </label>
+                  <button class="primary-action" type="submit">Save radar signal</button>
                 </form>
               </section>
 

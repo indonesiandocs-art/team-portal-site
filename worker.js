@@ -120,6 +120,30 @@ function cleanDocument(item, index) {
   };
 }
 
+function cleanRadarItem(item, index) {
+  const importance = stringValue(item?.importance, "medium");
+  const status = stringValue(item?.status, "published");
+
+  return {
+    id: stringValue(item?.id, `radar-${index + 1}`),
+    region: stringValue(item?.region, "China"),
+    category: stringValue(item?.category, "Banking"),
+    importance: ["critical", "high", "medium", "background"].includes(importance) ? importance : "medium",
+    signalType: stringValue(item?.signalType, "Bank behavior"),
+    title: stringValue(item?.title, "New radar signal"),
+    summary: stringValue(item?.summary, "Short signal summary"),
+    impact: stringValue(item?.impact, "Business impact to assess"),
+    action: stringValue(item?.action, "Recommended action to review"),
+    typology: stringValue(item?.typology, ""),
+    bank: stringValue(item?.bank, ""),
+    jurisdiction: stringValue(item?.jurisdiction, "China"),
+    sourceTitle: stringValue(item?.sourceTitle, ""),
+    sourceUrl: stringValue(item?.sourceUrl, ""),
+    publishedAt: stringValue(item?.publishedAt, new Date().toISOString().slice(0, 10)),
+    status: ["published", "draft"].includes(status) ? status : "published",
+  };
+}
+
 function cleanEvent(item, index) {
   return {
     id: stringValue(item?.id, `event-${index + 1}`),
@@ -169,6 +193,7 @@ function cleanPortalData(data) {
     employees: Array.isArray(data?.employees) ? data.employees.map(cleanEmployee) : [],
     externalContacts: Array.isArray(data?.externalContacts) ? data.externalContacts.map(cleanExternalContact) : [],
     documents: Array.isArray(data?.documents) ? data.documents.map(cleanDocument) : [],
+    radarItems: Array.isArray(data?.radarItems) ? data.radarItems.map(cleanRadarItem) : [],
     events: Array.isArray(data?.events) ? data.events.map(cleanEvent) : [],
     vacationRequests: Array.isArray(data?.vacationRequests) ? data.vacationRequests.map(cleanVacationRequest) : [],
     updatedAt: new Date().toISOString(),
@@ -251,6 +276,47 @@ async function handleVacationRequest(request, env) {
   } catch (error) {
     return jsonResponse({ error: error.message || "Could not submit vacation request" }, 400);
   }
+}
+
+async function handleRadarItems(request, env) {
+  if (!env.PORTAL_KV) {
+    return jsonResponse({ error: "Shared storage is not configured" }, 503);
+  }
+
+  const data = cleanPortalData((await env.PORTAL_KV.get(DATA_KEY, "json")) || {});
+
+  if (request.method === "GET") {
+    const publishedItems = data.radarItems.filter((item) => item.status === "published");
+    return jsonResponse({ radarItems: publishedItems });
+  }
+
+  if (!isAuthorized(request, env)) {
+    return unauthorized();
+  }
+
+  if (request.method === "POST") {
+    try {
+      const body = await readJsonBody(request);
+      const incomingItems = Array.isArray(body?.items) ? body.items : [body];
+      const cleanedItems = incomingItems.map(cleanRadarItem);
+      const byId = new Map(data.radarItems.map((item) => [item.id, item]));
+
+      cleanedItems.forEach((item) => {
+        byId.set(item.id, item);
+      });
+
+      data.radarItems = [...byId.values()]
+        .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+        .slice(0, 250);
+
+      await env.PORTAL_KV.put(DATA_KEY, JSON.stringify(cleanPortalData(data)));
+      return jsonResponse({ ok: true, radarItems: data.radarItems });
+    } catch (error) {
+      return jsonResponse({ error: error.message || "Could not save radar items" }, 400);
+    }
+  }
+
+  return jsonResponse({ error: "Method not allowed" }, 405);
 }
 
 function loginPage() {
@@ -493,6 +559,10 @@ export default {
 
     if (url.pathname === "/api/vacation-request") {
       return handleVacationRequest(request, env);
+    }
+
+    if (url.pathname === "/api/radar-items") {
+      return handleRadarItems(request, env);
     }
 
     return env.ASSETS.fetch(request);
