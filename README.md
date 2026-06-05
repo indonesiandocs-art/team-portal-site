@@ -7,7 +7,7 @@ Frontend and Cloudflare Worker backend for the Nova Group internal team portal.
 - Home dashboard with quick links, metrics, upcoming events, vacation requests, and key documents.
 - Team directory with search, department filters, table view, and card view.
 - Documents section with search, category filters, and document cards.
-- Payment Radar section for China payment-risk signals, bank behavior, sanctions typologies, and recommended actions.
+- Payment Radar section for weekly China payment-risk signals, bank behavior, sanctions typologies, and recommended actions.
 - Events section with birthdays, approved vacations, reminders, and a simple vacation request form.
 - Admin section for editing team records, event records, document records, payment radar signals, and vacation approvals.
 - Shared Cloudflare KV storage through the `/api/portal-data` Worker API.
@@ -34,7 +34,7 @@ Do not store access codes or admin tokens in the repository. Set or rotate them 
 
 ## Payment Radar automation
 
-The Payment Radar module is prepared for daily automated publishing.
+The Payment Radar module is prepared for weekly automated publishing.
 
 - `payment-radar-automation.md` defines the China-only source strategy, filtering rules, and JSON output shape.
 - `publish-radar-items.mjs` publishes generated radar JSON to `/api/radar-items`.
@@ -47,4 +47,4 @@ Publish a prepared JSON file:
 PAYMENT_RADAR_ADMIN_TOKEN=... node publish-radar-items.mjs radar-items.json https://team.drnova.org
 ```
 
-Only publish signals with a practical payment, bank, document, route, sanctions, or typology impact. Most days should produce 0-2 items, not a general news feed.
+Only publish signals with a practical payment, bank, document, route, sanctions, or typology impact. Most weeks should produce 0-3 items, not a general news feed.

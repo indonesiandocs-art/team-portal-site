@@ -1,6 +1,6 @@
 # Payment Radar Automation
 
-Daily scope: China only.
+Weekly scope: China only.
 
 Goal: publish only operationally useful payment-risk signals for a trading company that uses Chinese banks and wants to avoid resembling payment agents, sanctions-evasion intermediaries, or fake-trade structures.
 
@@ -52,7 +52,7 @@ Chinese:
 
 ## Output Shape
 
-Write 0-5 radar items per day. Most days should be 0-2.
+Write 0-5 radar items per week. Most weeks should be 0-3.
 
 Each item must fit this JSON schema:
 
@@ -87,4 +87,4 @@ Save generated items as JSON, then publish with:
 PAYMENT_RADAR_ADMIN_TOKEN=... node publish-radar-items.mjs <items-json-file> https://team.drnova.org
 ```
 
-If no item passes the publish criteria, do not publish anything. Report "No publishable China payment-risk signals today."
+If no item passes the publish criteria, do not publish anything. Report "No publishable China payment-risk signals this week."
