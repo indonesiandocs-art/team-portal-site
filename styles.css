@@ -690,6 +690,14 @@ h2 {
   background: var(--calendar-color);
 }
 
+.calendar-day.has-public-holiday {
+  color: #ffffff;
+}
+
+.calendar-day.has-gift-holiday {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--calendar-color), #ffffff 38%);
+}
+
 .calendar-day small {
   position: absolute;
   right: 3px;

@@ -135,6 +135,8 @@ const eventTypeLabels = {
   birthday: "Birthday",
   vacation: "Vacation",
   document: "Reminder",
+  "public-holiday": "Public holidays",
+  "gift-holiday": "Gift holidays",
 };
 
 const radarImportanceLabels = {
@@ -179,6 +181,7 @@ const adminTokenStorageKey = "novaGroupAdminToken";
 const portalDataEndpoint = "/api/portal-data";
 const adminCheckEndpoint = "/api/admin-check";
 const vacationRequestEndpoint = "/api/vacation-request";
+const holidayCalendarEndpoint = "/assets/holiday-calendar.json";
 
 const state = {
   search: "",
@@ -202,6 +205,7 @@ const state = {
   externalContacts: [],
   documents: [],
   events: [],
+  holidayItems: [],
   radarItems: [],
   vacationRequests: [],
   adminToken: "",
@@ -674,6 +678,30 @@ function normalizeRadarRecords(records) {
   });
 }
 
+function normalizeHolidayRecords(records) {
+  if (!Array.isArray(records)) {
+    return [];
+  }
+
+  return records
+    .filter((item) => item && parseLocalDate(item.date))
+    .map((item, index) => {
+      const countryCode = String(item.countryCode || "INT").toUpperCase();
+      const countryName = String(item.countryName || countryCode).trim();
+      const holidayName = String(item.name || "Public holiday").trim();
+
+      return {
+        id: item.id || createId(`holiday-${countryCode.toLowerCase()}-${index}`),
+        countryCode,
+        countryName,
+        date: item.date,
+        name: holidayName,
+        isNonWorking: item.isNonWorking !== false,
+        isGiftHoliday: item.isGiftHoliday === true,
+      };
+    });
+}
+
 function applySharedPortalData(data) {
   if (!data || typeof data !== "object") {
     return;
@@ -728,6 +756,26 @@ async function loadSharedPortalData() {
   } catch {
     state.sharedBackendAvailable = false;
     setAdminStatus("Shared storage unavailable, using this browser", "error");
+  }
+}
+
+async function loadHolidayCalendar() {
+  if (!window.fetch || window.location.protocol === "file:") {
+    state.holidayItems = [];
+    return;
+  }
+
+  try {
+    const response = await fetch(holidayCalendarEndpoint, { cache: "no-store" });
+
+    if (!response.ok) {
+      throw new Error(`Holiday calendar returned ${response.status}`);
+    }
+
+    const payload = await response.json();
+    state.holidayItems = normalizeHolidayRecords(payload.holidays);
+  } catch {
+    state.holidayItems = [];
   }
 }
 
@@ -990,6 +1038,19 @@ function getCalendarItems() {
       source: "request",
     }));
 
+  const holidayItems = state.holidayItems.map((holiday) => ({
+    id: holiday.id,
+    type: holiday.isGiftHoliday ? "gift-holiday" : "public-holiday",
+    title: `${holiday.countryName}: ${holiday.name}`,
+    label: holiday.isGiftHoliday ? "Gift holidays" : "Public holidays",
+    startDate: holiday.date,
+    endDate: holiday.date,
+    meta: holiday.isGiftHoliday ? "Key relationship date" : "Official non-working day",
+    colorKey: holiday.isGiftHoliday ? "gift-holiday" : "public-holiday",
+    source: "holiday",
+    countryCode: holiday.countryCode,
+  }));
+
   const requestEventIds = new Set(approvedRequests.map((request) => `vacation-${request.id}`));
   const eventItems = state.events
     .filter((event) => event.date && event.source !== "vacation-request" && !requestEventIds.has(event.id))
@@ -1009,14 +1070,42 @@ function getCalendarItems() {
       source: "event",
     }));
 
-  return [...approvedRequests, ...eventItems].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+  return [...approvedRequests, ...holidayItems, ...eventItems].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 }
 
 function calendarItemTouchesDay(item, dateKey) {
   return item.startDate <= dateKey && item.endDate >= dateKey;
 }
 
+function getCalendarItemPriority(item) {
+  if (item.type === "gift-holiday") {
+    return 0;
+  }
+
+  if (item.type === "vacation") {
+    return 1;
+  }
+
+  if (item.type === "public-holiday") {
+    return 2;
+  }
+
+  if (item.type === "birthday") {
+    return 3;
+  }
+
+  return 4;
+}
+
 function getCalendarColor(item, vacationIndexByKey) {
+  if (item.type === "gift-holiday") {
+    return "#f45b3f";
+  }
+
+  if (item.type === "public-holiday") {
+    return "#6f7d89";
+  }
+
   if (item.type === "birthday") {
     return "#c53b73";
   }
@@ -1100,8 +1189,16 @@ function renderCompanyCalendar() {
       const days = Array.from({ length: daysInMonth }, (_, dayIndex) => {
         const date = new Date(currentYear, monthIndex, dayIndex + 1);
         const dateKey = toDateKey(date);
-        const dayItems = calendarItems.filter((item) => calendarItemTouchesDay(item, dateKey));
+        const dayItems = calendarItems
+          .filter((item) => calendarItemTouchesDay(item, dateKey))
+          .sort((a, b) => getCalendarItemPriority(a) - getCalendarItemPriority(b));
         const firstItem = dayItems[0];
+        const dayClasses = [
+          "calendar-day",
+          dayItems.length ? "has-calendar-item" : "",
+          dayItems.some((item) => item.type === "public-holiday") ? "has-public-holiday" : "",
+          dayItems.some((item) => item.type === "gift-holiday") ? "has-gift-holiday" : "",
+        ].filter(Boolean).join(" ");
         const title = dayItems
           .map((item) => {
             const dateRange = item.startDate === item.endDate ? formatDate(item.startDate) : formatDateRange(item.startDate, item.endDate);
@@ -1111,7 +1208,7 @@ function renderCompanyCalendar() {
         const color = firstItem ? getCalendarColor(firstItem, vacationIndexByKey) : "";
 
         return `
-          <span class="calendar-day ${dayItems.length ? "has-calendar-item" : ""}" style="${color ? `--calendar-color: ${color}` : ""}" title="${escapeHtml(title)}">
+          <span class="${dayClasses}" style="${color ? `--calendar-color: ${color}` : ""}" title="${escapeHtml(title)}">
             <span>${dayIndex + 1}</span>
             ${dayItems.length > 1 ? `<small>${dayItems.length}</small>` : ""}
           </span>
@@ -2672,6 +2769,7 @@ async function initializePortal() {
   state.adminUnlocked = false;
   elements.adminTokenInput.value = state.adminToken;
   initializeCollections();
+  await loadHolidayCalendar();
   setAdminTab(state.adminTab);
   renderAdminGate();
   refreshPortal();

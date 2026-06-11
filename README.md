@@ -9,6 +9,7 @@ Frontend and Cloudflare Worker backend for the Nova Group internal team portal.
 - Documents section with search, category filters, and document cards.
 - Payment Radar section for weekly China payment-risk signals, bank behavior, sanctions typologies, and recommended actions.
 - Events section with birthdays, approved vacations, reminders, and a simple vacation request form.
+- Company calendar holiday layer with public non-working days and key relationship gift dates.
 - Admin section for editing team records, event records, document records, payment radar signals, and vacation approvals.
 - Shared Cloudflare KV storage through the `/api/portal-data` Worker API.
 - Automation-ready `/api/radar-items` Worker API for publishing radar signals with the admin token.
@@ -31,6 +32,13 @@ The Worker uses:
 - `ADMIN_TOKEN`: Worker secret used by the Admin page to publish changes.
 
 Do not store access codes or admin tokens in the repository. Set or rotate them through GitHub Actions secrets and Cloudflare Worker secrets.
+
+## Holiday calendar
+
+Holiday data is stored in `assets/holiday-calendar.json` and displayed inside the Company calendar.
+Keep all names in English. Each record can be marked as a normal public non-working day or as a key relationship gift date.
+
+Refresh this file annually before the new business year. CN, HK, ID, RU and core TR dates can be seeded from Nager.Date. AE, MY and movable Islamic holidays should be verified manually because official dates can shift with moon sighting and local announcements.
 
 ## Payment Radar automation
 
