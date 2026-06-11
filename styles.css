@@ -593,8 +593,22 @@ h2 {
   border-radius: var(--radius);
   background: #ffffff;
   color: var(--muted);
+  cursor: pointer;
   font-size: 13px;
   font-weight: 750;
+  font-family: inherit;
+  transition: border-color 0.16s ease, color 0.16s ease, opacity 0.16s ease, background 0.16s ease;
+}
+
+.legend-item:hover,
+.legend-item.is-active {
+  border-color: color-mix(in srgb, var(--calendar-color), #111827 15%);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--calendar-color), #ffffff 88%);
+}
+
+.legend-item.is-dimmed {
+  opacity: 0.46;
 }
 
 .legend-dot {

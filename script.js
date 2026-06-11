@@ -191,6 +191,7 @@ const state = {
   documentCategory: "all",
   externalContactSearch: "",
   externalContactCategory: "all",
+  calendarFilters: [],
   radarSearch: "",
   radarRegion: "China",
   radarImportance: "all",
@@ -1133,21 +1134,46 @@ function getCalendarLegendLabel(item) {
   return item.type === "vacation" ? item.label : (eventTypeLabels[item.type] || "Events");
 }
 
+function getCalendarLegendKey(item) {
+  return item.type === "vacation" ? item.colorKey : item.type;
+}
+
+function toggleCalendarFilter(filterKey) {
+  if (!filterKey) {
+    return;
+  }
+
+  const selectedFilters = new Set(state.calendarFilters);
+
+  if (selectedFilters.has(filterKey)) {
+    selectedFilters.delete(filterKey);
+  } else {
+    selectedFilters.add(filterKey);
+  }
+
+  state.calendarFilters = [...selectedFilters];
+  renderCompanyCalendar();
+}
+
 function renderCompanyCalendar() {
   const currentYear = new Date().getFullYear();
   const monthNames = Array.from({ length: 12 }, (_, index) => (
     new Intl.DateTimeFormat("en-GB", { month: "short" }).format(new Date(currentYear, index, 1))
   ));
   const weekDays = ["M", "T", "W", "T", "F", "S", "S"];
-  const calendarItems = getCalendarItems().filter((item) => {
+  const allCalendarItems = getCalendarItems().filter((item) => {
     const start = parseLocalDate(item.startDate);
     const end = parseLocalDate(item.endDate);
 
     return start && end && start.getFullYear() <= currentYear && end.getFullYear() >= currentYear;
   });
+  const activeFilterKeys = new Set(state.calendarFilters);
+  const calendarItems = activeFilterKeys.size
+    ? allCalendarItems.filter((item) => activeFilterKeys.has(getCalendarLegendKey(item)))
+    : allCalendarItems;
   const vacationIndexByKey = new Map();
 
-  calendarItems
+  allCalendarItems
     .filter((item) => item.type === "vacation")
     .forEach((item) => {
       if (!vacationIndexByKey.has(item.colorKey)) {
@@ -1157,11 +1183,12 @@ function renderCompanyCalendar() {
 
   const legendByKey = new Map();
 
-  calendarItems.forEach((item) => {
-    const legendKey = item.type === "vacation" ? item.colorKey : item.type;
+  allCalendarItems.forEach((item) => {
+    const legendKey = getCalendarLegendKey(item);
 
     if (!legendByKey.has(legendKey)) {
       legendByKey.set(legendKey, {
+        key: legendKey,
         label: getCalendarLegendLabel(item),
         color: getCalendarColor(item, vacationIndexByKey),
       });
@@ -1171,12 +1198,17 @@ function renderCompanyCalendar() {
   elements.calendarYear.textContent = String(currentYear);
   elements.calendarLegend.innerHTML = legendByKey.size
     ? [...legendByKey.values()]
-      .map((legendItem) => `
-        <span class="legend-item">
-          <span class="legend-dot" style="--calendar-color: ${legendItem.color}"></span>
+      .map((legendItem) => {
+        const isActive = activeFilterKeys.has(legendItem.key);
+        const isDimmed = activeFilterKeys.size && !isActive;
+
+        return `
+        <button class="legend-item ${isActive ? "is-active" : ""} ${isDimmed ? "is-dimmed" : ""}" type="button" data-calendar-filter="${escapeHtml(legendItem.key)}" aria-pressed="${isActive ? "true" : "false"}" style="--calendar-color: ${legendItem.color}">
+          <span class="legend-dot"></span>
           ${escapeHtml(legendItem.label)}
-        </span>
-      `)
+        </button>
+      `;
+      })
       .join("")
     : '<span class="empty-inline">No calendar items for this year yet.</span>';
 
@@ -2607,6 +2639,15 @@ window.addEventListener("hashchange", () => {
 
 elements.requestVacationButton.addEventListener("click", focusVacationRequestForm);
 elements.vacationRequestForm.addEventListener("submit", submitVacationRequest);
+elements.calendarLegend.addEventListener("click", (event) => {
+  const filterButton = event.target.closest("[data-calendar-filter]");
+
+  if (!filterButton) {
+    return;
+  }
+
+  toggleCalendarFilter(filterButton.dataset.calendarFilter);
+});
 elements.addEmployeeButton.addEventListener("click", () => {
   if (!state.adminUnlocked) {
     setActivePage("admin");
