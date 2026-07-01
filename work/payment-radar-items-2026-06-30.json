@@ -1,0 +1,20 @@
+[
+  {
+    "id": "china-hk-prince-group-ofac-scam-laundering-2026-06-30",
+    "region": "China",
+    "category": "Typology",
+    "importance": "high",
+    "signalType": "Enforcement case",
+    "title": "OFAC включил гонконгские финансовые и front-company структуры Prince Group в TCO-сеть",
+    "summary": "23 июня 2026 года Treasury/OFAC расширил санкции против Prince Group TCO: в SDN попали гонконгские физлица, China Reserve Securities Limited, Future Wing Financial Company Limited, CN Breeze Limited, CN Crystal Limited, Future Cosmos-группа, Tycoon Yachts (HK) Limited и связанные компании. Treasury отдельно указал, что сеть использовала HK asset management firms, компании владения активами, онлайн-платежные шлюзы и Huione/H-Pay инфраструктуру для перемещения и консолидации средств от cyber scams и digital-asset investment fraud.",
+    "impact": "Для платежей через Гонконг и китайско-гонконгских посредников это повышает риск блокировок, расширенного screening и вопросов банка по beneficial ownership, назначению платежа, связи с virtual assets, payment gateways и многоуровневыми holding/asset-management структурами. Любые совпадения по адресам, директорам, платежным платформам или аффилированным HK entities должны рассматриваться как санкционный и AML red flag до отправки платежа.",
+    "action": "Обновить screening по новым SDN-именам и связанным HK entities, проверить активные контрагенты и платежные маршруты на совпадения по адресам, директорам и corporate group links, а для HK посредников с финансовой, asset-management, leasing, yacht/holding или platform ролью заранее собирать UBO, source-of-funds, business rationale и документы по реальной торговой операции.",
+    "typology": "Красные флаги: HK компания без понятной торговой функции принимает или перенаправляет средства; payment gateway или virtual-asset элемент появляется в обычной товарной сделке; несколько co-located HK/BVI/Singapore entities управляют активами или счетами одного бенефициара; платежная цепочка обслуживает proceeds from scams, а не реальную поставку товара.",
+    "bank": "",
+    "jurisdiction": "Hong Kong / China / Southeast Asia route",
+    "sourceTitle": "Treasury Further Dismantles Overseas Scam Operations Targeting Americans",
+    "sourceUrl": "https://home.treasury.gov/news/press-releases/sb0538",
+    "publishedAt": "2026-06-30",
+    "status": "published"
+  }
+]
