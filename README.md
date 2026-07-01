@@ -7,7 +7,7 @@ Frontend and Cloudflare Worker backend for the Nova Group internal team portal.
 - Home dashboard with quick links, metrics, upcoming events, vacation requests, and key documents.
 - Team directory with search, department filters, table view, and card view.
 - Documents section with search, category filters, and document cards.
-- Payment Radar section for weekly China payment-risk signals, bank behavior, sanctions typologies, and recommended actions.
+- Payment Radar section for China payment-risk signals, bank behavior, sanctions typologies, and recommended actions.
 - Events section with birthdays, approved vacations, reminders, and a simple vacation request form.
 - Company calendar holiday layer with public non-working days and key relationship gift dates.
 - Admin section for editing team records, event records, document records, payment radar signals, and vacation approvals.
@@ -45,8 +45,10 @@ Refresh this file annually before the new business year. CN, HK, ID, RU and core
 The Payment Radar module is prepared for weekly automated publishing.
 
 - `payment-radar-automation.md` defines the China-only source strategy, filtering rules, and JSON output shape.
+- `run-weekly-radar.mjs` runs the weekly research workflow through the OpenAI API, validates generated items, saves JSON under `work/`, and publishes to `/api/radar-items`.
 - `publish-radar-items.mjs` publishes generated radar JSON to `/api/radar-items`.
 - Set `PAYMENT_RADAR_ADMIN_TOKEN` in the automation environment. It must match the Worker `ADMIN_TOKEN`.
+- Set `OPENAI_API_KEY` for the GitHub Actions weekly research runner.
 - Optionally set `PAYMENT_RADAR_SITE_ORIGIN`; it defaults to `https://team.drnova.org`.
 
 Publish a prepared JSON file:
@@ -55,4 +57,8 @@ Publish a prepared JSON file:
 PAYMENT_RADAR_ADMIN_TOKEN=... node publish-radar-items.mjs radar-items.json https://team.drnova.org
 ```
 
-Only publish signals with a practical payment, bank, document, route, sanctions, or typology impact. Most weeks should produce 0-3 items, not a general news feed.
+Only publish signals with a practical payment, bank, document, route, sanctions, or typology impact. Most weeks should produce 0-3 items, not a general news feed. Use manual out-of-cycle runs only for materially important China/Hong Kong payment-risk events.
+
+The GitHub Actions workflow `.github/workflows/china-payment-radar-weekly.yml` runs every Friday at 06:00 UTC, which is 09:00 in Istanbul, and can also be started manually from the Actions tab.
+
+To retry publication for an already prepared JSON file, commit the file under `work/` and start the same workflow manually. Manual runs publish the latest `work/payment-radar-items-*.json` file; scheduled Friday runs continue to run the full weekly research workflow. Set `PAYMENT_RADAR_MANUAL_RESEARCH=1` only when a manual run should ignore prepared JSON and run fresh research instead.

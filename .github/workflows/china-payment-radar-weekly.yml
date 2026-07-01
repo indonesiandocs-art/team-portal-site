@@ -1,0 +1,39 @@
+name: China Payment Radar Weekly
+
+on:
+  schedule:
+    - cron: "0 6 * * 5"
+  workflow_dispatch:
+
+jobs:
+  weekly-radar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ vars.PAYMENT_RADAR_OPENAI_MODEL || 'gpt-5' }}
+      OPENAI_REASONING_EFFORT: medium
+      PAYMENT_RADAR_ADMIN_TOKEN: ${{ secrets.PAYMENT_RADAR_ADMIN_TOKEN }}
+      PAYMENT_RADAR_SITE_ORIGIN: ${{ vars.PAYMENT_RADAR_SITE_ORIGIN || 'https://team.drnova.org' }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run weekly radar research and publish
+        run: node run-weekly-radar.mjs
+
+      - name: Upload prepared radar JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: payment-radar-items
+          path: work/payment-radar-items-*.json
+          if-no-files-found: ignore
