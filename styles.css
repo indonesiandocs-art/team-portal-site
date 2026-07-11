@@ -1196,6 +1196,11 @@ h2 {
   background: var(--accent-soft);
 }
 
+.status-pill.revoked {
+  color: #4b5563;
+  background: #eef1f4;
+}
+
 .status-pill.critical {
   color: #8d2418;
   background: #ffe1dc;

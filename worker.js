@@ -182,7 +182,7 @@ function cleanVacationRequest(item, index) {
     startDate: stringValue(item?.startDate, new Date().toISOString().slice(0, 10)),
     endDate: stringValue(item?.endDate, stringValue(item?.startDate, new Date().toISOString().slice(0, 10))),
     note: stringValue(item?.note, ""),
-    status: ["pending", "approved", "rejected"].includes(status) ? status : "pending",
+    status: ["pending", "approved", "rejected", "revoked"].includes(status) ? status : "pending",
     submittedAt: stringValue(item?.submittedAt, new Date().toISOString()),
     reviewedAt: stringValue(item?.reviewedAt, ""),
   };

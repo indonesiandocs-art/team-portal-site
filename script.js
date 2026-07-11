@@ -627,7 +627,7 @@ function normalizeVacationRequests(records) {
     startDate: request.startDate || new Date().toISOString().slice(0, 10),
     endDate: request.endDate || request.startDate || new Date().toISOString().slice(0, 10),
     note: request.note || "",
-    status: ["pending", "approved", "rejected"].includes(request.status) ? request.status : "pending",
+    status: ["pending", "approved", "rejected", "revoked"].includes(request.status) ? request.status : "pending",
     submittedAt: request.submittedAt || new Date().toISOString(),
     reviewedAt: request.reviewedAt || "",
   }));
@@ -1984,6 +1984,12 @@ function renderAdminRadar() {
 
 function vacationRequestMarkup(request) {
   const isPending = request.status === "pending";
+  const isApproved = request.status === "approved";
+  const statusClass = {
+    approved: "published",
+    rejected: "review",
+    revoked: "revoked",
+  }[request.status] || "";
 
   return `
     <div class="vacation-request-card" data-vacation-request-id="${escapeHtml(request.id)}">
@@ -1992,7 +1998,7 @@ function vacationRequestMarkup(request) {
         <span>${formatDateRange(request.startDate, request.endDate)}</span>
         ${request.note ? `<small>${escapeHtml(request.note)}</small>` : ""}
       </div>
-      <span class="status-pill ${request.status === "approved" ? "published" : request.status === "rejected" ? "review" : ""}">
+      <span class="status-pill ${statusClass}">
         ${escapeHtml(request.status)}
       </span>
       ${
@@ -2000,6 +2006,13 @@ function vacationRequestMarkup(request) {
           ? `<div class="request-actions">
               <button class="secondary-action" type="button" data-vacation-action="approve">Approve</button>
               <button class="danger-action" type="button" data-vacation-action="reject">Reject</button>
+            </div>`
+          : ""
+      }
+      ${
+        isApproved
+          ? `<div class="request-actions">
+              <button class="danger-action" type="button" data-vacation-action="revoke">Revoke</button>
             </div>`
           : ""
       }
@@ -2451,7 +2464,10 @@ async function submitVacationRequest(event) {
 function reviewVacationRequest(requestId, status) {
   const request = state.vacationRequests.find((item) => item.id === requestId);
 
-  if (!request || request.status !== "pending") {
+  const canReviewPending = request?.status === "pending" && ["approved", "rejected"].includes(status);
+  const canRevokeApproved = request?.status === "approved" && status === "revoked";
+
+  if (!request || (!canReviewPending && !canRevokeApproved)) {
     return;
   }
 
@@ -2780,7 +2796,11 @@ elements.adminVacationRequestList.addEventListener("click", (event) => {
 
   reviewVacationRequest(
     requestCard.dataset.vacationRequestId,
-    actionButton.dataset.vacationAction === "approve" ? "approved" : "rejected",
+    {
+      approve: "approved",
+      reject: "rejected",
+      revoke: "revoked",
+    }[actionButton.dataset.vacationAction],
   );
 });
 elements.employeeForm.addEventListener("submit", saveEmployeeFromForm);
