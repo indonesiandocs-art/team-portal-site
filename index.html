@@ -54,6 +54,10 @@
             <span class="nav-icon" aria-hidden="true">V</span>
             <span>Visualizations</span>
           </a>
+          <a class="nav-item" href="#flight" data-nav-target="flight">
+            <span class="nav-icon" aria-hidden="true">F</span>
+            <span>Nova Flight</span>
+          </a>
           <a class="nav-item" href="#admin" data-nav-target="admin">
             <span class="nav-icon" aria-hidden="true">A</span>
             <span>Admin</span>
@@ -137,6 +141,10 @@
                 <a href="#visualizations" data-nav-target="visualizations">
                   <strong>Visualizations</strong>
                   <span>Protected route schemes and interactive maps</span>
+                </a>
+                <a href="#flight" data-nav-target="flight">
+                  <strong>Nova Flight</strong>
+                  <span>Take a quick flight through the rings</span>
                 </a>
                 <a href="#admin" data-nav-target="admin">
                   <strong>Manage content</strong>
@@ -632,6 +640,51 @@
           </section>
         </section>
 
+        <section class="page-view" id="flight" data-page="flight" hidden>
+          <header class="page-header flight-page-header">
+            <div>
+              <p class="eyebrow">Team break</p>
+              <h1>Nova Flight</h1>
+            </div>
+            <div class="flight-best" aria-label="Best score">
+              <span>Best</span>
+              <strong id="flightBestScore">0</strong>
+            </div>
+          </header>
+
+          <section class="flight-game" id="flightGame">
+            <div class="flight-hud" aria-live="polite">
+              <div><span>Score</span><strong id="flightScore">0</strong></div>
+              <div><span>Time</span><strong id="flightTime">60</strong></div>
+              <div><span>Speed</span><strong id="flightSpeed">1.0x</strong></div>
+            </div>
+            <canvas id="flightCanvas" aria-label="Nova Flight game"></canvas>
+
+            <div class="flight-overlay" id="flightOverlay">
+              <div class="flight-overlay-content">
+                <span class="flight-mark" aria-hidden="true">N</span>
+                <h2 id="flightOverlayTitle">Ready for takeoff?</h2>
+                <p id="flightOverlayText">Fly through as many rings as you can in 60 seconds.</p>
+                <button class="flight-start" id="flightStartButton" type="button">Start flight</button>
+                <div class="flight-key-guide" aria-label="Controls">
+                  <span><kbd>Arrows</kbd> Move</span>
+                  <span><kbd>Space</kbd> Boost</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flight-touch-controls" aria-label="Flight controls">
+              <button type="button" data-flight-control="left" aria-label="Move left">&#8592;</button>
+              <div>
+                <button type="button" data-flight-control="up" aria-label="Move up">&#8593;</button>
+                <button type="button" data-flight-control="down" aria-label="Move down">&#8595;</button>
+              </div>
+              <button type="button" data-flight-control="right" aria-label="Move right">&#8594;</button>
+              <button class="flight-boost" type="button" data-flight-control="boost" aria-label="Boost">Boost</button>
+            </div>
+          </section>
+        </section>
+
         <section class="page-view" id="admin" data-page="admin" hidden>
           <header class="page-header">
             <div>
@@ -1043,5 +1096,6 @@
     </div>
 
     <script src="./script.js"></script>
+    <script src="./nova-flight.js"></script>
   </body>
 </html>
