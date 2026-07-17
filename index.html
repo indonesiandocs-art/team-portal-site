@@ -50,6 +50,10 @@
             <span class="nav-icon" aria-hidden="true">R</span>
             <span>Payment radar</span>
           </a>
+          <a class="nav-item" href="#visualizations" data-nav-target="visualizations">
+            <span class="nav-icon" aria-hidden="true">V</span>
+            <span>Visualizations</span>
+          </a>
           <a class="nav-item" href="#admin" data-nav-target="admin">
             <span class="nav-icon" aria-hidden="true">A</span>
             <span>Admin</span>
@@ -129,6 +133,10 @@
                 <a href="#radar" data-nav-target="radar">
                   <strong>Payment radar</strong>
                   <span>China banking signals, risk patterns, and actions</span>
+                </a>
+                <a href="#visualizations" data-nav-target="visualizations">
+                  <strong>Visualizations</strong>
+                  <span>Protected route schemes and interactive maps</span>
                 </a>
                 <a href="#admin" data-nav-target="admin">
                   <strong>Manage content</strong>
@@ -562,6 +570,66 @@
               <strong>No radar signals found</strong>
               <span>Try another filter or add the first weekly China signal in Admin.</span>
             </div>
+          </section>
+        </section>
+
+        <section class="page-view" id="visualizations" data-page="visualizations" hidden>
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Protected visual library</p>
+              <h1>Visualizations</h1>
+            </div>
+            <button class="secondary-action" id="visualizationsLogoutButton" type="button" hidden>Lock section</button>
+          </header>
+
+          <section class="workspace-panel" id="visualizationsGate">
+            <div class="panel-header compact-header">
+              <div>
+                <h2>Visualization access</h2>
+                <p>Enter the visualization code to open protected schemes and route maps.</p>
+              </div>
+            </div>
+
+            <form class="admin-auth" id="visualizationsAuthForm">
+              <div>
+                <strong>Protected visual library</strong>
+                <span>Separate access code required</span>
+              </div>
+              <label>
+                <span>Visualization code</span>
+                <input id="visualizationsAccessInput" type="password" autocomplete="current-password" />
+              </label>
+              <button class="secondary-action" type="submit">Open</button>
+            </form>
+            <p class="form-status" id="visualizationsStatus" aria-live="polite"></p>
+          </section>
+
+          <section class="visualizations-workspace" id="visualizationsWorkspace" hidden>
+            <aside class="workspace-panel visualizations-list-panel">
+              <div class="panel-header compact-header">
+                <div>
+                  <h2>Scheme library</h2>
+                  <p>Choose a visualization to open.</p>
+                </div>
+              </div>
+              <div class="visualization-list" id="visualizationList"></div>
+            </aside>
+
+            <section class="workspace-panel visualization-viewer-panel">
+              <div class="panel-header compact-header">
+                <div>
+                  <h2 id="visualizationTitle">Select a visualization</h2>
+                  <p id="visualizationMeta">The selected scheme will open here.</p>
+                </div>
+              </div>
+              <div class="visualization-frame-wrap" id="visualizationFrameWrap">
+                <iframe id="visualizationFrame" title="Selected visualization" sandbox="allow-scripts" hidden></iframe>
+                <div class="empty-panel" id="visualizationEmptyState">
+                  <strong>No visualization selected</strong>
+                  <span>Select a scheme from the library.</span>
+                </div>
+              </div>
+            </section>
           </section>
         </section>
 

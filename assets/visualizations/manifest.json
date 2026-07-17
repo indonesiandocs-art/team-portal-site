@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "updatedAt": "2026-07-17",
+  "items": [
+    {
+      "id": "mintai-fundamental-route",
+      "title": "Mintai Fundamental Route",
+      "description": "Interactive route visualization for internal review.",
+      "file": "mintai-fundamental-route.html",
+      "category": "Routes",
+      "updatedAt": "2026-07-17"
+    }
+  ]
+}

@@ -490,6 +490,62 @@ h2 {
   grid-row: span 2;
 }
 
+.visualizations-workspace {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.34fr) minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.visualizations-list-panel,
+.visualization-viewer-panel {
+  align-self: start;
+}
+
+.visualization-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.visualization-item {
+  display: grid;
+  width: 100%;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.visualization-item:hover,
+.visualization-item.is-active {
+  border-color: rgba(244, 91, 63, 0.38);
+  box-shadow: 0 12px 28px rgba(7, 31, 57, 0.07);
+}
+
+.visualization-item span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.visualization-frame-wrap {
+  margin-top: 18px;
+}
+
+.visualization-frame-wrap iframe {
+  display: block;
+  width: 100%;
+  min-height: 720px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
 .expanded-events {
   gap: 10px;
 }
@@ -1798,7 +1854,8 @@ h2 {
   .dashboard-grid,
   .year-calendar,
   .admin-grid,
-  .admin-section {
+  .admin-section,
+  .visualizations-workspace {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1850,8 +1907,13 @@ h2 {
   .events-grid,
   .admin-grid,
   .admin-section,
-  .documents-toolbar {
+  .documents-toolbar,
+  .visualizations-workspace {
     grid-template-columns: 1fr;
+  }
+
+  .visualization-frame-wrap iframe {
+    min-height: 520px;
   }
 
   .radar-card header,

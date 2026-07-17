@@ -182,6 +182,9 @@ const portalDataEndpoint = "/api/portal-data";
 const adminCheckEndpoint = "/api/admin-check";
 const vacationRequestEndpoint = "/api/vacation-request";
 const holidayCalendarEndpoint = "/assets/holiday-calendar.json";
+const visualizationsLoginEndpoint = "/api/visualizations-login";
+const visualizationsLogoutEndpoint = "/api/visualizations-logout";
+const visualizationsListEndpoint = "/api/visualizations-list";
 
 const state = {
   search: "",
@@ -209,6 +212,9 @@ const state = {
   holidayItems: [],
   radarItems: [],
   vacationRequests: [],
+  visualizations: [],
+  visualizationsUnlocked: false,
+  currentVisualizationId: "",
   adminToken: "",
   adminUnlocked: false,
   sharedBackendAvailable: false,
@@ -274,6 +280,17 @@ const elements = {
   radarHighTotal: document.querySelector("#radarHighTotal"),
   radarBankTotal: document.querySelector("#radarBankTotal"),
   radarRegionTotal: document.querySelector("#radarRegionTotal"),
+  visualizationsGate: document.querySelector("#visualizationsGate"),
+  visualizationsWorkspace: document.querySelector("#visualizationsWorkspace"),
+  visualizationsAuthForm: document.querySelector("#visualizationsAuthForm"),
+  visualizationsAccessInput: document.querySelector("#visualizationsAccessInput"),
+  visualizationsStatus: document.querySelector("#visualizationsStatus"),
+  visualizationsLogoutButton: document.querySelector("#visualizationsLogoutButton"),
+  visualizationList: document.querySelector("#visualizationList"),
+  visualizationTitle: document.querySelector("#visualizationTitle"),
+  visualizationMeta: document.querySelector("#visualizationMeta"),
+  visualizationFrame: document.querySelector("#visualizationFrame"),
+  visualizationEmptyState: document.querySelector("#visualizationEmptyState"),
   adminTabs: document.querySelectorAll("[data-admin-tab]"),
   adminSections: document.querySelectorAll("[data-admin-section]"),
   adminEmployeeList: document.querySelector("#adminEmployeeList"),
@@ -778,6 +795,153 @@ async function loadHolidayCalendar() {
   } catch {
     state.holidayItems = [];
   }
+}
+
+function setVisualizationsStatus(message, status = "idle") {
+  elements.visualizationsStatus.textContent = message;
+  elements.visualizationsStatus.dataset.status = status;
+}
+
+function normalizeVisualizationItems(items) {
+  return (Array.isArray(items) ? items : []).map((item, index) => ({
+    id: item.id || createId(`visualization-${index}`),
+    title: item.title || "Untitled visualization",
+    description: item.description || "",
+    category: item.category || "Visualization",
+    updatedAt: item.updatedAt || "",
+    url: item.url || "",
+  })).filter((item) => item.url);
+}
+
+function renderVisualizations() {
+  elements.visualizationsGate.hidden = state.visualizationsUnlocked;
+  elements.visualizationsWorkspace.hidden = !state.visualizationsUnlocked;
+  elements.visualizationsLogoutButton.hidden = !state.visualizationsUnlocked;
+
+  if (!state.visualizationsUnlocked) {
+    elements.visualizationFrame.hidden = true;
+    elements.visualizationFrame.removeAttribute("src");
+    return;
+  }
+
+  elements.visualizationList.innerHTML = state.visualizations.length
+    ? state.visualizations.map((item) => `
+        <button class="visualization-item ${item.id === state.currentVisualizationId ? "is-active" : ""}" type="button" data-visualization-id="${escapeHtml(item.id)}" aria-pressed="${item.id === state.currentVisualizationId ? "true" : "false"}">
+          <strong>${escapeHtml(item.title)}</strong>
+          <span>${escapeHtml(item.category)}${item.updatedAt ? ` · ${escapeHtml(formatDate(item.updatedAt))}` : ""}</span>
+        </button>
+      `).join("")
+    : `
+      <div class="empty-panel">
+        <strong>No visualizations</strong>
+        <span>Add HTML files to the visualization catalog.</span>
+      </div>
+    `;
+
+  const currentItem = state.visualizations.find((item) => item.id === state.currentVisualizationId) || state.visualizations[0];
+
+  if (!currentItem) {
+    elements.visualizationTitle.textContent = "Select a visualization";
+    elements.visualizationMeta.textContent = "The selected scheme will open here.";
+    elements.visualizationFrame.hidden = true;
+    elements.visualizationFrame.removeAttribute("src");
+    elements.visualizationEmptyState.hidden = false;
+    return;
+  }
+
+  state.currentVisualizationId = currentItem.id;
+  elements.visualizationTitle.textContent = currentItem.title;
+  elements.visualizationMeta.textContent = [currentItem.category, currentItem.description].filter(Boolean).join(" · ");
+  if (elements.visualizationFrame.getAttribute("src") !== currentItem.url) {
+    elements.visualizationFrame.src = currentItem.url;
+  }
+  elements.visualizationFrame.hidden = false;
+  elements.visualizationEmptyState.hidden = true;
+}
+
+async function loadVisualizations({ silent = false } = {}) {
+  if (!window.fetch || window.location.protocol === "file:") {
+    state.visualizationsUnlocked = false;
+    renderVisualizations();
+    return;
+  }
+
+  try {
+    const response = await fetch(visualizationsListEndpoint, { cache: "no-store" });
+
+    if (response.status === 401) {
+      state.visualizationsUnlocked = false;
+      if (!silent) {
+        setVisualizationsStatus("Enter visualization code to open this section.", "idle");
+      }
+      renderVisualizations();
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Visualization list returned ${response.status}`);
+    }
+
+    const payload = await response.json();
+    state.visualizations = normalizeVisualizationItems(payload.items);
+    state.visualizationsUnlocked = true;
+    state.currentVisualizationId = state.currentVisualizationId || state.visualizations[0]?.id || "";
+    setVisualizationsStatus("", "ready");
+    renderVisualizations();
+  } catch {
+    state.visualizationsUnlocked = false;
+    setVisualizationsStatus("Visualization library is unavailable. Try again later.", "error");
+    renderVisualizations();
+  }
+}
+
+async function submitVisualizationsAccess(event) {
+  event.preventDefault();
+  const accessCode = elements.visualizationsAccessInput.value.trim();
+
+  if (!accessCode) {
+    setVisualizationsStatus("Enter visualization code.", "error");
+    return;
+  }
+
+  setVisualizationsStatus("Checking access...", "idle");
+
+  try {
+    const response = await fetch(visualizationsLoginEndpoint, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ accessCode }),
+    });
+
+    if (!response.ok) {
+      setVisualizationsStatus("Visualization code is not accepted.", "error");
+      return;
+    }
+
+    elements.visualizationsAuthForm.reset();
+    await loadVisualizations({ silent: true });
+  } catch {
+    setVisualizationsStatus("Could not check access. Try again.", "error");
+  }
+}
+
+async function lockVisualizations() {
+  try {
+    await fetch(visualizationsLogoutEndpoint, { method: "POST" });
+  } catch {
+    // The local UI should still lock even if the network request fails.
+  }
+
+  state.visualizationsUnlocked = false;
+  state.currentVisualizationId = "";
+  state.visualizations = [];
+  setVisualizationsStatus("Visualization section is locked.", "idle");
+  renderVisualizations();
+}
+
+function selectVisualization(visualizationId) {
+  state.currentVisualizationId = visualizationId;
+  renderVisualizations();
 }
 
 async function publishPortalData({ silent = false } = {}) {
@@ -2147,6 +2311,7 @@ function refreshPortal() {
   renderEvents();
   renderCompanyCalendar();
   renderOrgChart();
+  renderVisualizations();
   renderHome();
   renderContentOverview();
   renderAdminLists();
@@ -2664,6 +2829,17 @@ elements.calendarLegend.addEventListener("click", (event) => {
 
   toggleCalendarFilter(filterButton.dataset.calendarFilter);
 });
+elements.visualizationsAuthForm.addEventListener("submit", submitVisualizationsAccess);
+elements.visualizationsLogoutButton.addEventListener("click", lockVisualizations);
+elements.visualizationList.addEventListener("click", (event) => {
+  const visualizationButton = event.target.closest("[data-visualization-id]");
+
+  if (!visualizationButton) {
+    return;
+  }
+
+  selectVisualization(visualizationButton.dataset.visualizationId);
+});
 elements.addEmployeeButton.addEventListener("click", () => {
   if (!state.adminUnlocked) {
     setActivePage("admin");
@@ -2831,6 +3007,7 @@ async function initializePortal() {
   elements.adminTokenInput.value = state.adminToken;
   initializeCollections();
   await loadHolidayCalendar();
+  await loadVisualizations({ silent: true });
   setAdminTab(state.adminTab);
   renderAdminGate();
   refreshPortal();

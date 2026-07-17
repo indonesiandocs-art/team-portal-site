@@ -1,7 +1,12 @@
 const DATA_KEY = "portal-data:v1";
 const MAX_BODY_SIZE = 1_000_000;
 const ACCESS_COOKIE = "nova_portal_access";
+const VISUALIZATIONS_COOKIE = "nova_visualizations_access";
 const ACCESS_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
+const VISUALIZATIONS_COOKIE_MAX_AGE = 60 * 60 * 24 * 14;
+const VISUALIZATIONS_FALLBACK_ACCESS_HASH = "80d55f8dd606a21aee459bf6725c5f52740bff1f0c82b7e993868e93c55ca3a4";
+const VISUALIZATIONS_ASSET_PREFIX = "/assets/visualizations/";
+const VISUALIZATIONS_MANIFEST_PATH = "/assets/visualizations/manifest.json";
 
 const jsonHeaders = {
   "content-type": "application/json; charset=utf-8",
@@ -70,6 +75,10 @@ async function getAccessCookieValue(accessCode) {
   return sha256(`nova-portal-access:${accessCode}`);
 }
 
+async function getVisualizationsCookieValue(accessCode) {
+  return sha256(`nova-visualizations-access:${accessCode}`);
+}
+
 async function hasPortalAccess(request, env) {
   if (!env.PORTAL_ACCESS_CODE) {
     return true;
@@ -82,6 +91,24 @@ async function hasPortalAccess(request, env) {
   }
 
   return cookieValue === await getAccessCookieValue(env.PORTAL_ACCESS_CODE);
+}
+
+async function getVisualizationsAccessHash(env) {
+  if (env.VISUALIZATIONS_ACCESS_CODE) {
+    return getVisualizationsCookieValue(env.VISUALIZATIONS_ACCESS_CODE);
+  }
+
+  return VISUALIZATIONS_FALLBACK_ACCESS_HASH;
+}
+
+async function hasVisualizationsAccess(request, env) {
+  const cookieValue = getCookie(request, VISUALIZATIONS_COOKIE);
+
+  if (!cookieValue) {
+    return false;
+  }
+
+  return cookieValue === await getVisualizationsAccessHash(env);
 }
 
 function stringValue(value, fallback = "") {
@@ -511,6 +538,76 @@ function handlePortalLogout() {
   });
 }
 
+async function handleVisualizationsLogin(request, env) {
+  if (request.method !== "POST") {
+    return jsonResponse({ error: "Method not allowed" }, 405);
+  }
+
+  try {
+    const body = await readJsonBody(request);
+    const accessCode = stringValue(body?.accessCode);
+    const cookieValue = accessCode ? await getVisualizationsCookieValue(accessCode) : "";
+
+    if (!cookieValue || cookieValue !== await getVisualizationsAccessHash(env)) {
+      return unauthorized();
+    }
+
+    return jsonResponse(
+      { ok: true },
+      200,
+      {
+        "set-cookie": `${VISUALIZATIONS_COOKIE}=${encodeURIComponent(cookieValue)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${VISUALIZATIONS_COOKIE_MAX_AGE}`,
+      },
+    );
+  } catch {
+    return jsonResponse({ error: "Could not check visualization access" }, 400);
+  }
+}
+
+function handleVisualizationsLogout() {
+  return jsonResponse(
+    { ok: true },
+    200,
+    {
+      "set-cookie": `${VISUALIZATIONS_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`,
+    },
+  );
+}
+
+async function handleVisualizationsList(request, env) {
+  if (request.method !== "GET") {
+    return jsonResponse({ error: "Method not allowed" }, 405);
+  }
+
+  if (!(await hasVisualizationsAccess(request, env))) {
+    return unauthorized();
+  }
+
+  const manifestUrl = new URL(request.url);
+  manifestUrl.pathname = VISUALIZATIONS_MANIFEST_PATH;
+  manifestUrl.search = "";
+  const response = await env.ASSETS.fetch(new Request(manifestUrl.toString(), request));
+
+  if (!response.ok) {
+    return jsonResponse({ error: "Visualization catalog is not available" }, 404);
+  }
+
+  const manifest = await response.json();
+  const items = Array.isArray(manifest.items) ? manifest.items : [];
+
+  return jsonResponse({
+    items: items.map((item) => ({
+      id: stringValue(item?.id),
+      title: stringValue(item?.title, "Untitled visualization"),
+      description: stringValue(item?.description, ""),
+      file: stringValue(item?.file),
+      category: stringValue(item?.category, "Visualization"),
+      updatedAt: stringValue(item?.updatedAt, ""),
+      url: `${VISUALIZATIONS_ASSET_PREFIX}${encodeURIComponent(stringValue(item?.file))}`,
+    })).filter((item) => item.id && item.file),
+  });
+}
+
 function handleAdminCheck(request, env) {
   if (request.method !== "POST") {
     return jsonResponse({ error: "Method not allowed" }, 405);
@@ -557,6 +654,18 @@ export default {
       return handleAdminCheck(request, env);
     }
 
+    if (url.pathname === "/api/visualizations-login") {
+      return handleVisualizationsLogin(request, env);
+    }
+
+    if (url.pathname === "/api/visualizations-logout") {
+      return handleVisualizationsLogout();
+    }
+
+    if (url.pathname === "/api/visualizations-list") {
+      return handleVisualizationsList(request, env);
+    }
+
     if (url.pathname === "/api/portal-data") {
       return handlePortalData(request, env);
     }
@@ -567,6 +676,10 @@ export default {
 
     if (url.pathname === "/api/radar-items") {
       return handleRadarItems(request, env);
+    }
+
+    if (url.pathname.startsWith(VISUALIZATIONS_ASSET_PREFIX) && !(await hasVisualizationsAccess(request, env))) {
+      return unauthorized();
     }
 
     return env.ASSETS.fetch(request);
