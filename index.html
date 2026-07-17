@@ -579,7 +579,6 @@
               <p class="eyebrow">Protected visual library</p>
               <h1>Visualizations</h1>
             </div>
-            <button class="secondary-action" id="visualizationsLogoutButton" type="button" hidden>Lock section</button>
           </header>
 
           <section class="workspace-panel" id="visualizationsGate">
@@ -714,6 +713,7 @@
               <button class="admin-tab" type="button" data-admin-tab="vacations" aria-pressed="false">Vacation requests</button>
               <button class="admin-tab" type="button" data-admin-tab="documents" aria-pressed="false">Documents</button>
               <button class="admin-tab" type="button" data-admin-tab="radar" aria-pressed="false">Payment radar</button>
+              <button class="admin-tab" type="button" data-admin-tab="visualizations" aria-pressed="false">Visualizations</button>
             </div>
 
             <div class="admin-workspace">
@@ -1013,6 +1013,19 @@
                   </label>
                   <button class="primary-action" type="submit">Save radar signal</button>
                 </form>
+              </section>
+
+              <section class="admin-section single-column-section" data-admin-section="visualizations" hidden>
+                <div class="admin-list-panel">
+                  <div class="admin-list-header">
+                    <h3>Visualization library</h3>
+                    <a class="secondary-action" href="#visualizations" data-nav-target="visualizations">Open library</a>
+                  </div>
+                  <div class="empty-panel">
+                    <strong>Scheme uploads are handled through the site files</strong>
+                    <span>Add the exported HTML file to assets/visualizations, then add it to assets/visualizations/manifest.json. The library page will show it after deployment.</span>
+                  </div>
+                </div>
               </section>
 
               <section class="admin-section single-column-section" data-admin-section="vacations" hidden>

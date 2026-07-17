@@ -183,7 +183,6 @@ const adminCheckEndpoint = "/api/admin-check";
 const vacationRequestEndpoint = "/api/vacation-request";
 const holidayCalendarEndpoint = "/assets/holiday-calendar.json";
 const visualizationsLoginEndpoint = "/api/visualizations-login";
-const visualizationsLogoutEndpoint = "/api/visualizations-logout";
 const visualizationsListEndpoint = "/api/visualizations-list";
 
 const state = {
@@ -285,7 +284,6 @@ const elements = {
   visualizationsAuthForm: document.querySelector("#visualizationsAuthForm"),
   visualizationsAccessInput: document.querySelector("#visualizationsAccessInput"),
   visualizationsStatus: document.querySelector("#visualizationsStatus"),
-  visualizationsLogoutButton: document.querySelector("#visualizationsLogoutButton"),
   visualizationList: document.querySelector("#visualizationList"),
   visualizationTitle: document.querySelector("#visualizationTitle"),
   visualizationMeta: document.querySelector("#visualizationMeta"),
@@ -425,7 +423,7 @@ function renderAdminGate() {
   const isUnlocked = state.adminUnlocked;
   elements.addEmployeeButton.hidden = !isUnlocked;
   elements.addDocumentButton.hidden = !isUnlocked;
-  elements.newAdminItemButton.hidden = !isUnlocked || state.adminTab === "vacations";
+  elements.newAdminItemButton.hidden = !isUnlocked || ["vacations", "visualizations"].includes(state.adminTab);
   elements.adminLockedPanel.hidden = isUnlocked;
   elements.contentOverview.hidden = !isUnlocked;
   document.querySelector(".admin-tabs").hidden = !isUnlocked;
@@ -816,7 +814,6 @@ function normalizeVisualizationItems(items) {
 function renderVisualizations() {
   elements.visualizationsGate.hidden = state.visualizationsUnlocked;
   elements.visualizationsWorkspace.hidden = !state.visualizationsUnlocked;
-  elements.visualizationsLogoutButton.hidden = !state.visualizationsUnlocked;
 
   if (!state.visualizationsUnlocked) {
     elements.visualizationFrame.hidden = true;
@@ -923,20 +920,6 @@ async function submitVisualizationsAccess(event) {
   } catch {
     setVisualizationsStatus("Could not check access. Try again.", "error");
   }
-}
-
-async function lockVisualizations() {
-  try {
-    await fetch(visualizationsLogoutEndpoint, { method: "POST" });
-  } catch {
-    // The local UI should still lock even if the network request fails.
-  }
-
-  state.visualizationsUnlocked = false;
-  state.currentVisualizationId = "";
-  state.visualizations = [];
-  setVisualizationsStatus("Visualization section is locked.", "idle");
-  renderVisualizations();
 }
 
 function selectVisualization(visualizationId) {
@@ -2704,7 +2687,7 @@ function deleteRadarRecord() {
 
 function setAdminTab(tab) {
   state.adminTab = tab;
-  elements.newAdminItemButton.hidden = !state.adminUnlocked || tab === "vacations";
+  elements.newAdminItemButton.hidden = !state.adminUnlocked || ["vacations", "visualizations"].includes(tab);
 
   elements.adminTabs.forEach((button) => {
     const isActive = button.dataset.adminTab === tab;
@@ -2830,7 +2813,6 @@ elements.calendarLegend.addEventListener("click", (event) => {
   toggleCalendarFilter(filterButton.dataset.calendarFilter);
 });
 elements.visualizationsAuthForm.addEventListener("submit", submitVisualizationsAccess);
-elements.visualizationsLogoutButton.addEventListener("click", lockVisualizations);
 elements.visualizationList.addEventListener("click", (event) => {
   const visualizationButton = event.target.closest("[data-visualization-id]");
 
