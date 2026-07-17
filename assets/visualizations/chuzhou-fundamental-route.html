@@ -817,7 +817,7 @@ html&gt;body{padding:0}&lt;/style&gt;
   &lt;div class=&quot;viz-controls&quot; aria-label=&quot;Route conditions&quot;&gt;
     &lt;span&gt;Stream&lt;/span&gt;
     &lt;div class=&quot;viz-row&quot; role=&quot;group&quot; aria-label=&quot;Choose stream&quot;&gt;
-      &lt;button type=&quot;button&quot; class=&quot;btn stream-btn&quot; data-stream=&quot;white&quot; aria-pressed=&quot;true&quot;&gt;White — Yava&lt;/button&gt;
+      &lt;button type=&quot;button&quot; class=&quot;btn stream-btn&quot; data-stream=&quot;white&quot; aria-pressed=&quot;true&quot;&gt;White — Java&lt;/button&gt;
       &lt;button type=&quot;button&quot; class=&quot;btn stream-btn&quot; data-stream=&quot;gray&quot; aria-pressed=&quot;false&quot;&gt;Gray — X-Trade &amp;amp; Quantum&lt;/button&gt;
     &lt;/div&gt;
     &lt;span&gt;Supplier accepts Chuzhou?&lt;/span&gt;
@@ -829,14 +829,14 @@ html&gt;body{padding:0}&lt;/style&gt;
 
   &lt;svg class=&quot;flow&quot; viewBox=&quot;0 0 920 590&quot; role=&quot;img&quot; aria-labelledby=&quot;independent-title independent-desc&quot;&gt;
     &lt;title id=&quot;independent-title&quot;&gt;Independent White and Gray Chuzhou streams&lt;/title&gt;
-    &lt;desc id=&quot;independent-desc&quot;&gt;In the White stream, suppliers not linked to Russia provide liquidity to Yava&#x27;s account at Chuzhou Bank. Yava pays suppliers directly or through LianLian. In the Gray stream, Russia-linked suppliers at Chuzhou Bank and potential suppliers at other banks provide liquidity to X-Trade and Quantum accounts at Chuzhou Bank. X-Trade and Quantum pay suppliers directly or through LianLian.&lt;/desc&gt;
+    &lt;desc id=&quot;independent-desc&quot;&gt;In the White stream, suppliers not linked to Russia provide liquidity to Java&#x27;s account at Chuzhou Bank. Java pays suppliers directly or through LianLian. In the Gray stream, both Russia-linked suppliers at Chuzhou Bank and potential suppliers at other banks can provide liquidity to both X-Trade and Quantum accounts at Chuzhou Bank. X-Trade and Quantum pay suppliers directly or through LianLian.&lt;/desc&gt;
     &lt;defs&gt;
       &lt;marker id=&quot;ind-arrow-neutral&quot; viewBox=&quot;0 0 10 10&quot; refX=&quot;8&quot; refY=&quot;5&quot; markerWidth=&quot;7&quot; markerHeight=&quot;7&quot; orient=&quot;auto-start-reverse&quot;&gt;&lt;path d=&quot;M0 0L10 5L0 10Z&quot; fill=&quot;var(--muted-foreground)&quot;/&gt;&lt;/marker&gt;
       &lt;marker id=&quot;ind-arrow-active&quot; viewBox=&quot;0 0 10 10&quot; refX=&quot;8&quot; refY=&quot;5&quot; markerWidth=&quot;7&quot; markerHeight=&quot;7&quot; orient=&quot;auto-start-reverse&quot;&gt;&lt;path d=&quot;M0 0L10 5L0 10Z&quot; fill=&quot;var(--viz-series-1)&quot;/&gt;&lt;/marker&gt;
     &lt;/defs&gt;
 
     &lt;rect class=&quot;lane white-lane selected-lane&quot; x=&quot;18&quot; y=&quot;34&quot; width=&quot;884&quot; height=&quot;224&quot; rx=&quot;18&quot;/&gt;
-    &lt;text class=&quot;lane-title&quot; x=&quot;40&quot; y=&quot;64&quot;&gt;WHITE STREAM · YAVA&lt;/text&gt;
+    &lt;text class=&quot;lane-title&quot; x=&quot;40&quot; y=&quot;64&quot;&gt;WHITE STREAM · JAVA&lt;/text&gt;
     &lt;g class=&quot;node&quot; transform=&quot;translate(38 92)&quot;&gt;
       &lt;rect width=&quot;210&quot; height=&quot;84&quot; rx=&quot;14&quot;/&gt;
       &lt;text x=&quot;105&quot; y=&quot;32&quot; text-anchor=&quot;middle&quot;&gt;Liquidity suppliers&lt;/text&gt;
@@ -844,7 +844,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;/g&gt;
     &lt;g class=&quot;node&quot; transform=&quot;translate(326 92)&quot;&gt;
       &lt;rect width=&quot;250&quot; height=&quot;84&quot; rx=&quot;14&quot;/&gt;
-      &lt;text x=&quot;125&quot; y=&quot;32&quot; text-anchor=&quot;middle&quot;&gt;Yava&lt;/text&gt;
+      &lt;text x=&quot;125&quot; y=&quot;32&quot; text-anchor=&quot;middle&quot;&gt;Java&lt;/text&gt;
       &lt;text class=&quot;sub&quot; x=&quot;125&quot; y=&quot;56&quot; text-anchor=&quot;middle&quot;&gt;account at Chuzhou Bank&lt;/text&gt;
     &lt;/g&gt;
     &lt;g class=&quot;node&quot; transform=&quot;translate(712 92)&quot;&gt;
@@ -896,7 +896,9 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;/g&gt;
     &lt;path class=&quot;edge gray-flow&quot; d=&quot;M248 366H323&quot; marker-end=&quot;url(#ind-arrow-neutral)&quot;/&gt;
     &lt;path class=&quot;edge gray-flow&quot; d=&quot;M248 456H323&quot; marker-end=&quot;url(#ind-arrow-neutral)&quot;/&gt;
-    &lt;text class=&quot;edge-label gray-label&quot; x=&quot;286&quot; y=&quot;353&quot; text-anchor=&quot;middle&quot;&gt;liquidity&lt;/text&gt;
+    &lt;path class=&quot;edge gray-flow&quot; d=&quot;M248 382C286 382 286 448 323 448&quot; marker-end=&quot;url(#ind-arrow-neutral)&quot;/&gt;
+    &lt;path class=&quot;edge gray-flow&quot; d=&quot;M248 440C286 440 286 392 323 384&quot; marker-end=&quot;url(#ind-arrow-neutral)&quot;/&gt;
+    &lt;text class=&quot;edge-label gray-label&quot; x=&quot;286&quot; y=&quot;353&quot; text-anchor=&quot;middle&quot;&gt;liquidity to both&lt;/text&gt;
     &lt;path class=&quot;edge gray-direct&quot; d=&quot;M576 366C636 366 648 388 709 396&quot; marker-end=&quot;url(#ind-arrow-neutral)&quot;/&gt;
     &lt;path class=&quot;edge gray-direct&quot; d=&quot;M576 456C636 456 650 424 709 410&quot; marker-end=&quot;url(#ind-arrow-neutral)&quot;/&gt;
     &lt;text class=&quot;edge-label gray-direct-label&quot; x=&quot;642&quot; y=&quot;350&quot; text-anchor=&quot;middle&quot;&gt;payment&lt;/text&gt;
@@ -906,7 +908,7 @@ html&gt;body{padding:0}&lt;/style&gt;
 
   &lt;div class=&quot;selected-detail&quot; aria-live=&quot;polite&quot;&gt;
     &lt;span class=&quot;viz-badge&quot;&gt;Active route&lt;/span&gt;
-    &lt;span class=&quot;route-detail&quot;&gt;White: non-Russia-linked suppliers → Yava at Chuzhou Bank → Supplier&lt;/span&gt;
+    &lt;span class=&quot;route-detail&quot;&gt;White: non-Russia-linked suppliers → Java at Chuzhou Bank → Supplier&lt;/span&gt;
   &lt;/div&gt;
 &lt;/div&gt;
 
@@ -977,8 +979,8 @@ html&gt;body{padding:0}&lt;/style&gt;
     whiteSupplierSub.textContent = isWhite &amp;&amp; !isDirect ? &#x27;paid via LianLian&#x27; : &#x27;accepts Chuzhou&#x27;;
     graySupplierSub.textContent = !isWhite &amp;&amp; !isDirect ? &#x27;paid via LianLian&#x27; : &#x27;accepts Chuzhou&#x27;;
     const source = isWhite
-      ? &#x27;White: non-Russia-linked suppliers → Yava at Chuzhou Bank&#x27;
-      : &#x27;Gray: Russia-linked suppliers → X-Trade / Quantum at Chuzhou Bank&#x27;;
+      ? &#x27;White: non-Russia-linked suppliers → Java at Chuzhou Bank&#x27;
+      : &#x27;Gray: both supplier groups → X-Trade and Quantum at Chuzhou Bank&#x27;;
     const destination = isDirect ? &#x27;Supplier&#x27; : &#x27;LianLian → Supplier&#x27;;
     detail.textContent = `${source} → ${destination}`;
   }
