@@ -67,8 +67,8 @@
 
   function spawnRing(depth = 1) {
     rings.push({
-      x: (Math.random() * 1.45) - 0.725,
-      y: (Math.random() * 1.05) - 0.38,
+      x: (Math.random() * 1.36) - 0.68,
+      y: (Math.random() * 0.96) - 0.38,
       z: depth,
       checked: false,
       hue: Math.random() > 0.5 ? "#f45b3f" : "#0a3159",
@@ -223,8 +223,9 @@
 
   function drawRing(ring, width, height) {
     const perspective = 1 / Math.max(0.11, ring.z + 0.18);
-    const centerX = width / 2 + ring.x * width * 0.34 * perspective;
-    const centerY = height * 0.47 + ring.y * height * 0.32 * perspective;
+    const approach = Math.max(0.18, Math.min(1, 0.18 + (1.35 - ring.z) * 0.72));
+    const centerX = width / 2 + ring.x * width * 0.34 * approach;
+    const centerY = height * 0.47 + ring.y * height * 0.32 * approach;
     const radius = Math.min(width, height) * 0.055 * perspective;
 
     context.save();
