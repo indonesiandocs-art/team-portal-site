@@ -9,6 +9,14 @@
       "file": "mintai-fundamental-route.html",
       "category": "Routes",
       "updatedAt": "2026-07-17"
+    },
+    {
+      "id": "chuzhou-fundamental-route",
+      "title": "Chuzhou Fundamental Route",
+      "description": "White and Gray liquidity streams with direct and LianLian payment routes.",
+      "file": "chuzhou-fundamental-route.html",
+      "category": "Routes",
+      "updatedAt": "2026-07-17"
     }
   ]
 }
