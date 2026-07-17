@@ -38,7 +38,23 @@
     message: "",
   };
 
-  let bestScore = Number.parseInt(localStorage.getItem(bestScoreKey) || "0", 10);
+  function loadBestScore() {
+    try {
+      return Number.parseInt(localStorage.getItem(bestScoreKey) || "0", 10);
+    } catch {
+      return 0;
+    }
+  }
+
+  function saveBestScore(score) {
+    try {
+      localStorage.setItem(bestScoreKey, String(score));
+    } catch {
+      // Local file previews can block storage; gameplay should still work.
+    }
+  }
+
+  let bestScore = loadBestScore();
   bestElement.textContent = bestScore;
 
   function resizeCanvas() {
@@ -84,7 +100,7 @@
 
     if (state.score > bestScore) {
       bestScore = state.score;
-      localStorage.setItem(bestScoreKey, String(bestScore));
+      saveBestScore(bestScore);
       bestElement.textContent = bestScore;
       overlayTitle.textContent = "New best flight!";
     } else {
