@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-17",
+  "updatedAt": "2026-07-21",
   "items": [
     {
       "id": "mintai-fundamental-route",
@@ -17,6 +17,14 @@
       "file": "chuzhou-fundamental-route.html",
       "category": "Routes",
       "updatedAt": "2026-07-17"
+    },
+    {
+      "id": "nova-general-indonesia-route",
+      "title": "Nova General Indonesia Route",
+      "description": "Dubai liquidity from commodity traders through Nova General at Invest Bank to Indonesian companies and worldwide suppliers.",
+      "file": "nova-general-indonesia-route.html",
+      "category": "Routes",
+      "updatedAt": "2026-07-21"
     }
   ]
 }
