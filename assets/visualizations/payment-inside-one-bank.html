@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment Inside One Bank</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: light-dark(#ffffff, #181818);
+      --text: light-dark(#1a1c1f, #ffffff);
+      --muted: light-dark(#667085, #a7afbd);
+      --border: light-dark(#cfd5dd, #4a5361);
+      --bank-bg: light-dark(#f5faff, #122b40);
+      --company-bg: light-dark(#e5f3ff, #173b59);
+      --supplier-bg: light-dark(#f4f5f7, #292c31);
+      --arrow: light-dark(#338fd9, #83c3ff);
+      --purpose-bg: light-dark(#ffffff, #181818);
+      --purpose-text: light-dark(#1f6fa9, #a8d8ff);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      padding: clamp(18px, 4vw, 42px);
+      color: var(--text);
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .route {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 48px);
+      line-height: 1.08;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    .subtitle {
+      margin: 0 0 clamp(34px, 6vw, 64px);
+      color: var(--muted);
+      font-size: clamp(16px, 2vw, 21px);
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: minmax(170px, 1fr) minmax(66px, .48fr) minmax(390px, 2.3fr) minmax(66px, .48fr) minmax(170px, 1fr);
+      align-items: center;
+      gap: 14px;
+    }
+
+    .node {
+      display: grid;
+      place-items: center;
+      min-height: 112px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--supplier-bg);
+      text-align: center;
+      font-size: clamp(18px, 2.2vw, 25px);
+      font-weight: 650;
+      line-height: 1.15;
+    }
+
+    .bank {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 72px 1fr;
+      align-items: center;
+      gap: 12px;
+      min-height: 250px;
+      padding: 72px 22px 24px;
+      border: 2px solid var(--arrow);
+      border-radius: 24px;
+      background: var(--bank-bg);
+    }
+
+    .bank-title {
+      position: absolute;
+      top: 20px;
+      left: 22px;
+      right: 22px;
+      color: var(--purpose-text);
+      text-align: center;
+      font-size: clamp(17px, 2vw, 22px);
+      font-weight: 650;
+    }
+
+    .bank .node { background: var(--company-bg); }
+
+    .arrow {
+      position: relative;
+      height: 4px;
+      background: var(--arrow);
+    }
+
+    .arrow::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -1px;
+      width: 16px;
+      height: 16px;
+      border-top: 4px solid var(--arrow);
+      border-right: 4px solid var(--arrow);
+      transform: translateY(-50%) rotate(45deg);
+    }
+
+    .purpose {
+      position: absolute;
+      left: 50%;
+      bottom: 14px;
+      width: max-content;
+      max-width: 210px;
+      padding: 5px 8px;
+      transform: translateX(-50%);
+      color: var(--purpose-text);
+      background: var(--purpose-bg);
+      text-align: center;
+      font-size: 14px;
+      font-weight: 650;
+      line-height: 1.2;
+    }
+
+    .bank .arrow .purpose {
+      bottom: 18px;
+      max-width: 150px;
+      background: var(--bank-bg);
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      margin-top: 38px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .legend span::before {
+      content: "";
+      display: inline-block;
+      width: 30px;
+      height: 3px;
+      margin: 0 8px 3px 0;
+      background: var(--arrow);
+    }
+
+    @media (max-width: 820px) {
+      .flow {
+        grid-template-columns: 1fr;
+        justify-items: stretch;
+      }
+
+      .flow > .arrow {
+        width: 4px;
+        height: 72px;
+        margin: 0 auto;
+      }
+
+      .flow > .arrow::after {
+        top: auto;
+        right: 50%;
+        bottom: 0;
+        transform: translateX(50%) rotate(135deg);
+      }
+
+      .flow > .arrow .purpose {
+        left: 22px;
+        bottom: 50%;
+        transform: translateY(50%);
+      }
+
+      .bank {
+        grid-template-columns: 1fr;
+        padding-top: 78px;
+      }
+
+      .bank > .arrow {
+        width: 4px;
+        height: 80px;
+        margin: 0 auto;
+      }
+
+      .bank > .arrow::after {
+        top: auto;
+        right: 50%;
+        bottom: 0;
+        transform: translateX(50%) rotate(135deg);
+      }
+
+      .bank .arrow .purpose {
+        left: 22px;
+        bottom: 50%;
+        transform: translateY(50%);
+      }
+
+      .legend { margin-top: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="route" aria-labelledby="route-title">
+    <h1 id="route-title">Payment Purpose Inside One Bank</h1>
+    <p class="subtitle">The complete route is executed through either UBL or Invest Bank.</p>
+
+    <section class="flow" aria-label="Payment route from liquidity suppliers to final suppliers">
+      <div class="node">Liquidity Suppliers</div>
+
+      <div class="arrow" aria-label="Payment purpose: Commodity">
+        <span class="purpose">Payment purpose<br>Commodity</span>
+      </div>
+
+      <div class="bank">
+        <div class="bank-title">One Bank: UBL or Invest Bank</div>
+        <div class="node">Crescent</div>
+        <div class="arrow" aria-label="Payment purpose: Equipment">
+          <span class="purpose">Payment purpose<br>Equipment</span>
+        </div>
+        <div class="node">Nova General</div>
+      </div>
+
+      <div class="arrow" aria-label="Payment purpose: Equipment">
+        <span class="purpose">Payment purpose<br>Equipment</span>
+      </div>
+
+      <div class="node">Final Suppliers</div>
+    </section>
+
+    <div class="legend" aria-label="Legend">
+      <span>Direction of payment</span>
+    </div>
+  </main>
+</body>
+</html>

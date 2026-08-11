@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-21",
+  "updatedAt": "2026-08-11",
   "items": [
     {
       "id": "mintai-fundamental-route",
@@ -25,6 +25,14 @@
       "file": "nova-general-indonesia-route.html",
       "category": "Routes",
       "updatedAt": "2026-07-21"
+    },
+    {
+      "id": "payment-inside-one-bank",
+      "title": "Payment Purpose Inside One Bank",
+      "description": "Commodity liquidity to Crescent, transfer to Nova General, and equipment payments to final suppliers within UBL or Invest Bank.",
+      "file": "payment-inside-one-bank.html",
+      "category": "Routes",
+      "updatedAt": "2026-08-11"
     }
   ]
 }
