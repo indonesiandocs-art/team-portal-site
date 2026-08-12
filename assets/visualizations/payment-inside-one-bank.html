@@ -888,71 +888,110 @@ svg.lucide {
 html&gt;body{padding:0}&lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
-&lt;div id=&quot;payment-inside-one-bank-flow&quot;&gt;
-  &lt;svg class=&quot;flow&quot; viewBox=&quot;0 0 920 300&quot; role=&quot;img&quot; aria-labelledby=&quot;one-bank-title one-bank-desc&quot;&gt;
-    &lt;title id=&quot;one-bank-title&quot;&gt;Payment purpose inside one bank&lt;/title&gt;
-    &lt;desc id=&quot;one-bank-desc&quot;&gt;Liquidity suppliers pay Crescent for commodity. Crescent and Nova General operate inside either UBL or Invest Bank. Crescent pays Nova General for equipment, and Nova General pays final suppliers for equipment.&lt;/desc&gt;
+&lt;div id=&quot;payment-bank-streams-flow&quot;&gt;
+  &lt;svg class=&quot;flow&quot; viewBox=&quot;0 0 920 510&quot; role=&quot;img&quot; aria-labelledby=&quot;bank-streams-title bank-streams-desc&quot;&gt;
+    &lt;title id=&quot;bank-streams-title&quot;&gt;Same-bank and cross-bank payment streams&lt;/title&gt;
+    &lt;desc id=&quot;bank-streams-desc&quot;&gt;The first stream routes commodity liquidity to Crescent and equipment payments through Nova General inside either UBL or Invest Bank. The second stream routes commodity liquidity to Crescent at UBL, transfers equipment payment to Nova General at Invest Bank, and then pays finance suppliers.&lt;/desc&gt;
     &lt;defs&gt;
-      &lt;marker id=&quot;one-bank-arrow&quot; viewBox=&quot;0 0 10 10&quot; refX=&quot;8&quot; refY=&quot;5&quot; markerWidth=&quot;7&quot; markerHeight=&quot;7&quot; orient=&quot;auto-start-reverse&quot;&gt;
+      &lt;marker id=&quot;bank-stream-arrow&quot; viewBox=&quot;0 0 10 10&quot; refX=&quot;8&quot; refY=&quot;5&quot; markerWidth=&quot;7&quot; markerHeight=&quot;7&quot; orient=&quot;auto-start-reverse&quot;&gt;
         &lt;path d=&quot;M0 0L10 5L0 10Z&quot; fill=&quot;var(--viz-series-1)&quot;/&gt;
       &lt;/marker&gt;
     &lt;/defs&gt;
 
-    &lt;text class=&quot;section-label&quot; x=&quot;28&quot; y=&quot;40&quot;&gt;LIQUIDITY SOURCE&lt;/text&gt;
-    &lt;g class=&quot;node&quot; transform=&quot;translate(28 92)&quot;&gt;
-      &lt;rect width=&quot;172&quot; height=&quot;82&quot; rx=&quot;14&quot;/&gt;
-      &lt;text x=&quot;86&quot; y=&quot;36&quot; text-anchor=&quot;middle&quot;&gt;Liquidity&lt;/text&gt;
-      &lt;text x=&quot;86&quot; y=&quot;59&quot; text-anchor=&quot;middle&quot;&gt;Suppliers&lt;/text&gt;
+    &lt;rect class=&quot;lane&quot; x=&quot;18&quot; y=&quot;24&quot; width=&quot;884&quot; height=&quot;214&quot; rx=&quot;18&quot;/&gt;
+    &lt;text class=&quot;lane-title&quot; x=&quot;40&quot; y=&quot;55&quot;&gt;STREAM 1 · PAYMENT INSIDE ONE BANK&lt;/text&gt;
+
+    &lt;g class=&quot;node&quot; transform=&quot;translate(40 100)&quot;&gt;
+      &lt;rect width=&quot;154&quot; height=&quot;78&quot; rx=&quot;14&quot;/&gt;
+      &lt;text x=&quot;77&quot; y=&quot;34&quot; text-anchor=&quot;middle&quot;&gt;Liquidity&lt;/text&gt;
+      &lt;text x=&quot;77&quot; y=&quot;57&quot; text-anchor=&quot;middle&quot;&gt;Suppliers&lt;/text&gt;
     &lt;/g&gt;
 
-    &lt;rect class=&quot;bank-boundary&quot; x=&quot;276&quot; y=&quot;52&quot; width=&quot;374&quot; height=&quot;176&quot; rx=&quot;18&quot;/&gt;
-    &lt;text class=&quot;group-label&quot; x=&quot;298&quot; y=&quot;82&quot;&gt;ONE BANK · UBL OR INVEST BANK&lt;/text&gt;
-
-    &lt;g class=&quot;node account&quot; transform=&quot;translate(304 112)&quot;&gt;
-      &lt;rect width=&quot;130&quot; height=&quot;78&quot; rx=&quot;14&quot;/&gt;
-      &lt;text x=&quot;65&quot; y=&quot;46&quot; text-anchor=&quot;middle&quot;&gt;Crescent&lt;/text&gt;
+    &lt;rect class=&quot;bank-boundary&quot; x=&quot;276&quot; y=&quot;72&quot; width=&quot;378&quot; height=&quot;138&quot; rx=&quot;18&quot;/&gt;
+    &lt;text class=&quot;group-label&quot; x=&quot;298&quot; y=&quot;100&quot;&gt;ONE BANK · UBL OR INVEST BANK&lt;/text&gt;
+    &lt;g class=&quot;node account&quot; transform=&quot;translate(304 116)&quot;&gt;
+      &lt;rect width=&quot;130&quot; height=&quot;68&quot; rx=&quot;14&quot;/&gt;
+      &lt;text x=&quot;65&quot; y=&quot;40&quot; text-anchor=&quot;middle&quot;&gt;Crescent&lt;/text&gt;
+    &lt;/g&gt;
+    &lt;g class=&quot;node account&quot; transform=&quot;translate(496 116)&quot;&gt;
+      &lt;rect width=&quot;130&quot; height=&quot;68&quot; rx=&quot;14&quot;/&gt;
+      &lt;text x=&quot;65&quot; y=&quot;29&quot; text-anchor=&quot;middle&quot;&gt;Nova&lt;/text&gt;
+      &lt;text x=&quot;65&quot; y=&quot;50&quot; text-anchor=&quot;middle&quot;&gt;General&lt;/text&gt;
     &lt;/g&gt;
 
-    &lt;g class=&quot;node account&quot; transform=&quot;translate(492 112)&quot;&gt;
-      &lt;rect width=&quot;130&quot; height=&quot;78&quot; rx=&quot;14&quot;/&gt;
-      &lt;text x=&quot;65&quot; y=&quot;35&quot; text-anchor=&quot;middle&quot;&gt;Nova&lt;/text&gt;
-      &lt;text x=&quot;65&quot; y=&quot;57&quot; text-anchor=&quot;middle&quot;&gt;General&lt;/text&gt;
+    &lt;g class=&quot;node destination&quot; transform=&quot;translate(730 100)&quot;&gt;
+      &lt;rect width=&quot;150&quot; height=&quot;78&quot; rx=&quot;14&quot;/&gt;
+      &lt;text x=&quot;75&quot; y=&quot;34&quot; text-anchor=&quot;middle&quot;&gt;Final&lt;/text&gt;
+      &lt;text x=&quot;75&quot; y=&quot;57&quot; text-anchor=&quot;middle&quot;&gt;Suppliers&lt;/text&gt;
     &lt;/g&gt;
 
-    &lt;text class=&quot;section-label&quot; x=&quot;744&quot; y=&quot;40&quot;&gt;PAYMENT DESTINATION&lt;/text&gt;
-    &lt;g class=&quot;node destination&quot; transform=&quot;translate(734 92)&quot;&gt;
-      &lt;rect width=&quot;158&quot; height=&quot;82&quot; rx=&quot;14&quot;/&gt;
-      &lt;text x=&quot;79&quot; y=&quot;36&quot; text-anchor=&quot;middle&quot;&gt;Final&lt;/text&gt;
-      &lt;text x=&quot;79&quot; y=&quot;59&quot; text-anchor=&quot;middle&quot;&gt;Suppliers&lt;/text&gt;
+    &lt;path class=&quot;edge&quot; d=&quot;M194 139H301&quot; marker-end=&quot;url(#bank-stream-arrow)&quot;/&gt;
+    &lt;text class=&quot;edge-label&quot; x=&quot;247&quot; y=&quot;111&quot; text-anchor=&quot;middle&quot;&gt;Payment purpose&lt;/text&gt;
+    &lt;text class=&quot;edge-label purpose-value&quot; x=&quot;247&quot; y=&quot;128&quot; text-anchor=&quot;middle&quot;&gt;Commodity&lt;/text&gt;
+    &lt;path class=&quot;edge&quot; d=&quot;M434 150H493&quot; marker-end=&quot;url(#bank-stream-arrow)&quot;/&gt;
+    &lt;text class=&quot;edge-label compact&quot; x=&quot;464&quot; y=&quot;123&quot; text-anchor=&quot;middle&quot;&gt;Equipment&lt;/text&gt;
+    &lt;path class=&quot;edge&quot; d=&quot;M626 150C681 150 680 139 727 139&quot; marker-end=&quot;url(#bank-stream-arrow)&quot;/&gt;
+    &lt;text class=&quot;edge-label&quot; x=&quot;678&quot; y=&quot;111&quot; text-anchor=&quot;middle&quot;&gt;Payment purpose&lt;/text&gt;
+    &lt;text class=&quot;edge-label purpose-value&quot; x=&quot;678&quot; y=&quot;128&quot; text-anchor=&quot;middle&quot;&gt;Equipment&lt;/text&gt;
+
+    &lt;rect class=&quot;lane cross-bank-lane&quot; x=&quot;18&quot; y=&quot;258&quot; width=&quot;884&quot; height=&quot;228&quot; rx=&quot;18&quot;/&gt;
+    &lt;text class=&quot;lane-title&quot; x=&quot;40&quot; y=&quot;289&quot;&gt;STREAM 2 · PAYMENT BETWEEN BANKS&lt;/text&gt;
+
+    &lt;g class=&quot;node&quot; transform=&quot;translate(40 350)&quot;&gt;
+      &lt;rect width=&quot;154&quot; height=&quot;78&quot; rx=&quot;14&quot;/&gt;
+      &lt;text x=&quot;77&quot; y=&quot;34&quot; text-anchor=&quot;middle&quot;&gt;Liquidity&lt;/text&gt;
+      &lt;text x=&quot;77&quot; y=&quot;57&quot; text-anchor=&quot;middle&quot;&gt;Suppliers&lt;/text&gt;
     &lt;/g&gt;
 
-    &lt;path class=&quot;edge&quot; d=&quot;M200 133H301&quot; marker-end=&quot;url(#one-bank-arrow)&quot;/&gt;
-    &lt;text class=&quot;edge-label&quot; x=&quot;250&quot; y=&quot;105&quot; text-anchor=&quot;middle&quot;&gt;Payment purpose&lt;/text&gt;
-    &lt;text class=&quot;edge-label purpose-value&quot; x=&quot;250&quot; y=&quot;122&quot; text-anchor=&quot;middle&quot;&gt;Commodity&lt;/text&gt;
+    &lt;rect class=&quot;bank-boundary single-bank&quot; x=&quot;276&quot; y=&quot;308&quot; width=&quot;174&quot; height=&quot;150&quot; rx=&quot;18&quot;/&gt;
+    &lt;text class=&quot;group-label&quot; x=&quot;296&quot; y=&quot;337&quot;&gt;UBL BANK&lt;/text&gt;
+    &lt;g class=&quot;node account&quot; transform=&quot;translate(298 360)&quot;&gt;
+      &lt;rect width=&quot;130&quot; height=&quot;68&quot; rx=&quot;14&quot;/&gt;
+      &lt;text x=&quot;65&quot; y=&quot;40&quot; text-anchor=&quot;middle&quot;&gt;Crescent&lt;/text&gt;
+    &lt;/g&gt;
 
-    &lt;path class=&quot;edge&quot; d=&quot;M434 151H489&quot; marker-end=&quot;url(#one-bank-arrow)&quot;/&gt;
-    &lt;text class=&quot;edge-label compact&quot; x=&quot;462&quot; y=&quot;119&quot; text-anchor=&quot;middle&quot;&gt;Payment&lt;/text&gt;
-    &lt;text class=&quot;edge-label compact&quot; x=&quot;462&quot; y=&quot;135&quot; text-anchor=&quot;middle&quot;&gt;purpose&lt;/text&gt;
-    &lt;text class=&quot;edge-label purpose-value compact&quot; x=&quot;462&quot; y=&quot;176&quot; text-anchor=&quot;middle&quot;&gt;Equipment&lt;/text&gt;
+    &lt;rect class=&quot;bank-boundary single-bank&quot; x=&quot;490&quot; y=&quot;308&quot; width=&quot;174&quot; height=&quot;150&quot; rx=&quot;18&quot;/&gt;
+    &lt;text class=&quot;group-label&quot; x=&quot;510&quot; y=&quot;337&quot;&gt;INVEST BANK&lt;/text&gt;
+    &lt;g class=&quot;node account&quot; transform=&quot;translate(512 360)&quot;&gt;
+      &lt;rect width=&quot;130&quot; height=&quot;68&quot; rx=&quot;14&quot;/&gt;
+      &lt;text x=&quot;65&quot; y=&quot;29&quot; text-anchor=&quot;middle&quot;&gt;Nova&lt;/text&gt;
+      &lt;text x=&quot;65&quot; y=&quot;50&quot; text-anchor=&quot;middle&quot;&gt;General&lt;/text&gt;
+    &lt;/g&gt;
 
-    &lt;path class=&quot;edge&quot; d=&quot;M622 151C680 151 680 133 731 133&quot; marker-end=&quot;url(#one-bank-arrow)&quot;/&gt;
-    &lt;text class=&quot;edge-label&quot; x=&quot;678&quot; y=&quot;105&quot; text-anchor=&quot;middle&quot;&gt;Payment purpose&lt;/text&gt;
-    &lt;text class=&quot;edge-label purpose-value&quot; x=&quot;678&quot; y=&quot;122&quot; text-anchor=&quot;middle&quot;&gt;Equipment&lt;/text&gt;
+    &lt;g class=&quot;node destination&quot; transform=&quot;translate(730 350)&quot;&gt;
+      &lt;rect width=&quot;150&quot; height=&quot;78&quot; rx=&quot;14&quot;/&gt;
+      &lt;text x=&quot;75&quot; y=&quot;34&quot; text-anchor=&quot;middle&quot;&gt;Finance&lt;/text&gt;
+      &lt;text x=&quot;75&quot; y=&quot;57&quot; text-anchor=&quot;middle&quot;&gt;Suppliers&lt;/text&gt;
+    &lt;/g&gt;
+
+    &lt;path class=&quot;edge&quot; d=&quot;M194 389H295&quot; marker-end=&quot;url(#bank-stream-arrow)&quot;/&gt;
+    &lt;text class=&quot;edge-label&quot; x=&quot;245&quot; y=&quot;361&quot; text-anchor=&quot;middle&quot;&gt;Payment purpose&lt;/text&gt;
+    &lt;text class=&quot;edge-label purpose-value&quot; x=&quot;245&quot; y=&quot;378&quot; text-anchor=&quot;middle&quot;&gt;Commodity&lt;/text&gt;
+    &lt;path class=&quot;edge interbank&quot; d=&quot;M428 394H509&quot; marker-end=&quot;url(#bank-stream-arrow)&quot;/&gt;
+    &lt;text class=&quot;edge-label&quot; x=&quot;469&quot; y=&quot;362&quot; text-anchor=&quot;middle&quot;&gt;Interbank payment&lt;/text&gt;
+    &lt;text class=&quot;edge-label purpose-value&quot; x=&quot;469&quot; y=&quot;379&quot; text-anchor=&quot;middle&quot;&gt;Equipment&lt;/text&gt;
+    &lt;path class=&quot;edge&quot; d=&quot;M642 394C687 394 690 389 727 389&quot; marker-end=&quot;url(#bank-stream-arrow)&quot;/&gt;
+    &lt;text class=&quot;edge-label&quot; x=&quot;685&quot; y=&quot;361&quot; text-anchor=&quot;middle&quot;&gt;Payment purpose&lt;/text&gt;
+    &lt;text class=&quot;edge-label purpose-value&quot; x=&quot;685&quot; y=&quot;378&quot; text-anchor=&quot;middle&quot;&gt;Equipment&lt;/text&gt;
   &lt;/svg&gt;
 &lt;/div&gt;
 
 &lt;style&gt;
-  #payment-inside-one-bank-flow { width: 100%; color: var(--foreground); }
-  #payment-inside-one-bank-flow .flow { display: block; width: 100%; height: auto; }
-  #payment-inside-one-bank-flow .bank-boundary { fill: color-mix(in srgb, var(--muted) 28%, transparent); stroke: var(--border); stroke-width: 1.5; }
-  #payment-inside-one-bank-flow .section-label,
-  #payment-inside-one-bank-flow .group-label { fill: var(--muted-foreground); font-weight: 500; }
-  #payment-inside-one-bank-flow .node rect { fill: var(--card); stroke: var(--border); stroke-width: 1.5; }
-  #payment-inside-one-bank-flow .node text { fill: var(--card-foreground); font-weight: 500; }
-  #payment-inside-one-bank-flow .edge { fill: none; stroke: var(--viz-series-1); stroke-width: 3.5; }
-  #payment-inside-one-bank-flow .edge-label { fill: var(--muted-foreground); font-size: 13px; }
-  #payment-inside-one-bank-flow .edge-label.purpose-value { fill: var(--foreground); font-weight: 500; }
-  #payment-inside-one-bank-flow .edge-label.compact { font-size: 12px; }
+  #payment-bank-streams-flow { width: 100%; color: var(--foreground); }
+  #payment-bank-streams-flow .flow { display: block; width: 100%; height: auto; }
+  #payment-bank-streams-flow .lane { fill: color-mix(in srgb, var(--muted) 22%, transparent); stroke: var(--border); stroke-width: 1.5; }
+  #payment-bank-streams-flow .cross-bank-lane { fill: color-mix(in srgb, var(--viz-series-1) 7%, transparent); }
+  #payment-bank-streams-flow .bank-boundary { fill: color-mix(in srgb, var(--muted) 30%, transparent); stroke: var(--border); stroke-width: 1.5; }
+  #payment-bank-streams-flow .single-bank { stroke: var(--viz-series-1); }
+  #payment-bank-streams-flow .lane-title,
+  #payment-bank-streams-flow .group-label { fill: var(--muted-foreground); font-weight: 500; }
+  #payment-bank-streams-flow .node rect { fill: var(--card); stroke: var(--border); stroke-width: 1.5; }
+  #payment-bank-streams-flow .node text { fill: var(--card-foreground); font-weight: 500; }
+  #payment-bank-streams-flow .edge { fill: none; stroke: var(--viz-series-1); stroke-width: 3.5; }
+  #payment-bank-streams-flow .edge.interbank { stroke-width: 5; }
+  #payment-bank-streams-flow .edge-label { fill: var(--muted-foreground); font-size: 13px; }
+  #payment-bank-streams-flow .edge-label.purpose-value { fill: var(--foreground); font-weight: 500; }
+  #payment-bank-streams-flow .edge-label.compact { fill: var(--foreground); font-size: 12px; font-weight: 500; }
 &lt;/style&gt;
 
 &lt;script src=&quot;https://unpkg.com/@floating-ui/core@1.7.3/dist/floating-ui.core.umd.min.js&quot;&gt;&lt;/script&gt;
