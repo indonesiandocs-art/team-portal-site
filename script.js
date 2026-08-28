@@ -944,7 +944,8 @@ function normalizeCompanyRecords(items) {
     id: item.id || createId(`company-${index}`),
     name: String(item.name || "New company").trim(),
     website: String(item.website || "").trim(),
-    email: String(item.email || "").trim(),
+    bankEmail: String(item.bankEmail || "").trim(),
+    clientEmail: String(item.clientEmail || item.email || "").trim(),
   }));
 }
 
@@ -964,7 +965,8 @@ function renderCompanies() {
             <h3>${escapeHtml(company.name)}</h3>
             <div class="company-links">
               ${company.website ? `<a href="${escapeHtml(company.website)}" target="_blank" rel="noopener noreferrer">${escapeHtml(company.website.replace(/^https?:\/\//, "").replace(/\/$/, ""))}</a>` : `<span>Website not added</span>`}
-              ${company.email ? `<a href="mailto:${escapeHtml(company.email)}">${escapeHtml(company.email)}</a>` : `<span>Email not added</span>`}
+              ${company.bankEmail ? `<a href="mailto:${escapeHtml(company.bankEmail)}"><strong>Banks:</strong> ${escapeHtml(company.bankEmail)}</a>` : `<span>Banks: email not added</span>`}
+              ${company.clientEmail ? `<a href="mailto:${escapeHtml(company.clientEmail)}"><strong>Clients:</strong> ${escapeHtml(company.clientEmail)}</a>` : `<span>Clients: email not added</span>`}
             </div>
           </div>
         </article>
@@ -2307,7 +2309,7 @@ function renderAdminCompanies() {
     ? state.companies.map((company) => `
         <button class="admin-record ${company.id === state.currentCompanyId ? "is-active" : ""}" type="button" data-company-id="${escapeHtml(company.id)}">
           <strong>${escapeHtml(company.name)}</strong>
-          <span>${escapeHtml(company.email || company.website || "Details not added")}</span>
+          <span>${escapeHtml(company.bankEmail || company.clientEmail || company.website || "Details not added")}</span>
         </button>
       `).join("")
     : `<div class="empty-panel"><strong>No companies</strong><span>Add the first group company.</span></div>`;
@@ -2470,7 +2472,7 @@ function fillCompanyForm(company) {
     return;
   }
   elements.companyFormTitle.textContent = `Edit ${company.name}`;
-  ["name", "website", "email"].forEach((key) => {
+  ["name", "website", "bankEmail", "clientEmail"].forEach((key) => {
     elements.companyForm.elements[key].value = company[key] || "";
   });
 }
@@ -2650,7 +2652,7 @@ function createRadarRecord() {
 }
 
 function createCompanyRecord() {
-  const company = { id: createId("company"), name: "New company", website: "", email: "" };
+  const company = { id: createId("company"), name: "New company", website: "", bankEmail: "", clientEmail: "" };
   state.companies.unshift(company);
   state.currentCompanyId = company.id;
   refreshPortal();
@@ -2771,7 +2773,7 @@ function saveCompanyFromForm(event) {
   const company = getCurrentCompany();
   if (!company) return;
   const formData = new FormData(elements.companyForm);
-  ["name", "website", "email"].forEach((key) => {
+  ["name", "website", "bankEmail", "clientEmail"].forEach((key) => {
     company[key] = String(formData.get(key) || "").trim();
   });
   refreshPortal();

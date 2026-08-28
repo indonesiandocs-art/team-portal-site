@@ -241,7 +241,8 @@ function cleanCompany(item, index) {
     id: stringValue(item?.id, `company-${index + 1}`),
     name: stringValue(item?.name, "New company"),
     website: stringValue(item?.website, ""),
-    email: stringValue(item?.email, ""),
+    bankEmail: stringValue(item?.bankEmail, ""),
+    clientEmail: stringValue(item?.clientEmail, stringValue(item?.email, "")),
   };
 }
 
