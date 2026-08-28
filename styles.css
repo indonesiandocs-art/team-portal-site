@@ -546,6 +546,58 @@ h2 {
   background: #ffffff;
 }
 
+.company-directory {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.company-card {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.company-mark {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 50%;
+  color: #ffffff;
+  background: var(--ink);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.company-card h3 {
+  margin: 2px 0 10px;
+  font-size: 17px;
+}
+
+.company-links {
+  display: grid;
+  gap: 6px;
+}
+
+.company-links a,
+.company-links span {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.company-links a:hover {
+  color: var(--accent);
+}
+
 .flight-page-header {
   align-items: center;
 }

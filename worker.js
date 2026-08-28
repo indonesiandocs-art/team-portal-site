@@ -1,10 +1,14 @@
 const DATA_KEY = "portal-data:v1";
+const COMPANIES_DATA_KEY = "companies-data:v1";
 const MAX_BODY_SIZE = 1_000_000;
 const ACCESS_COOKIE = "nova_portal_access";
 const VISUALIZATIONS_COOKIE = "nova_visualizations_access";
+const COMPANIES_COOKIE = "nova_companies_access";
 const ACCESS_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 const VISUALIZATIONS_COOKIE_MAX_AGE = 60 * 60 * 24 * 14;
+const COMPANIES_COOKIE_MAX_AGE = 60 * 60 * 24 * 14;
 const VISUALIZATIONS_FALLBACK_ACCESS_HASH = "80d55f8dd606a21aee459bf6725c5f52740bff1f0c82b7e993868e93c55ca3a4";
+const COMPANIES_FALLBACK_ACCESS_HASH = "f859f3865576933856ff3e1616c3e29aaede4f80c977e40127aeddb5233c6da2";
 const VISUALIZATIONS_ASSET_PREFIX = "/assets/visualizations/";
 const VISUALIZATIONS_MANIFEST_PATH = "/assets/visualizations/manifest.json";
 
@@ -79,6 +83,10 @@ async function getVisualizationsCookieValue(accessCode) {
   return sha256(`nova-visualizations-access:${accessCode}`);
 }
 
+async function getCompaniesCookieValue(accessCode) {
+  return sha256(`nova-companies-access:${accessCode}`);
+}
+
 async function hasPortalAccess(request, env) {
   if (!env.PORTAL_ACCESS_CODE) {
     return true;
@@ -109,6 +117,19 @@ async function hasVisualizationsAccess(request, env) {
   }
 
   return cookieValue === await getVisualizationsAccessHash(env);
+}
+
+async function getCompaniesAccessHash(env) {
+  if (env.COMPANIES_ACCESS_CODE) {
+    return getCompaniesCookieValue(env.COMPANIES_ACCESS_CODE);
+  }
+
+  return COMPANIES_FALLBACK_ACCESS_HASH;
+}
+
+async function hasCompaniesAccess(request, env) {
+  const cookieValue = getCookie(request, COMPANIES_COOKIE);
+  return Boolean(cookieValue) && cookieValue === await getCompaniesAccessHash(env);
 }
 
 function stringValue(value, fallback = "") {
@@ -215,6 +236,15 @@ function cleanVacationRequest(item, index) {
   };
 }
 
+function cleanCompany(item, index) {
+  return {
+    id: stringValue(item?.id, `company-${index + 1}`),
+    name: stringValue(item?.name, "New company"),
+    website: stringValue(item?.website, ""),
+    email: stringValue(item?.email, ""),
+  };
+}
+
 function cleanPortalData(data) {
   return {
     employees: Array.isArray(data?.employees) ? data.employees.map(cleanEmployee) : [],
@@ -258,6 +288,38 @@ async function handlePortalData(request, env) {
       return jsonResponse({ ok: true, updatedAt: data.updatedAt });
     } catch (error) {
       return jsonResponse({ error: error.message || "Could not save content" }, 400);
+    }
+  }
+
+  return jsonResponse({ error: "Method not allowed" }, 405);
+}
+
+async function handleCompanies(request, env) {
+  if (!env.PORTAL_KV) {
+    return jsonResponse({ error: "Shared storage is not configured" }, 503);
+  }
+
+  if (request.method === "GET") {
+    if (!(await hasCompaniesAccess(request, env)) && !isAuthorized(request, env)) {
+      return unauthorized();
+    }
+
+    const items = (await env.PORTAL_KV.get(COMPANIES_DATA_KEY, "json")) || [];
+    return jsonResponse({ companies: Array.isArray(items) ? items.map(cleanCompany) : [] });
+  }
+
+  if (request.method === "PUT") {
+    if (!isAuthorized(request, env)) {
+      return unauthorized();
+    }
+
+    try {
+      const body = await readJsonBody(request);
+      const companies = (Array.isArray(body?.companies) ? body.companies : []).map(cleanCompany);
+      await env.PORTAL_KV.put(COMPANIES_DATA_KEY, JSON.stringify(companies));
+      return jsonResponse({ ok: true, companies });
+    } catch (error) {
+      return jsonResponse({ error: error.message || "Could not save companies" }, 400);
     }
   }
 
@@ -564,6 +626,28 @@ async function handleVisualizationsLogin(request, env) {
   }
 }
 
+async function handleCompaniesLogin(request, env) {
+  if (request.method !== "POST") {
+    return jsonResponse({ error: "Method not allowed" }, 405);
+  }
+
+  try {
+    const body = await readJsonBody(request);
+    const accessCode = stringValue(body?.accessCode);
+    const cookieValue = accessCode ? await getCompaniesCookieValue(accessCode) : "";
+
+    if (!cookieValue || cookieValue !== await getCompaniesAccessHash(env)) {
+      return unauthorized();
+    }
+
+    return jsonResponse({ ok: true }, 200, {
+      "set-cookie": `${COMPANIES_COOKIE}=${encodeURIComponent(cookieValue)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${COMPANIES_COOKIE_MAX_AGE}`,
+    });
+  } catch {
+    return jsonResponse({ error: "Could not check company directory access" }, 400);
+  }
+}
+
 function handleVisualizationsLogout() {
   return jsonResponse(
     { ok: true },
@@ -656,6 +740,14 @@ export default {
 
     if (url.pathname === "/api/visualizations-login") {
       return handleVisualizationsLogin(request, env);
+    }
+
+    if (url.pathname === "/api/companies-login") {
+      return handleCompaniesLogin(request, env);
+    }
+
+    if (url.pathname === "/api/companies") {
+      return handleCompanies(request, env);
     }
 
     if (url.pathname === "/api/visualizations-logout") {

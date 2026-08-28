@@ -184,6 +184,8 @@ const vacationRequestEndpoint = "/api/vacation-request";
 const holidayCalendarEndpoint = "/assets/holiday-calendar.json";
 const visualizationsLoginEndpoint = "/api/visualizations-login";
 const visualizationsListEndpoint = "/api/visualizations-list";
+const companiesLoginEndpoint = "/api/companies-login";
+const companiesEndpoint = "/api/companies";
 
 const state = {
   search: "",
@@ -213,6 +215,9 @@ const state = {
   vacationRequests: [],
   visualizations: [],
   visualizationsUnlocked: false,
+  companies: [],
+  companiesUnlocked: false,
+  currentCompanyId: "",
   currentVisualizationId: "",
   adminToken: "",
   adminUnlocked: false,
@@ -289,6 +294,12 @@ const elements = {
   visualizationMeta: document.querySelector("#visualizationMeta"),
   visualizationFrame: document.querySelector("#visualizationFrame"),
   visualizationEmptyState: document.querySelector("#visualizationEmptyState"),
+  companiesGate: document.querySelector("#companiesGate"),
+  companiesWorkspace: document.querySelector("#companiesWorkspace"),
+  companiesAuthForm: document.querySelector("#companiesAuthForm"),
+  companiesAccessInput: document.querySelector("#companiesAccessInput"),
+  companiesStatus: document.querySelector("#companiesStatus"),
+  companyDirectory: document.querySelector("#companyDirectory"),
   adminTabs: document.querySelectorAll("[data-admin-tab]"),
   adminSections: document.querySelectorAll("[data-admin-section]"),
   adminEmployeeList: document.querySelector("#adminEmployeeList"),
@@ -296,6 +307,7 @@ const elements = {
   adminEventList: document.querySelector("#adminEventList"),
   adminDocumentList: document.querySelector("#adminDocumentList"),
   adminRadarList: document.querySelector("#adminRadarList"),
+  adminCompanyList: document.querySelector("#adminCompanyList"),
   adminAuthForm: document.querySelector("#adminAuthForm"),
   adminLockedPanel: document.querySelector("#adminLockedPanel"),
   contentOverview: document.querySelector("#contentOverview"),
@@ -328,6 +340,10 @@ const elements = {
   radarFormTitle: document.querySelector("#radarFormTitle"),
   createRadarRecordButton: document.querySelector("#createRadarRecordButton"),
   deleteRadarButton: document.querySelector("#deleteRadarButton"),
+  companyForm: document.querySelector("#companyForm"),
+  companyFormTitle: document.querySelector("#companyFormTitle"),
+  createCompanyRecordButton: document.querySelector("#createCompanyRecordButton"),
+  deleteCompanyButton: document.querySelector("#deleteCompanyButton"),
 };
 
 function initials(name) {
@@ -473,6 +489,7 @@ async function verifyAdminAccess({ silent = false } = {}) {
 
     if (response.ok) {
       setAdminStatus("Admin access unlocked", "ready");
+      await loadCompanies({ asAdmin: true, silent: true });
       return true;
     }
 
@@ -919,6 +936,120 @@ async function submitVisualizationsAccess(event) {
     await loadVisualizations({ silent: true });
   } catch {
     setVisualizationsStatus("Could not check access. Try again.", "error");
+  }
+}
+
+function normalizeCompanyRecords(items) {
+  return (Array.isArray(items) ? items : []).map((item, index) => ({
+    id: item.id || createId(`company-${index}`),
+    name: String(item.name || "New company").trim(),
+    website: String(item.website || "").trim(),
+    email: String(item.email || "").trim(),
+  }));
+}
+
+function renderCompanies() {
+  elements.companiesGate.hidden = state.companiesUnlocked;
+  elements.companiesWorkspace.hidden = !state.companiesUnlocked;
+
+  if (!state.companiesUnlocked) {
+    return;
+  }
+
+  elements.companyDirectory.innerHTML = state.companies.length
+    ? [...state.companies].sort((a, b) => a.name.localeCompare(b.name)).map((company) => `
+        <article class="company-card">
+          <div class="company-mark" aria-hidden="true">${escapeHtml(company.name.charAt(0).toUpperCase())}</div>
+          <div>
+            <h3>${escapeHtml(company.name)}</h3>
+            <div class="company-links">
+              ${company.website ? `<a href="${escapeHtml(company.website)}" target="_blank" rel="noopener noreferrer">${escapeHtml(company.website.replace(/^https?:\/\//, "").replace(/\/$/, ""))}</a>` : `<span>Website not added</span>`}
+              ${company.email ? `<a href="mailto:${escapeHtml(company.email)}">${escapeHtml(company.email)}</a>` : `<span>Email not added</span>`}
+            </div>
+          </div>
+        </article>
+      `).join("")
+    : `<div class="empty-panel"><strong>No companies yet</strong><span>Add the first company in Admin.</span></div>`;
+}
+
+function setCompaniesStatus(message, status = "idle") {
+  elements.companiesStatus.textContent = message;
+  elements.companiesStatus.dataset.status = status;
+}
+
+async function loadCompanies({ asAdmin = false, silent = false } = {}) {
+  if (!window.fetch || window.location.protocol === "file:") {
+    state.companiesUnlocked = false;
+    renderCompanies();
+    return false;
+  }
+
+  const headers = asAdmin && state.adminToken ? { authorization: `Bearer ${state.adminToken}` } : {};
+
+  try {
+    const response = await fetch(companiesEndpoint, { headers, cache: "no-store" });
+    if (response.status === 401) {
+      state.companiesUnlocked = false;
+      if (!silent) setCompaniesStatus("Enter the company directory code.", "idle");
+      renderCompanies();
+      return false;
+    }
+    if (!response.ok) throw new Error(`Company directory returned ${response.status}`);
+    const payload = await response.json();
+    state.companies = normalizeCompanyRecords(payload.companies);
+    state.currentCompanyId = state.currentCompanyId || state.companies[0]?.id || "";
+    if (!asAdmin) state.companiesUnlocked = true;
+    setCompaniesStatus("", "ready");
+    renderCompanies();
+    renderAdminCompanies();
+    fillCompanyForm(getCurrentCompany());
+    return true;
+  } catch {
+    if (!silent) setCompaniesStatus("Company directory is unavailable. Try again later.", "error");
+    return false;
+  }
+}
+
+async function submitCompaniesAccess(event) {
+  event.preventDefault();
+  const accessCode = elements.companiesAccessInput.value.trim();
+  if (!accessCode) {
+    setCompaniesStatus("Enter the company directory code.", "error");
+    return;
+  }
+  setCompaniesStatus("Checking access...", "idle");
+  try {
+    const response = await fetch(companiesLoginEndpoint, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ accessCode }),
+    });
+    if (!response.ok) {
+      setCompaniesStatus("Company directory code is not accepted.", "error");
+      return;
+    }
+    elements.companiesAuthForm.reset();
+    await loadCompanies({ silent: true });
+  } catch {
+    setCompaniesStatus("Could not check access. Try again.", "error");
+  }
+}
+
+async function publishCompanies({ silent = false } = {}) {
+  if (!state.adminToken || !state.sharedBackendAvailable) return false;
+  if (!silent) setAdminStatus("Saving company directory...", "idle");
+  try {
+    const response = await fetch(companiesEndpoint, {
+      method: "PUT",
+      headers: { "content-type": "application/json", authorization: `Bearer ${state.adminToken}` },
+      body: JSON.stringify({ companies: state.companies }),
+    });
+    if (!response.ok) throw new Error(`Save failed with ${response.status}`);
+    if (!silent) setAdminStatus("Company directory saved", "ready");
+    return true;
+  } catch {
+    if (!silent) setAdminStatus("Could not save company directory", "error");
+    return false;
   }
 }
 
@@ -2088,6 +2219,10 @@ function getCurrentRadarItem() {
   return state.radarItems.find((item) => item.id === state.currentRadarId);
 }
 
+function getCurrentCompany() {
+  return state.companies.find((company) => company.id === state.currentCompanyId);
+}
+
 function renderAdminEmployees() {
   elements.adminEmployeeList.innerHTML = state.employees
     .map(
@@ -2167,6 +2302,17 @@ function renderAdminRadar() {
     `;
 }
 
+function renderAdminCompanies() {
+  elements.adminCompanyList.innerHTML = state.companies.length
+    ? state.companies.map((company) => `
+        <button class="admin-record ${company.id === state.currentCompanyId ? "is-active" : ""}" type="button" data-company-id="${escapeHtml(company.id)}">
+          <strong>${escapeHtml(company.name)}</strong>
+          <span>${escapeHtml(company.email || company.website || "Details not added")}</span>
+        </button>
+      `).join("")
+    : `<div class="empty-panel"><strong>No companies</strong><span>Add the first group company.</span></div>`;
+}
+
 function vacationRequestMarkup(request) {
   const isPending = request.status === "pending";
   const isApproved = request.status === "approved";
@@ -2234,6 +2380,7 @@ function renderAdminLists() {
   renderAdminEvents();
   renderAdminDocuments();
   renderAdminRadar();
+  renderAdminCompanies();
   renderAdminVacationRequests();
 }
 
@@ -2316,6 +2463,18 @@ function fillRadarForm(item) {
   });
 }
 
+function fillCompanyForm(company) {
+  if (!company) {
+    elements.companyFormTitle.textContent = "Edit company";
+    elements.companyForm.reset();
+    return;
+  }
+  elements.companyFormTitle.textContent = `Edit ${company.name}`;
+  ["name", "website", "email"].forEach((key) => {
+    elements.companyForm.elements[key].value = company[key] || "";
+  });
+}
+
 function refreshPortal() {
   state.events = syncBirthdayEventsFromEmployees(state.events);
   state.events = syncBirthdayEventsFromExternalContacts(state.events);
@@ -2333,6 +2492,7 @@ function refreshPortal() {
   renderCompanyCalendar();
   renderOrgChart();
   renderVisualizations();
+  renderCompanies();
   renderHome();
   renderContentOverview();
   renderAdminLists();
@@ -2341,6 +2501,7 @@ function refreshPortal() {
   fillEventForm(getCurrentEvent());
   fillDocumentForm(getCurrentDocument());
   fillRadarForm(getCurrentRadarItem());
+  fillCompanyForm(getCurrentCompany());
 }
 
 function selectEmployee(employeeId) {
@@ -2371,6 +2532,12 @@ function selectRadarItem(radarId) {
   state.currentRadarId = radarId;
   renderAdminRadar();
   fillRadarForm(getCurrentRadarItem());
+}
+
+function selectCompany(companyId) {
+  state.currentCompanyId = companyId;
+  renderAdminCompanies();
+  fillCompanyForm(getCurrentCompany());
 }
 
 function createEmployeeRecord() {
@@ -2482,6 +2649,16 @@ function createRadarRecord() {
   elements.radarForm.elements.title.select();
 }
 
+function createCompanyRecord() {
+  const company = { id: createId("company"), name: "New company", website: "", email: "" };
+  state.companies.unshift(company);
+  state.currentCompanyId = company.id;
+  refreshPortal();
+  void publishCompanies({ silent: true });
+  elements.companyForm.elements.name.focus();
+  elements.companyForm.elements.name.select();
+}
+
 function saveEmployeeFromForm(event) {
   event.preventDefault();
 
@@ -2587,6 +2764,18 @@ function saveRadarFromForm(event) {
 
   refreshPortal();
   void publishPortalData();
+}
+
+function saveCompanyFromForm(event) {
+  event.preventDefault();
+  const company = getCurrentCompany();
+  if (!company) return;
+  const formData = new FormData(elements.companyForm);
+  ["name", "website", "email"].forEach((key) => {
+    company[key] = String(formData.get(key) || "").trim();
+  });
+  refreshPortal();
+  void publishCompanies();
 }
 
 async function submitVacationRequest(event) {
@@ -2723,6 +2912,15 @@ function deleteRadarRecord() {
   void publishPortalData();
 }
 
+function deleteCompanyRecord() {
+  const company = getCurrentCompany();
+  if (!company || !window.confirm("Delete this company?")) return;
+  state.companies = state.companies.filter((item) => item.id !== company.id);
+  state.currentCompanyId = state.companies[0]?.id || "";
+  refreshPortal();
+  void publishCompanies();
+}
+
 function setAdminTab(tab) {
   state.adminTab = tab;
   elements.newAdminItemButton.hidden = !state.adminUnlocked || ["vacations", "visualizations"].includes(tab);
@@ -2851,6 +3049,7 @@ elements.calendarLegend.addEventListener("click", (event) => {
   toggleCalendarFilter(filterButton.dataset.calendarFilter);
 });
 elements.visualizationsAuthForm.addEventListener("submit", submitVisualizationsAccess);
+elements.companiesAuthForm.addEventListener("submit", submitCompaniesAccess);
 elements.visualizationList.addEventListener("click", (event) => {
   const visualizationButton = event.target.closest("[data-visualization-id]");
 
@@ -2881,6 +3080,10 @@ elements.addDocumentButton.addEventListener("click", () => {
   createDocumentRecord();
 });
 elements.newAdminItemButton.addEventListener("click", () => {
+  if (state.adminTab === "companies") {
+    createCompanyRecord();
+    return;
+  }
   if (state.adminTab === "external") {
     createExternalContactRecord();
     return;
@@ -2982,6 +3185,10 @@ elements.adminRadarList.addEventListener("click", (event) => {
     selectRadarItem(item.dataset.radarId);
   }
 });
+elements.adminCompanyList.addEventListener("click", (event) => {
+  const item = event.target.closest("[data-company-id]");
+  if (item) selectCompany(item.dataset.companyId);
+});
 elements.adminVacationRequestList.addEventListener("click", (event) => {
   const actionButton = event.target.closest("[data-vacation-action]");
   const requestCard = event.target.closest("[data-vacation-request-id]");
@@ -3004,16 +3211,19 @@ elements.externalContactForm.addEventListener("submit", saveExternalContactFromF
 elements.eventForm.addEventListener("submit", saveEventFromForm);
 elements.documentForm.addEventListener("submit", saveDocumentFromForm);
 elements.radarForm.addEventListener("submit", saveRadarFromForm);
+elements.companyForm.addEventListener("submit", saveCompanyFromForm);
 elements.createEmployeeRecordButton.addEventListener("click", createEmployeeRecord);
 elements.createExternalContactRecordButton.addEventListener("click", createExternalContactRecord);
 elements.createEventRecordButton.addEventListener("click", createEventRecord);
 elements.createDocumentRecordButton.addEventListener("click", createDocumentRecord);
 elements.createRadarRecordButton.addEventListener("click", createRadarRecord);
+elements.createCompanyRecordButton.addEventListener("click", createCompanyRecord);
 elements.deleteEmployeeButton.addEventListener("click", deleteEmployeeRecord);
 elements.deleteExternalContactButton.addEventListener("click", deleteExternalContactRecord);
 elements.deleteEventButton.addEventListener("click", deleteEventRecord);
 elements.deleteDocumentButton.addEventListener("click", deleteDocumentRecord);
 elements.deleteRadarButton.addEventListener("click", deleteRadarRecord);
+elements.deleteCompanyButton.addEventListener("click", deleteCompanyRecord);
 elements.adminAuthForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   state.adminToken = elements.adminTokenInput.value.trim();
@@ -3028,6 +3238,7 @@ async function initializePortal() {
   initializeCollections();
   await loadHolidayCalendar();
   await loadVisualizations({ silent: true });
+  await loadCompanies({ silent: true });
   setAdminTab(state.adminTab);
   renderAdminGate();
   refreshPortal();

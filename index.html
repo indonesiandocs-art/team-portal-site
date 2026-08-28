@@ -54,6 +54,10 @@
             <span class="nav-icon" aria-hidden="true">V</span>
             <span>Visualizations</span>
           </a>
+          <a class="nav-item" href="#companies" data-nav-target="companies">
+            <span class="nav-icon" aria-hidden="true">G</span>
+            <span>Companies</span>
+          </a>
           <a class="nav-item" href="#flight" data-nav-target="flight">
             <span class="nav-icon" aria-hidden="true">F</span>
             <span>Nova Flight</span>
@@ -640,6 +644,46 @@
           </section>
         </section>
 
+        <section class="page-view" id="companies" data-page="companies" hidden>
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Protected group directory</p>
+              <h1>Companies</h1>
+            </div>
+          </header>
+
+          <section class="workspace-panel" id="companiesGate">
+            <div class="panel-header compact-header">
+              <div>
+                <h2>Company directory access</h2>
+                <p>Enter the separate company directory code.</p>
+              </div>
+            </div>
+            <form class="admin-auth" id="companiesAuthForm">
+              <div>
+                <strong>Protected company information</strong>
+                <span>Separate access code required</span>
+              </div>
+              <label>
+                <span>Company directory code</span>
+                <input id="companiesAccessInput" type="password" autocomplete="current-password" />
+              </label>
+              <button class="secondary-action" type="submit">Open</button>
+            </form>
+            <p class="form-status" id="companiesStatus" aria-live="polite"></p>
+          </section>
+
+          <section class="workspace-panel" id="companiesWorkspace" hidden>
+            <div class="panel-header compact-header">
+              <div>
+                <h2>Group companies</h2>
+                <p>Websites and corporate email addresses.</p>
+              </div>
+            </div>
+            <div class="company-directory" id="companyDirectory"></div>
+          </section>
+        </section>
+
         <section class="page-view" id="flight" data-page="flight" hidden>
           <header class="page-header flight-page-header">
             <div>
@@ -767,6 +811,7 @@
               <button class="admin-tab" type="button" data-admin-tab="documents" aria-pressed="false">Documents</button>
               <button class="admin-tab" type="button" data-admin-tab="radar" aria-pressed="false">Payment radar</button>
               <button class="admin-tab" type="button" data-admin-tab="visualizations" aria-pressed="false">Visualizations</button>
+              <button class="admin-tab" type="button" data-admin-tab="companies" aria-pressed="false">Companies</button>
             </div>
 
             <div class="admin-workspace">
@@ -1079,6 +1124,35 @@
                     <span>Add the exported HTML file to assets/visualizations, then add it to assets/visualizations/manifest.json. The library page will show it after deployment.</span>
                   </div>
                 </div>
+              </section>
+
+              <section class="admin-section" data-admin-section="companies" hidden>
+                <div class="admin-list-panel">
+                  <div class="admin-list-header">
+                    <h3>Company records</h3>
+                    <button class="secondary-action" id="createCompanyRecordButton" type="button">New</button>
+                  </div>
+                  <div class="admin-record-list" id="adminCompanyList"></div>
+                </div>
+                <form class="admin-form" id="companyForm">
+                  <div class="form-header">
+                    <h3 id="companyFormTitle">Edit company</h3>
+                    <button class="danger-action" id="deleteCompanyButton" type="button">Delete</button>
+                  </div>
+                  <label>
+                    <span>Company name</span>
+                    <input name="name" type="text" required />
+                  </label>
+                  <label>
+                    <span>Website</span>
+                    <input name="website" type="url" placeholder="https://..." />
+                  </label>
+                  <label>
+                    <span>Company email</span>
+                    <input name="email" type="email" placeholder="info@company.com" />
+                  </label>
+                  <button class="primary-action" type="submit">Save company</button>
+                </form>
               </section>
 
               <section class="admin-section single-column-section" data-admin-section="vacations" hidden>
