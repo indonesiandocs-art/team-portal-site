@@ -1687,7 +1687,32 @@ function renderContentOverview() {
 }
 
 function getSortedEvents() {
-  return [...state.events].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const today = toDateKey(new Date());
+
+  return state.events
+    .map((event) => {
+      if (event.type !== "birthday") {
+        return event;
+      }
+
+      return {
+        ...event,
+        date: getNextBirthdayDate(event.date),
+      };
+    })
+    .filter((event) => {
+      if (!event.date) {
+        return false;
+      }
+
+      if (event.source === "vacation-request") {
+        const request = state.vacationRequests.find((item) => item.id === event.requestId);
+        return Boolean(request && request.status === "approved" && request.endDate >= today);
+      }
+
+      return event.date >= today;
+    })
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
 }
 
 function getSafeDocumentUrl(url) {
@@ -1761,6 +1786,19 @@ function renderHome() {
       `,
     )
     .join("");
+}
+
+function scheduleUpcomingDatesRefresh() {
+  const now = new Date();
+  const nextDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  const delay = nextDay.getTime() - now.getTime() + 1000;
+
+  window.setTimeout(() => {
+    renderEvents();
+    renderHome();
+    renderContentOverview();
+    scheduleUpcomingDatesRefresh();
+  }, delay);
 }
 
 function employeePersonMarkup(employee) {
@@ -2993,6 +3031,7 @@ async function initializePortal() {
   setAdminTab(state.adminTab);
   renderAdminGate();
   refreshPortal();
+  scheduleUpcomingDatesRefresh();
   setActivePage(window.location.hash.replace("#", "") || "home");
   await loadSharedPortalData();
 }

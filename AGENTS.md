@@ -3,9 +3,9 @@
 This Codex project is dedicated to the Nova Group China payment radar workflow.
 
 Scope:
-- Run only the China payment-risk radar research and publish flow.
+- Maintain the Nova Group employee portal and all its sections.
+- Run the China payment-risk radar research and publish flow.
 - Keep weekly radar threads and automation runs in this project.
-- Do not use this project for general portal design, content, or unrelated site tasks.
 
 Key files:
 - `payment-radar-automation.md` contains the publication criteria and output schema.
