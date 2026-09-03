@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-visualize-standalone>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,7 +10,7 @@
 </head>
 <body>
 <iframe sandbox="allow-scripts" referrerpolicy="no-referrer" title="Payment Inside One Bank" srcdoc="&lt;!doctype html&gt;
-&lt;html lang=&quot;en&quot;&gt;
+&lt;html lang=&quot;en&quot; data-visualize-standalone&gt;
 &lt;head&gt;
 &lt;meta charset=&quot;utf-8&quot;&gt;
 &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
@@ -121,10 +121,12 @@
   --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
   --font-weight-normal: 430;
   --font-weight-medium: 500;
+  --icon-size: 16px;
   --line-height-normal: calc(var(--font-size-normal) * 1.5);
   --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
   --line-height-small: calc(var(--font-size-small) + 4px);
-  --radius: var(--border-radius-lg, 12.5px);
+  --corner-shape: round;
+  --radius: var(--border-radius-lg, 10px);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -174,10 +176,10 @@ html &gt; body {
   );
 
   margin: 0;
-  padding: 5px;
+  padding: var(--visualize-paint-gutter, 0px);
   color: var(--foreground);
   background: transparent !important;
-  font-family: var(--font-sans);
+  font-family: var(--font-sans) !important;
   font-size: var(--font-size-normal);
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-normal);
@@ -238,7 +240,7 @@ code:not(pre code) {
   display: inline;
   padding: 1px 6px;
   border-radius: var(--radius-sm);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
   background: var(--muted);
   font-family: var(--font-mono);
   font-size: 0.92em;
@@ -328,12 +330,12 @@ code:not(pre code) {
   overflow: hidden;
   overflow-wrap: break-word;
   border-radius: var(--radius-2xl);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
   color: var(--card-foreground);
   background: var(--card);
 }
 
-#widget &gt; :not(.card) {
+#widget &gt; :not(.card, .progress) {
   width: 100% !important;
   max-width: none !important;
   margin: 0 !important;
@@ -362,7 +364,7 @@ code:not(pre code) {
   padding: 4px 8px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
   color: var(--popover-foreground);
   background: var(--popover);
   box-shadow: none;
@@ -399,6 +401,42 @@ code:not(pre code) {
   gap: 10px;
 }
 
+hr {
+  width: 100%;
+  height: 1px;
+  margin-block: 6px;
+  border: 0;
+  background: var(--border);
+}
+
+.nav {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.progress {
+  display: flex;
+  height: 8px;
+  margin-block: calc((var(--line-height-normal, 1.5em) - 8px) / 2);
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+}
+
+.progress-bar:only-child {
+  border-radius: var(--radius-full);
+}
+
+.progress-bar {
+  height: 100%;
+  flex-shrink: 0;
+  border: 0;
+  background: var(--viz-series-1);
+}
+
 .viz-badge {
   padding: 3px 8px;
   border-radius: var(--radius-full);
@@ -416,6 +454,10 @@ small,
 
 .text-muted {
   color: var(--muted-foreground);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 .sr-only {
@@ -451,6 +493,7 @@ small,
 }
 
 .btn,
+.nav-link,
 .form-check-input,
 .form-control,
 .form-range,
@@ -458,7 +501,8 @@ small,
   font: inherit;
 }
 
-.btn {
+.btn,
+.nav-link {
   appearance: button;
   display: inline-flex;
   inline-size: fit-content;
@@ -472,7 +516,7 @@ small,
   -webkit-app-region: no-drag;
   border: 1px solid var(--input);
   border-radius: var(--radius-lg);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
   color: var(--secondary-foreground);
   background: var(--secondary);
   cursor: var(--cursor-interaction, pointer);
@@ -498,7 +542,8 @@ a.btn {
   text-decoration: none;
 }
 
-.btn:not(:disabled):hover {
+.btn:not(:disabled):hover,
+.nav-link:not(:disabled):not([aria-disabled=&quot;true&quot;]):hover {
   background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
 }
 
@@ -529,7 +574,27 @@ a.btn {
   background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
 }
 
-.btn:disabled {
+.nav-pills .nav-link {
+  min-width: 0;
+  border-color: transparent;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+
+.nav-justified .nav-link {
+  flex: 1 1 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.nav-pills .nav-link.active {
+  color: var(--foreground);
+  background: var(--muted);
+}
+
+.btn:disabled,
+.nav-link:disabled,
+.nav-link[aria-disabled=&quot;true&quot;] {
   cursor: not-allowed;
   opacity: 0.4;
 }
@@ -552,7 +617,7 @@ a.btn {
   outline: none;
   border: 1px solid var(--input);
   border-radius: var(--radius-lg);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
   color: var(--foreground);
   background: var(--secondary);
 }
@@ -597,7 +662,7 @@ a.btn {
 .form-control-color[type=&quot;color&quot;]::-webkit-color-swatch {
   border: 0;
   border-radius: calc(var(--radius-lg) - 4px);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
 }
 
 textarea.form-control {
@@ -628,7 +693,7 @@ textarea.form-control {
   outline: none;
   border: 1px solid var(--input);
   border-radius: var(--radius-lg);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
   color: var(--foreground);
   background-color: var(--secondary);
   background-image:
@@ -677,7 +742,7 @@ textarea.form-control {
 .form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;] {
   border-color: var(--input);
   border-radius: var(--radius-sm);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
   background-color: var(--secondary);
   box-shadow: var(--shadow-sm);
 }
@@ -841,10 +906,10 @@ textarea.form-control {
 }
 
 .btn:not(.btn-primary, .viz-tile):is(
-    [aria-pressed=&quot;true&quot;],
-    [aria-selected=&quot;true&quot;],
-    .is-selected
-  ) {
+  [aria-pressed=&quot;true&quot;],
+  [aria-selected=&quot;true&quot;],
+  .is-selected
+) {
   border-color: var(--primary);
   color: var(--primary-foreground);
   background: var(--primary);
@@ -855,9 +920,91 @@ textarea.form-control {
   box-shadow: inset 0 0 0 1px var(--primary);
 }
 
-.btn:focus-visible {
+.btn:focus-visible,
+.nav-link:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .btn,
+  .nav-link,
+  .form-control,
+  .form-select {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Keep small-screen WebKit from zooming when a text field receives focus. */
+  .form-control,
+  .form-select {
+    font-size: max(16px, var(--font-size-normal));
+  }
+
+  .form-control[type=&quot;file&quot;]::file-selector-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .form-control-color[type=&quot;color&quot;] {
+    width: 44px;
+    height: 44px;
+  }
+
+  .form-control:is(
+    [type=&quot;date&quot;],
+    [type=&quot;datetime-local&quot;],
+    [type=&quot;month&quot;],
+    [type=&quot;time&quot;],
+    [type=&quot;week&quot;]
+  ) {
+    min-width: 0;
+    max-width: 100%;
+    padding-block: 8px;
+  }
+
+  .form-check {
+    min-height: 44px;
+    padding-inline: 15px;
+  }
+
+  .form-check-input {
+    position: relative;
+  }
+
+  .form-check-input::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    content: &quot;&quot;;
+    transform: translate(-50%, -50%);
+  }
+
+  .form-check-label {
+    display: inline-flex;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .form-range {
+    height: 44px;
+    touch-action: pan-y;
+  }
+
+  .form-range::-webkit-slider-runnable-track {
+    height: 44px;
+  }
+
+  .form-range::-moz-range-track {
+    height: 44px;
+  }
+
+  .form-range::-webkit-slider-thumb {
+    margin-top: 12px;
+  }
 }
 
 svg {
@@ -873,8 +1020,8 @@ svg {
 /* Model-authored chart rules can otherwise stretch icons after these styles load. */
 svg.lucide {
   display: block;
-  width: 16px !important;
-  height: 16px !important;
+  width: var(--icon-size) !important;
+  height: var(--icon-size) !important;
   flex: none;
   margin: 0 !important;
   stroke-width: 1.6;
@@ -891,15 +1038,16 @@ html&gt;body{padding:0}&lt;/style&gt;
 &lt;div id=&quot;payment-bank-streams-flow&quot;&gt;
   &lt;svg class=&quot;flow&quot; viewBox=&quot;0 0 920 510&quot; role=&quot;img&quot; aria-labelledby=&quot;bank-streams-title bank-streams-desc&quot;&gt;
     &lt;title id=&quot;bank-streams-title&quot;&gt;Same-bank and cross-bank payment streams&lt;/title&gt;
-    &lt;desc id=&quot;bank-streams-desc&quot;&gt;The first stream routes commodity liquidity to Crescent and equipment payments through Nova General inside either UBL or Invest Bank. The second stream routes commodity liquidity to Crescent at UBL, transfers equipment payment to Nova General at Invest Bank, and then pays finance suppliers.&lt;/desc&gt;
+    &lt;desc id=&quot;bank-streams-desc&quot;&gt;The first stream routes commodity liquidity to Crescent and equipment payments through Nova General inside one bank. This is an incorrect structure and must not be used. The second stream routes commodity liquidity to Crescent at UBL, transfers equipment payment to Nova General at Invest Bank, and then pays finance suppliers. This is the correct structure.&lt;/desc&gt;
     &lt;defs&gt;
       &lt;marker id=&quot;bank-stream-arrow&quot; viewBox=&quot;0 0 10 10&quot; refX=&quot;8&quot; refY=&quot;5&quot; markerWidth=&quot;7&quot; markerHeight=&quot;7&quot; orient=&quot;auto-start-reverse&quot;&gt;
         &lt;path d=&quot;M0 0L10 5L0 10Z&quot; fill=&quot;var(--viz-series-1)&quot;/&gt;
       &lt;/marker&gt;
     &lt;/defs&gt;
 
-    &lt;rect class=&quot;lane&quot; x=&quot;18&quot; y=&quot;24&quot; width=&quot;884&quot; height=&quot;214&quot; rx=&quot;18&quot;/&gt;
-    &lt;text class=&quot;lane-title&quot; x=&quot;40&quot; y=&quot;55&quot;&gt;STREAM 1 · PAYMENT INSIDE ONE BANK&lt;/text&gt;
+    &lt;rect class=&quot;lane incorrect-lane&quot; x=&quot;18&quot; y=&quot;24&quot; width=&quot;884&quot; height=&quot;214&quot; rx=&quot;18&quot;/&gt;
+    &lt;text class=&quot;lane-title&quot; x=&quot;40&quot; y=&quot;55&quot;&gt;STREAM 1 · PAYMENT &lt;tspan class=&quot;incorrect-text&quot;&gt;INSIDE ONE BANK&lt;/tspan&gt;&lt;/text&gt;
+    &lt;text class=&quot;status-label incorrect-text&quot; x=&quot;880&quot; y=&quot;55&quot; text-anchor=&quot;end&quot;&gt;INCORRECT STRUCTURE · DO NOT USE&lt;/text&gt;
 
     &lt;g class=&quot;node&quot; transform=&quot;translate(40 100)&quot;&gt;
       &lt;rect width=&quot;154&quot; height=&quot;78&quot; rx=&quot;14&quot;/&gt;
@@ -936,6 +1084,7 @@ html&gt;body{padding:0}&lt;/style&gt;
 
     &lt;rect class=&quot;lane cross-bank-lane&quot; x=&quot;18&quot; y=&quot;258&quot; width=&quot;884&quot; height=&quot;228&quot; rx=&quot;18&quot;/&gt;
     &lt;text class=&quot;lane-title&quot; x=&quot;40&quot; y=&quot;289&quot;&gt;STREAM 2 · PAYMENT BETWEEN BANKS&lt;/text&gt;
+    &lt;text class=&quot;status-label correct-text&quot; x=&quot;880&quot; y=&quot;289&quot; text-anchor=&quot;end&quot;&gt;CORRECT STRUCTURE&lt;/text&gt;
 
     &lt;g class=&quot;node&quot; transform=&quot;translate(40 350)&quot;&gt;
       &lt;rect width=&quot;154&quot; height=&quot;78&quot; rx=&quot;14&quot;/&gt;
@@ -980,11 +1129,15 @@ html&gt;body{padding:0}&lt;/style&gt;
   #payment-bank-streams-flow { width: 100%; color: var(--foreground); }
   #payment-bank-streams-flow .flow { display: block; width: 100%; height: auto; }
   #payment-bank-streams-flow .lane { fill: color-mix(in srgb, var(--muted) 22%, transparent); stroke: var(--border); stroke-width: 1.5; }
+  #payment-bank-streams-flow .incorrect-lane { fill: color-mix(in srgb, var(--destructive) 7%, transparent); stroke: var(--destructive); }
   #payment-bank-streams-flow .cross-bank-lane { fill: color-mix(in srgb, var(--viz-series-1) 7%, transparent); }
   #payment-bank-streams-flow .bank-boundary { fill: color-mix(in srgb, var(--muted) 30%, transparent); stroke: var(--border); stroke-width: 1.5; }
   #payment-bank-streams-flow .single-bank { stroke: var(--viz-series-1); }
   #payment-bank-streams-flow .lane-title,
   #payment-bank-streams-flow .group-label { fill: var(--muted-foreground); font-weight: 500; }
+  #payment-bank-streams-flow .status-label { font-weight: 500; }
+  #payment-bank-streams-flow .incorrect-text { fill: var(--destructive); }
+  #payment-bank-streams-flow .correct-text { fill: var(--green); }
   #payment-bank-streams-flow .node rect { fill: var(--card); stroke: var(--border); stroke-width: 1.5; }
   #payment-bank-streams-flow .node text { fill: var(--card-foreground); font-weight: 500; }
   #payment-bank-streams-flow .edge { fill: none; stroke: var(--viz-series-1); stroke-width: 3.5; }
@@ -1017,6 +1170,8 @@ html&gt;body{padding:0}&lt;/style&gt;
   let autoUpdateCleanup = null;
   let positionRequest = 0;
   let skipDelayUntil = 0;
+  let lastPointerWasTouch = false;
+  let pinnedByTouch = false;
 
   const getTrigger = (target) =&gt;
     target?.nodeType === Node.ELEMENT_NODE
@@ -1065,6 +1220,7 @@ html&gt;body{padding:0}&lt;/style&gt;
   };
   const closeTooltip = (activateSkipDelay = true) =&gt; {
     clearOpenTimeout();
+    pinnedByTouch = false;
     positionRequest += 1;
     autoUpdateCleanup?.();
     autoUpdateCleanup = null;
@@ -1171,7 +1327,40 @@ html&gt;body{padding:0}&lt;/style&gt;
     }
     requestOpen(trigger);
   };
+  const handlePointer = (event) =&gt; {
+    lastPointerWasTouch =
+      event.type === &quot;pointerdown&quot; &amp;&amp; event.pointerType === &quot;touch&quot;;
+  };
+  const handleTouchClick = (event) =&gt; {
+    const isTouch = event.pointerType === &quot;touch&quot; || lastPointerWasTouch;
+    lastPointerWasTouch = false;
+    if (!isTouch || event.detail === 0) {
+      return;
+    }
+    const trigger = getTrigger(event.target);
+    if (
+      trigger == null ||
+      !trigger.isConnected ||
+      getContent(trigger).length === 0 ||
+      (pinnedByTouch &amp;&amp; activeTrigger === trigger)
+    ) {
+      if (pinnedByTouch) {
+        closeTooltip();
+      }
+      return;
+    }
+    openTooltip(trigger);
+    pinnedByTouch = activeTrigger === trigger;
+    window.setTimeout(() =&gt; {
+      if (activeTrigger === trigger &amp;&amp; !trigger.isConnected) {
+        closeTooltip(false);
+      }
+    }, 0);
+  };
   const handleLeave = (event) =&gt; {
+    if (pinnedByTouch) {
+      return;
+    }
     const trigger = getTrigger(event.target);
     if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
       return;
@@ -1192,6 +1381,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     }
   };
   const handleContextMenu = (event) =&gt; {
+    lastPointerWasTouch = false;
     const trigger = getTrigger(event.target);
     if (activeTrigger === trigger || pendingTrigger === trigger) {
       closeTooltip();
@@ -1199,7 +1389,11 @@ html&gt;body{padding:0}&lt;/style&gt;
   };
   const destroy = () =&gt; {
     closeTooltip(false);
+    lastPointerWasTouch = false;
     document.removeEventListener(&quot;pointerover&quot;, handlePointerOpen);
+    document.removeEventListener(&quot;pointerdown&quot;, handlePointer);
+    document.removeEventListener(&quot;pointercancel&quot;, handlePointer);
+    document.removeEventListener(&quot;click&quot;, handleTouchClick);
     document.removeEventListener(&quot;pointerout&quot;, handleLeave);
     document.removeEventListener(&quot;focusin&quot;, handleFocusIn);
     document.removeEventListener(&quot;focusout&quot;, handleLeave);
@@ -1209,12 +1403,82 @@ html&gt;body{padding:0}&lt;/style&gt;
   };
 
   document.addEventListener(&quot;pointerover&quot;, handlePointerOpen);
+  document.addEventListener(&quot;pointerdown&quot;, handlePointer);
+  document.addEventListener(&quot;pointercancel&quot;, handlePointer);
+  document.addEventListener(&quot;click&quot;, handleTouchClick);
   document.addEventListener(&quot;pointerout&quot;, handleLeave);
   document.addEventListener(&quot;focusin&quot;, handleFocusIn);
   document.addEventListener(&quot;focusout&quot;, handleLeave);
   document.addEventListener(&quot;keydown&quot;, handleKeyDown);
   document.addEventListener(&quot;contextmenu&quot;, handleContextMenu);
   window.addEventListener(&quot;pagehide&quot;, destroy, { once: true });
+})();
+&lt;/script&gt;
+&lt;script id=&quot;codex-visualization-tabs&quot;&gt;
+(() =&gt; {
+  const selector = &#x27;.nav[role=&quot;tablist&quot;] [role=&quot;tab&quot;]&#x27;;
+  const disabled = &#x27;:disabled,[aria-disabled=&quot;true&quot;]&#x27;;
+  const selectTab = (selected) =&gt; {
+    const panelId = selected.getAttribute(&quot;aria-controls&quot;);
+    for (const tab of selected.closest(&#x27;[role=&quot;tablist&quot;]&#x27;).querySelectorAll(&#x27;[role=&quot;tab&quot;]&#x27;)) {
+      const active = tab === selected;
+      tab.classList.toggle(&quot;active&quot;, active);
+      tab.setAttribute(&quot;aria-selected&quot;, String(active));
+      const id = tab.getAttribute(&quot;aria-controls&quot;);
+      const panel = id &amp;&amp; document.getElementById(id);
+      if (panel != null) {
+        panel.hidden = id !== panelId;
+        if (!panel.hidden &amp;&amp; selected.id) {
+          panel.setAttribute(&quot;aria-labelledby&quot;, selected.id);
+        }
+      }
+    }
+  };
+  const interact = (event) =&gt; {
+    const tab = event.target?.closest?.(selector);
+    if (event.defaultPrevented || tab == null || tab.matches(disabled)) {
+      return;
+    }
+    if (event.type === &quot;click&quot;) {
+      selectTab(tab);
+      return;
+    }
+    const tabs = Array.from(
+      tab.closest(&#x27;[role=&quot;tablist&quot;]&#x27;).querySelectorAll(&#x27;[role=&quot;tab&quot;]&#x27;),
+    ).filter((candidate) =&gt; !candidate.matches(disabled));
+    const current = tabs.indexOf(tab);
+    let next;
+    if (event.key === &quot;ArrowRight&quot; || event.key === &quot;ArrowDown&quot;) {
+      next = (current + 1) % tabs.length;
+    } else if (event.key === &quot;ArrowLeft&quot; || event.key === &quot;ArrowUp&quot;) {
+      next = (current + tabs.length - 1) % tabs.length;
+    } else if (event.key === &quot;Home&quot;) {
+      next = 0;
+    } else if (event.key === &quot;End&quot;) {
+      next = tabs.length - 1;
+    } else {
+      return;
+    }
+    event.preventDefault();
+    tabs[next].focus();
+    selectTab(tabs[next]);
+  };
+
+  for (const list of document.querySelectorAll(&#x27;.nav[role=&quot;tablist&quot;]&#x27;)) {
+    const selected =
+      list.querySelector(&#x27;[role=&quot;tab&quot;][aria-selected=&quot;true&quot;]&#x27;) ??
+      list.querySelector(&#x27;[role=&quot;tab&quot;].active&#x27;) ??
+      list.querySelector(&#x27;[role=&quot;tab&quot;]&#x27;);
+    if (selected != null) {
+      selectTab(selected);
+    }
+  }
+  document.addEventListener(&quot;click&quot;, interact);
+  document.addEventListener(&quot;keydown&quot;, interact);
+  window.addEventListener(&quot;pagehide&quot;, () =&gt; {
+    document.removeEventListener(&quot;click&quot;, interact);
+    document.removeEventListener(&quot;keydown&quot;, interact);
+  }, { once: true });
 })();
 &lt;/script&gt;
 &lt;script id=&quot;codex-visualization-lucide&quot; async src=&quot;https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js&quot;&gt;&lt;/script&gt;

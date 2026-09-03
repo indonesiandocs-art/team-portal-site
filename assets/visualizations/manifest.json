@@ -29,10 +29,10 @@
     {
       "id": "payment-inside-one-bank",
       "title": "Payment Purpose Inside One Bank",
-      "description": "Commodity liquidity to Crescent, transfer to Nova General, and equipment payments to final suppliers within UBL or Invest Bank.",
+      "description": "Comparison of the prohibited same-bank structure and the correct payment-between-banks structure.",
       "file": "payment-inside-one-bank.html",
       "category": "Routes",
-      "updatedAt": "2026-08-11"
+      "updatedAt": "2026-09-03"
     },
     {
       "id": "russia-international-agency-route",
