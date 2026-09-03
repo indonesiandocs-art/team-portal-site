@@ -41,6 +41,14 @@
       "file": "russia-international-agency-route.html",
       "category": "Routes",
       "updatedAt": "2026-09-03"
+    },
+    {
+      "id": "emlak-bank-fundamental-road",
+      "title": "Emlak Bank Fundamental Road",
+      "description": "Liquidity from Solid or other suppliers to XTrade or Teknik, with their respective Emlak Bank payment conditions.",
+      "file": "emlak-bank-fundamental-road.html",
+      "category": "Routes",
+      "updatedAt": "2026-09-03"
     }
   ]
 }
