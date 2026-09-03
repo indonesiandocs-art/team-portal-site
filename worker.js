@@ -240,6 +240,7 @@ function cleanCompany(item, index) {
   return {
     id: stringValue(item?.id, `company-${index + 1}`),
     name: stringValue(item?.name, "New company"),
+    country: stringValue(item?.country, "Not specified"),
     website: stringValue(item?.website, ""),
     bankEmail: stringValue(item?.bankEmail, ""),
     clientEmail: stringValue(item?.clientEmail, stringValue(item?.email, "")),

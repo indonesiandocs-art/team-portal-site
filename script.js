@@ -943,6 +943,7 @@ function normalizeCompanyRecords(items) {
   return (Array.isArray(items) ? items : []).map((item, index) => ({
     id: item.id || createId(`company-${index}`),
     name: String(item.name || "New company").trim(),
+    country: String(item.country || "Not specified").trim(),
     website: String(item.website || "").trim(),
     bankEmail: String(item.bankEmail || "").trim(),
     clientEmail: String(item.clientEmail || item.email || "").trim(),
@@ -957,21 +958,41 @@ function renderCompanies() {
     return;
   }
 
-  elements.companyDirectory.innerHTML = state.companies.length
-    ? [...state.companies].sort((a, b) => a.name.localeCompare(b.name)).map((company) => `
-        <article class="company-card">
-          <div class="company-mark" aria-hidden="true">${escapeHtml(company.name.charAt(0).toUpperCase())}</div>
-          <div>
-            <h3>${escapeHtml(company.name)}</h3>
-            <div class="company-links">
-              ${company.website ? `<a href="${escapeHtml(company.website)}" target="_blank" rel="noopener noreferrer">${escapeHtml(company.website.replace(/^https?:\/\//, "").replace(/\/$/, ""))}</a>` : `<span>Website not added</span>`}
-              ${company.bankEmail ? `<a href="mailto:${escapeHtml(company.bankEmail)}"><strong>Banks:</strong> ${escapeHtml(company.bankEmail)}</a>` : `<span>Banks: email not added</span>`}
-              ${company.clientEmail ? `<a href="mailto:${escapeHtml(company.clientEmail)}"><strong>Clients:</strong> ${escapeHtml(company.clientEmail)}</a>` : `<span>Clients: email not added</span>`}
-            </div>
-          </div>
-        </article>
-      `).join("")
-    : `<div class="empty-panel"><strong>No companies yet</strong><span>Add the first company in Admin.</span></div>`;
+  if (!state.companies.length) {
+    elements.companyDirectory.innerHTML = `<div class="empty-panel"><strong>No companies yet</strong><span>Add the first company in Admin.</span></div>`;
+    return;
+  }
+
+  const companiesByCountry = [...state.companies]
+    .sort((a, b) => a.country.localeCompare(b.country) || a.name.localeCompare(b.name))
+    .reduce((groups, company) => {
+      const country = company.country || "Not specified";
+      if (!groups.has(country)) groups.set(country, []);
+      groups.get(country).push(company);
+      return groups;
+    }, new Map());
+
+  elements.companyDirectory.innerHTML = [...companiesByCountry.entries()].map(([country, companies]) => `
+    <section class="company-country">
+      <header>
+        <h3>${escapeHtml(country)}</h3>
+        <span>${companies.length} ${companies.length === 1 ? "company" : "companies"}</span>
+      </header>
+      <div class="company-list">
+        <div class="company-list-head" aria-hidden="true">
+          <span>Company</span><span>Website</span><span>Email for banks</span><span>Email for clients</span>
+        </div>
+        ${companies.map((company) => `
+          <article class="company-row">
+            <strong>${escapeHtml(company.name)}</strong>
+            <span>${company.website ? `<a href="${escapeHtml(company.website)}" target="_blank" rel="noopener noreferrer">${escapeHtml(company.website.replace(/^https?:\/\//, "").replace(/\/$/, ""))}</a>` : "Not added"}</span>
+            <span>${company.bankEmail ? `<a href="mailto:${escapeHtml(company.bankEmail)}">${escapeHtml(company.bankEmail)}</a>` : "Not added"}</span>
+            <span>${company.clientEmail ? `<a href="mailto:${escapeHtml(company.clientEmail)}">${escapeHtml(company.clientEmail)}</a>` : "Not added"}</span>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `).join("");
 }
 
 function setCompaniesStatus(message, status = "idle") {
@@ -2472,7 +2493,7 @@ function fillCompanyForm(company) {
     return;
   }
   elements.companyFormTitle.textContent = `Edit ${company.name}`;
-  ["name", "website", "bankEmail", "clientEmail"].forEach((key) => {
+  ["name", "country", "website", "bankEmail", "clientEmail"].forEach((key) => {
     elements.companyForm.elements[key].value = company[key] || "";
   });
 }
@@ -2652,7 +2673,7 @@ function createRadarRecord() {
 }
 
 function createCompanyRecord() {
-  const company = { id: createId("company"), name: "New company", website: "", bankEmail: "", clientEmail: "" };
+  const company = { id: createId("company"), name: "New company", country: "Not specified", website: "", bankEmail: "", clientEmail: "" };
   state.companies.unshift(company);
   state.currentCompanyId = company.id;
   refreshPortal();
@@ -2773,7 +2794,7 @@ function saveCompanyFromForm(event) {
   const company = getCurrentCompany();
   if (!company) return;
   const formData = new FormData(elements.companyForm);
-  ["name", "website", "bankEmail", "clientEmail"].forEach((key) => {
+  ["name", "country", "website", "bankEmail", "clientEmail"].forEach((key) => {
     company[key] = String(formData.get(key) || "").trim();
   });
   refreshPortal();

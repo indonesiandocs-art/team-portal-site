@@ -554,54 +554,76 @@ h2 {
 
 .company-directory {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
+  gap: 26px;
   margin-top: 18px;
 }
 
-.company-card {
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  gap: 14px;
-  align-items: start;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: #ffffff;
+.company-country > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
-.company-mark {
-  display: grid;
-  width: 44px;
-  height: 44px;
-  place-items: center;
-  border-radius: 50%;
-  color: #ffffff;
-  background: var(--ink);
-  font-weight: 700;
-  line-height: 1;
+.company-country h3 {
+  margin: 0;
+  font-size: 18px;
 }
 
-.company-card h3 {
-  margin: 2px 0 10px;
-  font-size: 17px;
-}
-
-.company-links {
-  display: grid;
-  gap: 6px;
-}
-
-.company-links a,
-.company-links span {
-  min-width: 0;
+.company-country > header span,
+.company-row span {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
+}
+
+.company-list {
+  border-top: 1px solid var(--line);
+}
+
+.company-list-head,
+.company-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.15fr) minmax(130px, 1fr) minmax(160px, 1.15fr) minmax(160px, 1.15fr);
+  gap: 16px;
+  align-items: center;
+  padding: 11px 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.company-list-head {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.company-row > * {
+  min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.company-links a:hover {
+.company-row a {
+  color: var(--ink);
+}
+
+.company-row a:hover {
   color: var(--accent);
+}
+
+@media (max-width: 760px) {
+  .company-list-head {
+    display: none;
+  }
+
+  .company-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .company-row span:nth-child(2)::before { content: "Website: "; font-weight: 700; }
+  .company-row span:nth-child(3)::before { content: "Banks: "; font-weight: 700; }
+  .company-row span:nth-child(4)::before { content: "Clients: "; font-weight: 700; }
 }
 
 .flight-page-header {
