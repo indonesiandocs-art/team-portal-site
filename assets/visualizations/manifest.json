@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-11",
+  "updatedAt": "2026-09-03",
   "items": [
     {
       "id": "mintai-fundamental-route",
@@ -33,6 +33,14 @@
       "file": "payment-inside-one-bank.html",
       "category": "Routes",
       "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "russia-international-agency-route",
+      "title": "Russia & International Agency Route",
+      "description": "Parallel RUB agency settlements and foreign-currency liquidity route through an agent and sub-agent.",
+      "file": "russia-international-agency-route.html",
+      "category": "Routes",
+      "updatedAt": "2026-09-03"
     }
   ]
 }
