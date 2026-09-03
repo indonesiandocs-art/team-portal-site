@@ -49,6 +49,14 @@
       "file": "emlak-bank-fundamental-road.html",
       "category": "Routes",
       "updatedAt": "2026-09-03"
+    },
+    {
+      "id": "crypto-liquidity-agency-route",
+      "title": "Crypto Liquidity Agency Route",
+      "description": "Alternative RUB-to-USDT route through crypto agents, followed by conversion into foreign-currency liquidity for final supplier payments.",
+      "file": "crypto-liquidity-agency-route.html",
+      "category": "Routes",
+      "updatedAt": "2026-09-03"
     }
   ]
 }
