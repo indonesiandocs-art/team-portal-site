@@ -5,10 +5,10 @@
     {
       "id": "mintai-fundamental-route",
       "title": "Mintai Fundamental Route",
-      "description": "Interactive route visualization for internal review.",
+      "description": "Liquidity route through Stable Vision or Quantum, with direct Mintai and Sunrate payment options.",
       "file": "mintai-fundamental-route.html",
       "category": "Routes",
-      "updatedAt": "2026-07-17"
+      "updatedAt": "2026-09-03"
     },
     {
       "id": "chuzhou-fundamental-route",

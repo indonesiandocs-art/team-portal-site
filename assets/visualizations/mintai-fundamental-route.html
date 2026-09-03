@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-visualize-standalone>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src 'unsafe-inline' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Mintai Fundamental Route</title>
-<style>:root{color-scheme:light dark;background:light-dark(rgb(255 255 255), rgb(24 24 24))}html,body{margin:0}body{box-sizing:border-box;padding:1rem;background:inherit}iframe{display:block;width:100%;max-width:736px;height:calc(100vh - 2rem);margin:0 auto;border:0}</style>
+<style>:root{color-scheme:light dark;background:light-dark(rgb(255 255 255), rgb(24 24 24))}html,body{margin:0}body{box-sizing:border-box;padding:1rem;background:inherit}iframe{display:block;width:100%;height:calc(100vh - 2rem);margin:0 auto;border:0}</style>
 </head>
 <body>
 <iframe sandbox="allow-scripts" referrerpolicy="no-referrer" title="Mintai Fundamental Route" srcdoc="&lt;!doctype html&gt;
-&lt;html lang=&quot;en&quot;&gt;
+&lt;html lang=&quot;en&quot; data-visualize-standalone&gt;
 &lt;head&gt;
 &lt;meta charset=&quot;utf-8&quot;&gt;
 &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
@@ -19,34 +19,88 @@
 &lt;title&gt;Mintai Fundamental Route&lt;/title&gt;
 &lt;style&gt;:root {
   color-scheme: light dark;
-  background-color: var(--background) !important;
+  background-color: var(
+    --background,
+    var(--color-background-primary, light-dark(rgb(255 255 255), rgb(24 24 24)))
+  ) !important;
 
   /* Agent-facing contract; keep in sync with SKILL.md. */
-  --background: light-dark(rgb(255 255 255), rgb(24 24 24));
-  --foreground: light-dark(rgb(26 28 31), rgb(255 255 255));
-  --card: color-mix(in oklab, var(--foreground) 5%, transparent);
-  --card-foreground: var(--foreground);
-  --popover: light-dark(rgb(255 255 255), rgb(45 45 45));
-  --popover-foreground: var(--foreground);
-  --primary: light-dark(rgb(51 156 255), rgb(131 195 255));
-  --primary-foreground: light-dark(rgb(255 255 255), rgb(13 13 13));
-  --secondary: light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%));
-  --secondary-foreground: var(--foreground);
+  --background: var(
+    --color-background-primary,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --card: color-mix(in oklab, var(--foreground) 5%, var(--background));
+  --card-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --popover: var(
+    --color-background-secondary,
+    light-dark(rgb(255 255 255), rgb(45 45 45))
+  );
+  --popover-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --primary: var(
+    --color-text-info,
+    light-dark(rgb(51 156 255), rgb(131 195 255))
+  );
+  --primary-foreground: var(
+    --color-text-inverse,
+    light-dark(rgb(255 255 255), rgb(13 13 13))
+  );
+  --secondary: var(
+    --color-background-secondary,
+    light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%))
+  );
+  --secondary-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
   --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
-  --muted-foreground: light-dark(
-    rgb(26 28 31 / 49.4%),
-    rgb(255 255 255 / 49.8%)
+  --muted-foreground: var(
+    --color-text-secondary,
+    light-dark(rgb(26 28 31 / 49.4%), rgb(255 255 255 / 49.8%))
   );
-  --accent: light-dark(rgb(229 242 255), rgb(13 39 63));
-  --accent-foreground: var(--primary);
-  --destructive: light-dark(rgb(226 85 7), rgb(255 133 73));
-  --border: light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%));
-  --input: light-dark(
-    rgb(26 28 31 / 11.8%),
-    color-mix(in oklab, rgb(0 0 0) 10%, transparent)
+  --accent: var(
+    --color-background-info,
+    light-dark(rgb(229 242 255), rgb(13 39 63))
   );
-  --ring: light-dark(rgb(51 156 255), rgb(131 195 255 / 76%));
-  --font-size-base: 14px;
+  --accent-foreground: var(
+    --color-text-info,
+    light-dark(rgb(51 156 255), rgb(131 195 255))
+  );
+  --destructive: var(
+    --color-text-warning,
+    light-dark(rgb(226 85 7), rgb(255 133 73))
+  );
+  --border: var(
+    --color-border-secondary,
+    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
+  );
+  --input: var(
+    --color-border-primary,
+    light-dark(
+      rgb(26 28 31 / 11.8%),
+      color-mix(in oklab, rgb(0 0 0) 10%, transparent)
+    )
+  );
+  --ring: var(
+    --color-ring-primary,
+    light-dark(rgb(51 156 255), rgb(131 195 255 / 76%))
+  );
+  --font-size-base: var(--font-text-md-size, 14px);
+  --blue: light-dark(rgb(51 156 255), rgb(51 156 255));
+  --orange: light-dark(rgb(226 85 7), rgb(251 106 34));
+  --green: light-dark(rgb(0 162 64), rgb(64 201 119));
+  --red: light-dark(rgb(224 46 42), rgb(255 103 100));
+  --purple: light-dark(rgb(146 79 247), rgb(173 123 249));
+  --yellow: light-dark(rgb(255 195 0), rgb(255 210 64));
   --viz-series-1: var(--primary);
   --viz-series-2: light-dark(rgb(243 136 59), rgb(245 154 86));
   --viz-series-3: light-dark(rgb(93 201 119), rgb(116 213 139));
@@ -67,10 +121,12 @@
   --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
   --font-weight-normal: 430;
   --font-weight-medium: 500;
+  --icon-size: 16px;
   --line-height-normal: calc(var(--font-size-normal) * 1.5);
   --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
   --line-height-small: calc(var(--font-size-small) + 4px);
-  --radius: 12.5px;
+  --corner-shape: round;
+  --radius: var(--border-radius-lg, 10px);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -90,9 +146,6 @@
   --viz-accent-bg: var(--accent);
   --viz-font-size: var(--font-size-base);
   --viz-warning: var(--destructive);
-  --color-background-primary: var(--background);
-  --color-text-primary: var(--foreground);
-  --color-border-secondary: var(--border);
 }
 
 :root[data-theme=&quot;light&quot;] {
@@ -108,11 +161,25 @@
 }
 
 html &gt; body {
+  /* Preserve MCP aliases for older inline renderers without creating :root cycles. */
+  --color-background-primary: var(
+    --background,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --color-text-primary: var(
+    --foreground,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --color-border-secondary: var(
+    --border,
+    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
+  );
+
   margin: 0;
-  padding: 5px;
+  padding: var(--visualize-paint-gutter, 0px);
   color: var(--foreground);
   background: transparent !important;
-  font-family: var(--font-sans);
+  font-family: var(--font-sans) !important;
   font-size: var(--font-size-normal);
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-normal);
@@ -121,7 +188,7 @@ html &gt; body {
 a {
   color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
   cursor: pointer;
-  font-weight: var(--viz-font-weight-medium);
+  font-weight: var(--font-weight-medium, 500);
   text-decoration: none;
   text-underline-offset: 2px;
 }
@@ -173,7 +240,7 @@ code:not(pre code) {
   display: inline;
   padding: 1px 6px;
   border-radius: var(--radius-sm);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
   background: var(--muted);
   font-family: var(--font-mono);
   font-size: 0.92em;
@@ -263,12 +330,12 @@ code:not(pre code) {
   overflow: hidden;
   overflow-wrap: break-word;
   border-radius: var(--radius-2xl);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
   color: var(--card-foreground);
   background: var(--card);
 }
 
-#widget &gt; :not(.card) {
+#widget &gt; :not(.card, .progress) {
   width: 100% !important;
   max-width: none !important;
   margin: 0 !important;
@@ -297,7 +364,7 @@ code:not(pre code) {
   padding: 4px 8px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
   color: var(--popover-foreground);
   background: var(--popover);
   box-shadow: none;
@@ -334,6 +401,42 @@ code:not(pre code) {
   gap: 10px;
 }
 
+hr {
+  width: 100%;
+  height: 1px;
+  margin-block: 6px;
+  border: 0;
+  background: var(--border);
+}
+
+.nav {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.progress {
+  display: flex;
+  height: 8px;
+  margin-block: calc((var(--line-height-normal, 1.5em) - 8px) / 2);
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+}
+
+.progress-bar:only-child {
+  border-radius: var(--radius-full);
+}
+
+.progress-bar {
+  height: 100%;
+  flex-shrink: 0;
+  border: 0;
+  background: var(--viz-series-1);
+}
+
 .viz-badge {
   padding: 3px 8px;
   border-radius: var(--radius-full);
@@ -351,6 +454,10 @@ small,
 
 .text-muted {
   color: var(--muted-foreground);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 .sr-only {
@@ -386,6 +493,7 @@ small,
 }
 
 .btn,
+.nav-link,
 .form-check-input,
 .form-control,
 .form-range,
@@ -393,7 +501,8 @@ small,
   font: inherit;
 }
 
-.btn {
+.btn,
+.nav-link {
   appearance: button;
   display: inline-flex;
   inline-size: fit-content;
@@ -407,7 +516,7 @@ small,
   -webkit-app-region: no-drag;
   border: 1px solid var(--input);
   border-radius: var(--radius-lg);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
   color: var(--secondary-foreground);
   background: var(--secondary);
   cursor: var(--cursor-interaction, pointer);
@@ -433,7 +542,8 @@ a.btn {
   text-decoration: none;
 }
 
-.btn:not(:disabled):hover {
+.btn:not(:disabled):hover,
+.nav-link:not(:disabled):not([aria-disabled=&quot;true&quot;]):hover {
   background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
 }
 
@@ -464,7 +574,27 @@ a.btn {
   background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
 }
 
-.btn:disabled {
+.nav-pills .nav-link {
+  min-width: 0;
+  border-color: transparent;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+
+.nav-justified .nav-link {
+  flex: 1 1 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.nav-pills .nav-link.active {
+  color: var(--foreground);
+  background: var(--muted);
+}
+
+.btn:disabled,
+.nav-link:disabled,
+.nav-link[aria-disabled=&quot;true&quot;] {
   cursor: not-allowed;
   opacity: 0.4;
 }
@@ -487,7 +617,7 @@ a.btn {
   outline: none;
   border: 1px solid var(--input);
   border-radius: var(--radius-lg);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
   color: var(--foreground);
   background: var(--secondary);
 }
@@ -532,7 +662,7 @@ a.btn {
 .form-control-color[type=&quot;color&quot;]::-webkit-color-swatch {
   border: 0;
   border-radius: calc(var(--radius-lg) - 4px);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
 }
 
 textarea.form-control {
@@ -563,7 +693,7 @@ textarea.form-control {
   outline: none;
   border: 1px solid var(--input);
   border-radius: var(--radius-lg);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
   color: var(--foreground);
   background-color: var(--secondary);
   background-image:
@@ -612,7 +742,7 @@ textarea.form-control {
 .form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;] {
   border-color: var(--input);
   border-radius: var(--radius-sm);
-  corner-shape: superellipse(1.5);
+  corner-shape: var(--corner-shape);
   background-color: var(--secondary);
   box-shadow: var(--shadow-sm);
 }
@@ -776,10 +906,10 @@ textarea.form-control {
 }
 
 .btn:not(.btn-primary, .viz-tile):is(
-    [aria-pressed=&quot;true&quot;],
-    [aria-selected=&quot;true&quot;],
-    .is-selected
-  ) {
+  [aria-pressed=&quot;true&quot;],
+  [aria-selected=&quot;true&quot;],
+  .is-selected
+) {
   border-color: var(--primary);
   color: var(--primary-foreground);
   background: var(--primary);
@@ -790,9 +920,91 @@ textarea.form-control {
   box-shadow: inset 0 0 0 1px var(--primary);
 }
 
-.btn:focus-visible {
+.btn:focus-visible,
+.nav-link:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .btn,
+  .nav-link,
+  .form-control,
+  .form-select {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Keep small-screen WebKit from zooming when a text field receives focus. */
+  .form-control,
+  .form-select {
+    font-size: max(16px, var(--font-size-normal));
+  }
+
+  .form-control[type=&quot;file&quot;]::file-selector-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .form-control-color[type=&quot;color&quot;] {
+    width: 44px;
+    height: 44px;
+  }
+
+  .form-control:is(
+    [type=&quot;date&quot;],
+    [type=&quot;datetime-local&quot;],
+    [type=&quot;month&quot;],
+    [type=&quot;time&quot;],
+    [type=&quot;week&quot;]
+  ) {
+    min-width: 0;
+    max-width: 100%;
+    padding-block: 8px;
+  }
+
+  .form-check {
+    min-height: 44px;
+    padding-inline: 15px;
+  }
+
+  .form-check-input {
+    position: relative;
+  }
+
+  .form-check-input::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    content: &quot;&quot;;
+    transform: translate(-50%, -50%);
+  }
+
+  .form-check-label {
+    display: inline-flex;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .form-range {
+    height: 44px;
+    touch-action: pan-y;
+  }
+
+  .form-range::-webkit-slider-runnable-track {
+    height: 44px;
+  }
+
+  .form-range::-moz-range-track {
+    height: 44px;
+  }
+
+  .form-range::-webkit-slider-thumb {
+    margin-top: 12px;
+  }
 }
 
 svg {
@@ -805,6 +1017,16 @@ svg {
   width: 100%;
 }
 
+/* Model-authored chart rules can otherwise stretch icons after these styles load. */
+svg.lucide {
+  display: block;
+  width: var(--icon-size) !important;
+  height: var(--icon-size) !important;
+  flex: none;
+  margin: 0 !important;
+  stroke-width: 1.6;
+}
+
 .text-warning,
 .text-destructive {
   color: var(--destructive);
@@ -814,6 +1036,13 @@ html&gt;body{padding:0}&lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
 &lt;div id=&quot;mintai-fundamental-flow&quot;&gt;
+  &lt;div class=&quot;viz-controls&quot; aria-label=&quot;Company selection&quot;&gt;
+    &lt;span&gt;Which company receives the liquidity?&lt;/span&gt;
+    &lt;div class=&quot;viz-row&quot; role=&quot;group&quot; aria-label=&quot;Choose company&quot;&gt;
+      &lt;button type=&quot;button&quot; class=&quot;btn company-btn&quot; data-company=&quot;Stable Vision&quot; aria-pressed=&quot;true&quot;&gt;Stable Vision&lt;/button&gt;
+      &lt;button type=&quot;button&quot; class=&quot;btn company-btn&quot; data-company=&quot;Quantum&quot; aria-pressed=&quot;false&quot;&gt;Quantum&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
   &lt;div class=&quot;viz-controls&quot; aria-label=&quot;Payment condition&quot;&gt;
     &lt;span&gt;Does the supplier accept a direct Mintai payment?&lt;/span&gt;
     &lt;div class=&quot;viz-row&quot; role=&quot;group&quot; aria-label=&quot;Choose payment route&quot;&gt;
@@ -824,7 +1053,7 @@ html&gt;body{padding:0}&lt;/style&gt;
 
   &lt;svg class=&quot;flow&quot; viewBox=&quot;0 0 900 470&quot; role=&quot;img&quot; aria-labelledby=&quot;fundamental-title fundamental-desc&quot;&gt;
     &lt;title id=&quot;fundamental-title&quot;&gt;Fundamental Mintai funding and payment routes&lt;/title&gt;
-    &lt;desc id=&quot;fundamental-desc&quot;&gt;Ashon provides liquidity from Mintai Bank, and a second potential company may also provide liquidity from Mintai Bank. Other potential partner companies can provide liquidity to the Stable Vision account at Mintai Bank. Stable Vision then pays the supplier either directly from Mintai Bank or through its Sunrate account.&lt;/desc&gt;
+    &lt;desc id=&quot;fundamental-desc&quot;&gt;Liquidity can be received by either Stable Vision or Quantum at Mintai Bank. The selected company then pays the supplier either directly from Mintai Bank or through its own Sunrate account.&lt;/desc&gt;
     &lt;defs&gt;
       &lt;marker id=&quot;fund-arrow-neutral&quot; viewBox=&quot;0 0 10 10&quot; refX=&quot;8&quot; refY=&quot;5&quot; markerWidth=&quot;7&quot; markerHeight=&quot;7&quot; orient=&quot;auto-start-reverse&quot;&gt;&lt;path d=&quot;M0 0L10 5L0 10Z&quot; fill=&quot;var(--muted-foreground)&quot;/&gt;&lt;/marker&gt;
       &lt;marker id=&quot;fund-arrow-active&quot; viewBox=&quot;0 0 10 10&quot; refX=&quot;8&quot; refY=&quot;5&quot; markerWidth=&quot;7&quot; markerHeight=&quot;7&quot; orient=&quot;auto-start-reverse&quot;&gt;&lt;path d=&quot;M0 0L10 5L0 10Z&quot; fill=&quot;var(--viz-series-1)&quot;/&gt;&lt;/marker&gt;
@@ -849,15 +1078,15 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;/g&gt;
 
     &lt;rect class=&quot;company-boundary&quot; x=&quot;292&quot; y=&quot;42&quot; width=&quot;372&quot; height=&quot;390&quot; rx=&quot;18&quot;/&gt;
-    &lt;text class=&quot;group-label&quot; x=&quot;314&quot; y=&quot;72&quot;&gt;STABLE VISION&lt;/text&gt;
+    &lt;text class=&quot;group-label company-label&quot; x=&quot;314&quot; y=&quot;72&quot;&gt;STABLE VISION&lt;/text&gt;
     &lt;g class=&quot;node account&quot; transform=&quot;translate(342 116)&quot;&gt;
       &lt;rect width=&quot;270&quot; height=&quot;86&quot; rx=&quot;14&quot;/&gt;
-      &lt;text x=&quot;135&quot; y=&quot;36&quot; text-anchor=&quot;middle&quot;&gt;Stable Vision account&lt;/text&gt;
+      &lt;text class=&quot;mintai-account-name&quot; x=&quot;135&quot; y=&quot;36&quot; text-anchor=&quot;middle&quot;&gt;Stable Vision account&lt;/text&gt;
       &lt;text class=&quot;sub&quot; x=&quot;135&quot; y=&quot;62&quot; text-anchor=&quot;middle&quot;&gt;at Mintai Bank&lt;/text&gt;
     &lt;/g&gt;
     &lt;g class=&quot;node account&quot; transform=&quot;translate(342 310)&quot;&gt;
       &lt;rect width=&quot;270&quot; height=&quot;78&quot; rx=&quot;14&quot;/&gt;
-      &lt;text x=&quot;135&quot; y=&quot;32&quot; text-anchor=&quot;middle&quot;&gt;Stable Vision account&lt;/text&gt;
+      &lt;text class=&quot;sunrate-account-name&quot; x=&quot;135&quot; y=&quot;32&quot; text-anchor=&quot;middle&quot;&gt;Stable Vision account&lt;/text&gt;
       &lt;text class=&quot;sub&quot; x=&quot;135&quot; y=&quot;57&quot; text-anchor=&quot;middle&quot;&gt;at Sunrate&lt;/text&gt;
     &lt;/g&gt;
 
@@ -884,7 +1113,7 @@ html&gt;body{padding:0}&lt;/style&gt;
 
   &lt;div class=&quot;selected-detail&quot; aria-live=&quot;polite&quot;&gt;
     &lt;span class=&quot;viz-badge&quot;&gt;Active route&lt;/span&gt;
-    &lt;span class=&quot;route-detail&quot;&gt;Liquidity sources → Mintai Bank → Supplier&lt;/span&gt;
+    &lt;span class=&quot;route-detail&quot;&gt;Liquidity sources → Stable Vision at Mintai Bank → Supplier&lt;/span&gt;
   &lt;/div&gt;
 &lt;/div&gt;
 
@@ -918,17 +1147,27 @@ html&gt;body{padding:0}&lt;/style&gt;
 &lt;script&gt;
 (() =&gt; {
   const root = document.getElementById(&#x27;mintai-fundamental-flow&#x27;);
-  const buttons = [...root.querySelectorAll(&#x27;.route-btn&#x27;)];
+  const companyButtons = [...root.querySelectorAll(&#x27;.company-btn&#x27;)];
+  const routeButtons = [...root.querySelectorAll(&#x27;.route-btn&#x27;)];
   const direct = root.querySelector(&#x27;.direct&#x27;);
   const directLabel = root.querySelector(&#x27;.direct-label&#x27;);
   const fallback = [...root.querySelectorAll(&#x27;.fallback&#x27;)];
   const fallbackLabels = [...root.querySelectorAll(&#x27;.fallback-label&#x27;)];
   const supplierSub = root.querySelector(&#x27;.supplier-sub&#x27;);
   const detail = root.querySelector(&#x27;.route-detail&#x27;);
+  const companyLabel = root.querySelector(&#x27;.company-label&#x27;);
+  const mintaiAccountName = root.querySelector(&#x27;.mintai-account-name&#x27;);
+  const sunrateAccountName = root.querySelector(&#x27;.sunrate-account-name&#x27;);
+  let selectedCompany = &#x27;Stable Vision&#x27;;
+  let selectedRoute = &#x27;direct&#x27;;
 
-  function selectRoute(route) {
-    const isDirect = route === &#x27;direct&#x27;;
-    buttons.forEach(button =&gt; button.setAttribute(&#x27;aria-pressed&#x27;, String(button.dataset.route === route)));
+  function renderSelection() {
+    const isDirect = selectedRoute === &#x27;direct&#x27;;
+    companyButtons.forEach(button =&gt; button.setAttribute(&#x27;aria-pressed&#x27;, String(button.dataset.company === selectedCompany)));
+    routeButtons.forEach(button =&gt; button.setAttribute(&#x27;aria-pressed&#x27;, String(button.dataset.route === selectedRoute)));
+    companyLabel.textContent = selectedCompany.toUpperCase();
+    mintaiAccountName.textContent = `${selectedCompany} account`;
+    sunrateAccountName.textContent = `${selectedCompany} account`;
     direct.classList.toggle(&#x27;active&#x27;, isDirect);
     directLabel.classList.toggle(&#x27;active-label&#x27;, isDirect);
     direct.style.opacity = isDirect ? &#x27;1&#x27; : &#x27;.25&#x27;;
@@ -939,11 +1178,18 @@ html&gt;body{padding:0}&lt;/style&gt;
     });
     supplierSub.textContent = isDirect ? &#x27;accepts Mintai&#x27; : &#x27;paid via Sunrate&#x27;;
     detail.textContent = isDirect
-      ? &#x27;Liquidity sources → Mintai Bank → Supplier&#x27;
-      : &#x27;Liquidity sources → Mintai Bank → Sunrate → Supplier&#x27;;
+      ? `Liquidity sources → ${selectedCompany} at Mintai Bank → Supplier`
+      : `Liquidity sources → ${selectedCompany} at Mintai Bank → ${selectedCompany} at Sunrate → Supplier`;
   }
 
-  buttons.forEach(button =&gt; button.addEventListener(&#x27;click&#x27;, () =&gt; selectRoute(button.dataset.route)));
+  companyButtons.forEach(button =&gt; button.addEventListener(&#x27;click&#x27;, () =&gt; {
+    selectedCompany = button.dataset.company;
+    renderSelection();
+  }));
+  routeButtons.forEach(button =&gt; button.addEventListener(&#x27;click&#x27;, () =&gt; {
+    selectedRoute = button.dataset.route;
+    renderSelection();
+  }));
 })();
 &lt;/script&gt;
 
@@ -970,6 +1216,8 @@ html&gt;body{padding:0}&lt;/style&gt;
   let autoUpdateCleanup = null;
   let positionRequest = 0;
   let skipDelayUntil = 0;
+  let lastPointerWasTouch = false;
+  let pinnedByTouch = false;
 
   const getTrigger = (target) =&gt;
     target?.nodeType === Node.ELEMENT_NODE
@@ -1018,6 +1266,7 @@ html&gt;body{padding:0}&lt;/style&gt;
   };
   const closeTooltip = (activateSkipDelay = true) =&gt; {
     clearOpenTimeout();
+    pinnedByTouch = false;
     positionRequest += 1;
     autoUpdateCleanup?.();
     autoUpdateCleanup = null;
@@ -1124,7 +1373,40 @@ html&gt;body{padding:0}&lt;/style&gt;
     }
     requestOpen(trigger);
   };
+  const handlePointer = (event) =&gt; {
+    lastPointerWasTouch =
+      event.type === &quot;pointerdown&quot; &amp;&amp; event.pointerType === &quot;touch&quot;;
+  };
+  const handleTouchClick = (event) =&gt; {
+    const isTouch = event.pointerType === &quot;touch&quot; || lastPointerWasTouch;
+    lastPointerWasTouch = false;
+    if (!isTouch || event.detail === 0) {
+      return;
+    }
+    const trigger = getTrigger(event.target);
+    if (
+      trigger == null ||
+      !trigger.isConnected ||
+      getContent(trigger).length === 0 ||
+      (pinnedByTouch &amp;&amp; activeTrigger === trigger)
+    ) {
+      if (pinnedByTouch) {
+        closeTooltip();
+      }
+      return;
+    }
+    openTooltip(trigger);
+    pinnedByTouch = activeTrigger === trigger;
+    window.setTimeout(() =&gt; {
+      if (activeTrigger === trigger &amp;&amp; !trigger.isConnected) {
+        closeTooltip(false);
+      }
+    }, 0);
+  };
   const handleLeave = (event) =&gt; {
+    if (pinnedByTouch) {
+      return;
+    }
     const trigger = getTrigger(event.target);
     if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
       return;
@@ -1145,6 +1427,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     }
   };
   const handleContextMenu = (event) =&gt; {
+    lastPointerWasTouch = false;
     const trigger = getTrigger(event.target);
     if (activeTrigger === trigger || pendingTrigger === trigger) {
       closeTooltip();
@@ -1152,7 +1435,11 @@ html&gt;body{padding:0}&lt;/style&gt;
   };
   const destroy = () =&gt; {
     closeTooltip(false);
+    lastPointerWasTouch = false;
     document.removeEventListener(&quot;pointerover&quot;, handlePointerOpen);
+    document.removeEventListener(&quot;pointerdown&quot;, handlePointer);
+    document.removeEventListener(&quot;pointercancel&quot;, handlePointer);
+    document.removeEventListener(&quot;click&quot;, handleTouchClick);
     document.removeEventListener(&quot;pointerout&quot;, handleLeave);
     document.removeEventListener(&quot;focusin&quot;, handleFocusIn);
     document.removeEventListener(&quot;focusout&quot;, handleLeave);
@@ -1162,12 +1449,82 @@ html&gt;body{padding:0}&lt;/style&gt;
   };
 
   document.addEventListener(&quot;pointerover&quot;, handlePointerOpen);
+  document.addEventListener(&quot;pointerdown&quot;, handlePointer);
+  document.addEventListener(&quot;pointercancel&quot;, handlePointer);
+  document.addEventListener(&quot;click&quot;, handleTouchClick);
   document.addEventListener(&quot;pointerout&quot;, handleLeave);
   document.addEventListener(&quot;focusin&quot;, handleFocusIn);
   document.addEventListener(&quot;focusout&quot;, handleLeave);
   document.addEventListener(&quot;keydown&quot;, handleKeyDown);
   document.addEventListener(&quot;contextmenu&quot;, handleContextMenu);
   window.addEventListener(&quot;pagehide&quot;, destroy, { once: true });
+})();
+&lt;/script&gt;
+&lt;script id=&quot;codex-visualization-tabs&quot;&gt;
+(() =&gt; {
+  const selector = &#x27;.nav[role=&quot;tablist&quot;] [role=&quot;tab&quot;]&#x27;;
+  const disabled = &#x27;:disabled,[aria-disabled=&quot;true&quot;]&#x27;;
+  const selectTab = (selected) =&gt; {
+    const panelId = selected.getAttribute(&quot;aria-controls&quot;);
+    for (const tab of selected.closest(&#x27;[role=&quot;tablist&quot;]&#x27;).querySelectorAll(&#x27;[role=&quot;tab&quot;]&#x27;)) {
+      const active = tab === selected;
+      tab.classList.toggle(&quot;active&quot;, active);
+      tab.setAttribute(&quot;aria-selected&quot;, String(active));
+      const id = tab.getAttribute(&quot;aria-controls&quot;);
+      const panel = id &amp;&amp; document.getElementById(id);
+      if (panel != null) {
+        panel.hidden = id !== panelId;
+        if (!panel.hidden &amp;&amp; selected.id) {
+          panel.setAttribute(&quot;aria-labelledby&quot;, selected.id);
+        }
+      }
+    }
+  };
+  const interact = (event) =&gt; {
+    const tab = event.target?.closest?.(selector);
+    if (event.defaultPrevented || tab == null || tab.matches(disabled)) {
+      return;
+    }
+    if (event.type === &quot;click&quot;) {
+      selectTab(tab);
+      return;
+    }
+    const tabs = Array.from(
+      tab.closest(&#x27;[role=&quot;tablist&quot;]&#x27;).querySelectorAll(&#x27;[role=&quot;tab&quot;]&#x27;),
+    ).filter((candidate) =&gt; !candidate.matches(disabled));
+    const current = tabs.indexOf(tab);
+    let next;
+    if (event.key === &quot;ArrowRight&quot; || event.key === &quot;ArrowDown&quot;) {
+      next = (current + 1) % tabs.length;
+    } else if (event.key === &quot;ArrowLeft&quot; || event.key === &quot;ArrowUp&quot;) {
+      next = (current + tabs.length - 1) % tabs.length;
+    } else if (event.key === &quot;Home&quot;) {
+      next = 0;
+    } else if (event.key === &quot;End&quot;) {
+      next = tabs.length - 1;
+    } else {
+      return;
+    }
+    event.preventDefault();
+    tabs[next].focus();
+    selectTab(tabs[next]);
+  };
+
+  for (const list of document.querySelectorAll(&#x27;.nav[role=&quot;tablist&quot;]&#x27;)) {
+    const selected =
+      list.querySelector(&#x27;[role=&quot;tab&quot;][aria-selected=&quot;true&quot;]&#x27;) ??
+      list.querySelector(&#x27;[role=&quot;tab&quot;].active&#x27;) ??
+      list.querySelector(&#x27;[role=&quot;tab&quot;]&#x27;);
+    if (selected != null) {
+      selectTab(selected);
+    }
+  }
+  document.addEventListener(&quot;click&quot;, interact);
+  document.addEventListener(&quot;keydown&quot;, interact);
+  window.addEventListener(&quot;pagehide&quot;, () =&gt; {
+    document.removeEventListener(&quot;click&quot;, interact);
+    document.removeEventListener(&quot;keydown&quot;, interact);
+  }, { once: true });
 })();
 &lt;/script&gt;
 &lt;script id=&quot;codex-visualization-lucide&quot; async src=&quot;https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js&quot;&gt;&lt;/script&gt;
