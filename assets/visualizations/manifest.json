@@ -28,8 +28,8 @@
     },
     {
       "id": "payment-inside-one-bank",
-      "title": "Payment Purpose Inside One Bank",
-      "description": "Comparison of the prohibited same-bank structure and the correct payment-between-banks structure.",
+      "title": "Dubai Route",
+      "description": "Comparison of the prohibited same-bank structure and the correct cross-bank route to final suppliers.",
       "file": "payment-inside-one-bank.html",
       "category": "Routes",
       "updatedAt": "2026-09-03"
