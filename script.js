@@ -1013,11 +1013,11 @@ async function loadCompanies({ asAdmin = false, silent = false } = {}) {
     const response = await fetch(companiesEndpoint, { headers, cache: "no-store" });
     if (response.status === 401) {
       state.companiesUnlocked = false;
-      if (!silent) setCompaniesStatus("Enter the company directory code.", "idle");
+      if (!silent) setCompaniesStatus("Enter the website directory code.", "idle");
       renderCompanies();
       return false;
     }
-    if (!response.ok) throw new Error(`Company directory returned ${response.status}`);
+    if (!response.ok) throw new Error(`Website directory returned ${response.status}`);
     const payload = await response.json();
     state.companies = normalizeCompanyRecords(payload.companies);
     state.currentCompanyId = state.currentCompanyId || state.companies[0]?.id || "";
@@ -1028,7 +1028,7 @@ async function loadCompanies({ asAdmin = false, silent = false } = {}) {
     fillCompanyForm(getCurrentCompany());
     return true;
   } catch {
-    if (!silent) setCompaniesStatus("Company directory is unavailable. Try again later.", "error");
+    if (!silent) setCompaniesStatus("Website directory is unavailable. Try again later.", "error");
     return false;
   }
 }
@@ -1037,7 +1037,7 @@ async function submitCompaniesAccess(event) {
   event.preventDefault();
   const accessCode = elements.companiesAccessInput.value.trim();
   if (!accessCode) {
-    setCompaniesStatus("Enter the company directory code.", "error");
+    setCompaniesStatus("Enter the website directory code.", "error");
     return;
   }
   setCompaniesStatus("Checking access...", "idle");
@@ -1048,7 +1048,7 @@ async function submitCompaniesAccess(event) {
       body: JSON.stringify({ accessCode }),
     });
     if (!response.ok) {
-      setCompaniesStatus("Company directory code is not accepted.", "error");
+      setCompaniesStatus("Website directory code is not accepted.", "error");
       return;
     }
     elements.companiesAuthForm.reset();
