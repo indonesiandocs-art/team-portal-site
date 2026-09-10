@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-03",
+  "updatedAt": "2026-09-10",
   "items": [
     {
       "id": "mintai-fundamental-route",
@@ -57,6 +57,14 @@
       "file": "crypto-liquidity-agency-route.html",
       "category": "Routes",
       "updatedAt": "2026-09-03"
+    },
+    {
+      "id": "odi-china-overseas-group-structure",
+      "title": "ODI China–Overseas Group Structure",
+      "description": "ODI-compliant ownership chain from a mainland Chinese company to overseas subsidiaries, with regulatory checkpoints and bank-onboarding context.",
+      "file": "odi-china-overseas-group-structure.html",
+      "category": "Structures",
+      "updatedAt": "2026-09-10"
     }
   ]
 }
