@@ -1,7 +1,15 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-10",
+  "updatedAt": "2026-09-29",
   "items": [
+    {
+      "id": "cross-border-payment-platform",
+      "title": "Cross-Border Payment Platform",
+      "description": "Local IDR and VND collection with FX conversion to CNY/CNH, plus direct USD or CNY/CNH funding for international B2B payments from Indonesia.",
+      "file": "cross-border-payment-platform.html",
+      "category": "Platforms",
+      "updatedAt": "2026-09-29"
+    },
     {
       "id": "mintai-fundamental-route",
       "title": "Mintai Fundamental Route",
