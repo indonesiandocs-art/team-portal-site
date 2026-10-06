@@ -1,7 +1,15 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-29",
+  "updatedAt": "2026-10-06",
   "items": [
+    {
+      "id": "crescent-aed-eur-payment-hub",
+      "title": "Crescent AED & EUR Payment Hub",
+      "description": "AED liquidity collection through Crescent at BOK International Abu Dhabi, followed by AED and EUR supplier payments across the UAE, Indonesia, Europe and Hong Kong.",
+      "file": "crescent-aed-eur-payment-hub.html",
+      "category": "Routes",
+      "updatedAt": "2026-10-06"
+    },
     {
       "id": "cross-border-payment-platform",
       "title": "Cross-Border Payment Platform",
