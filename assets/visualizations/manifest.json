@@ -1,7 +1,15 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-06",
+  "updatedAt": "2026-10-08",
   "items": [
+    {
+      "id": "java-cogolinks-cross-border-platform",
+      "title": "Java Cross-Border Payment Platform",
+      "description": "Java local currency collection accounts through CoGoLinks, consolidation into JPMorgan or Citi, CNY funding from Chuzhou Bank, and worldwide payments under invoice.",
+      "file": "java-cogolinks-cross-border-platform.html",
+      "category": "Platforms",
+      "updatedAt": "2026-10-08"
+    },
     {
       "id": "crescent-aed-eur-payment-hub",
       "title": "Crescent AED & EUR Payment Hub",
