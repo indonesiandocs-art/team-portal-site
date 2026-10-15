@@ -1,14 +1,14 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-08",
+  "updatedAt": "2026-10-15",
   "items": [
     {
       "id": "java-cogolinks-cross-border-platform",
       "title": "Java Cross-Border Payment Platform",
-      "description": "Java local currency collection accounts through CoGoLinks, consolidation into JPMorgan or Citi, CNY funding from Chuzhou Bank, and worldwide payments under invoice.",
+      "description": "Java local collection accounts at NationalNobu, OCBC Malaysia and Vietnam Maritime Commercial Bank, consolidated into the primary DBS Hong Kong account for worldwide payments under invoice.",
       "file": "java-cogolinks-cross-border-platform.html",
       "category": "Platforms",
-      "updatedAt": "2026-10-08"
+      "updatedAt": "2026-10-15"
     },
     {
       "id": "crescent-aed-eur-payment-hub",
