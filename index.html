@@ -388,9 +388,13 @@
             <div class="panel-header">
               <div>
                 <h2>Year overview</h2>
-                <p>Approved vacations, birthdays, and internal reminders from January to December.</p>
+                <p>Public holidays, approved vacations, birthdays, and internal reminders from January to December.</p>
               </div>
-              <div class="year-chip" id="calendarYear"></div>
+              <div class="year-switcher" aria-label="Calendar year">
+                <button class="secondary-action" type="button" id="previousCalendarYear" aria-label="Previous calendar year">←</button>
+                <div class="year-chip" id="calendarYear"></div>
+                <button class="secondary-action" type="button" id="nextCalendarYear" aria-label="Next calendar year">→</button>
+              </div>
             </div>
             <div class="calendar-legend" id="calendarLegend"></div>
             <div class="year-calendar" id="companyCalendar"></div>

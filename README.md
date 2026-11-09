@@ -39,6 +39,9 @@ Do not store access codes or admin tokens in the repository. Set or rotate them 
 
 Holiday data is stored in `assets/holiday-calendar.json` and displayed inside the Company calendar.
 Keep all names in English. Each record can be marked as a normal public non-working day or as a key relationship gift date.
+The calendar opens on the following year when that year is present in the holiday data; use the arrow buttons to switch years.
+
+Birthdays are managed in the Admin section: set a team member's Birthday, or add a birthday to an external contact for a partner. The date recurs automatically in every calendar year.
 
 Refresh this file annually before the new business year. CN, HK, ID, RU and core TR dates can be seeded from Nager.Date. AE, MY and movable Islamic holidays should be verified manually because official dates can shift with moon sighting and local announcements.
 

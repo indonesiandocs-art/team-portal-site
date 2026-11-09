@@ -894,6 +894,18 @@ h2 {
   font-weight: 900;
 }
 
+.year-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.year-switcher .secondary-action {
+  min-width: 42px;
+  padding: 0;
+  font-size: 18px;
+}
+
 .calendar-legend {
   display: flex;
   flex-wrap: wrap;

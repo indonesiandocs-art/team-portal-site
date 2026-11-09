@@ -196,6 +196,7 @@ const state = {
   externalContactSearch: "",
   externalContactCategory: "all",
   calendarFilters: [],
+  calendarYear: new Date().getFullYear(),
   radarSearch: "",
   radarRegion: "China",
   radarImportance: "all",
@@ -256,6 +257,8 @@ const elements = {
   vacationRequestForm: document.querySelector("#vacationRequestForm"),
   vacationRequestStatus: document.querySelector("#vacationRequestStatus"),
   calendarYear: document.querySelector("#calendarYear"),
+  previousCalendarYear: document.querySelector("#previousCalendarYear"),
+  nextCalendarYear: document.querySelector("#nextCalendarYear"),
   companyCalendar: document.querySelector("#companyCalendar"),
   calendarLegend: document.querySelector("#calendarLegend"),
   orgChart: document.querySelector("#orgChart"),
@@ -807,6 +810,11 @@ async function loadHolidayCalendar() {
 
     const payload = await response.json();
     state.holidayItems = normalizeHolidayRecords(payload.holidays);
+    const nextCalendarYear = new Date().getFullYear() + 1;
+
+    if (Array.isArray(payload.years) && payload.years.includes(nextCalendarYear)) {
+      state.calendarYear = nextCalendarYear;
+    }
   } catch {
     state.holidayItems = [];
   }
@@ -1356,21 +1364,26 @@ function getCalendarItems() {
   const requestEventIds = new Set(approvedRequests.map((request) => `vacation-${request.id}`));
   const eventItems = state.events
     .filter((event) => event.date && event.source !== "vacation-request" && !requestEventIds.has(event.id))
-    .map((event) => ({
-      id: event.id,
-      type: event.type,
-      title: event.title,
-      label: event.type === "vacation"
-        ? event.title.replace(/\s+on vacation$/i, "").replace(/^Vacation:\s*/i, "") || event.title
-        : eventTypeLabels[event.type] || "Reminder",
-      startDate: event.date,
-      endDate: event.date,
-      meta: event.meta,
-      colorKey: event.type === "vacation"
-        ? `vacation:${event.title.replace(/\s+on vacation$/i, "").replace(/^Vacation:\s*/i, "") || event.title}`
-        : event.type,
-      source: "event",
-    }));
+    .map((event) => {
+      const birthdayMonthDay = event.type === "birthday" ? getBirthdayMonthDay(event.date) : "";
+      const calendarDate = birthdayMonthDay ? `${state.calendarYear}-${birthdayMonthDay}` : event.date;
+
+      return {
+        id: event.id,
+        type: event.type,
+        title: event.title,
+        label: event.type === "vacation"
+          ? event.title.replace(/\s+on vacation$/i, "").replace(/^Vacation:\s*/i, "") || event.title
+          : eventTypeLabels[event.type] || "Reminder",
+        startDate: calendarDate,
+        endDate: calendarDate,
+        meta: event.meta,
+        colorKey: event.type === "vacation"
+          ? `vacation:${event.title.replace(/\s+on vacation$/i, "").replace(/^Vacation:\s*/i, "") || event.title}`
+          : event.type,
+        source: "event",
+      };
+    });
 
   return [...approvedRequests, ...holidayItems, ...eventItems].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 }
@@ -1457,7 +1470,7 @@ function toggleCalendarFilter(filterKey) {
 }
 
 function renderCompanyCalendar() {
-  const currentYear = new Date().getFullYear();
+  const currentYear = state.calendarYear;
   const monthNames = Array.from({ length: 12 }, (_, index) => (
     new Intl.DateTimeFormat("en-GB", { month: "short" }).format(new Date(currentYear, index, 1))
   ));
@@ -3070,6 +3083,14 @@ elements.calendarLegend.addEventListener("click", (event) => {
   }
 
   toggleCalendarFilter(filterButton.dataset.calendarFilter);
+});
+elements.previousCalendarYear.addEventListener("click", () => {
+  state.calendarYear -= 1;
+  renderCompanyCalendar();
+});
+elements.nextCalendarYear.addEventListener("click", () => {
+  state.calendarYear += 1;
+  renderCompanyCalendar();
 });
 elements.visualizationsAuthForm.addEventListener("submit", submitVisualizationsAccess);
 elements.companiesAuthForm.addEventListener("submit", submitCompaniesAccess);
